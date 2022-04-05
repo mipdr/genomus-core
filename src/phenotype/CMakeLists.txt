@@ -4,10 +4,8 @@ project(genomus-core VERSION 0.1.0)
 include(CTest)
 enable_testing()
 
-add_subdirectory(phenotype)
-
-add_library(genomus-core genomus-core.cpp)
-set_target_properties(genomus-core PROPERTIES LINKER_LANGUAGE CXX)
+add_library(phenotype phenotype.cpp)
+set_target_properties(phenotype PROPERTIES LINKER_LANGUAGE CXX)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
