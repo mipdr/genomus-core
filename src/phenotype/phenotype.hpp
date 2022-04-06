@@ -54,7 +54,6 @@ namespace Phenotype {
             }
     };
 
-
     class Piano : public Species {
         public:
             Piano();   
