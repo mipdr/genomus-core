@@ -1,6 +1,8 @@
 #include <iostream>
 #include "genomus-core.hpp"
 
+#include "parameter_dictionary/parameter_dictionary.hpp"
+
 using namespace std;
 
 GenoMus::GenoMus() {
@@ -8,5 +10,11 @@ GenoMus::GenoMus() {
 }
 
 void GenoMus::hello() {
+
+
     cout << "Hello World" << endl;
+    // cout << "Probamos a codificat y decodificar: ";
+
+    example();
+
 }

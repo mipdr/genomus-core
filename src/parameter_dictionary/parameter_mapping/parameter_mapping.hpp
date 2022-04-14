@@ -12,14 +12,18 @@ namespace ParameterMapping {
 
     class ParameterMapper {
         private:
-            virtual float _encode(float generic_value);
-            virtual float _decode(float normalized_value);
+            virtual float _encode(float generic_value) const;
+            virtual float _decode(float normalized_value) const;
         public:
-            virtual float operator>>(float p) final;
-            virtual float operator<<(float p) final;
+            virtual const float operator>>(const float p) const final;
+            virtual const float operator<<(const float p) const final;
     };
 
-    // class NoteValueF : ParameterMapper {};
+    class NoteValueF : public ParameterMapper {
+        private:
+            float _encode(float generic_value) const;
+            float _decode(float normalized_value) const;
+    };
     // class MidiPitchF : ParameterMapper {};
     // class FrequencyF : ParameterMapper {};
     // class ArticulationF : ParameterMapper {};

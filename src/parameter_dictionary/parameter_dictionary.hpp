@@ -1,0 +1,15 @@
+#ifndef __GENOMUS_CORE_PARAMETER_DICTIONARY__
+#define __GENOMUS_CORE_PARAMETER_DICTIONARY__
+
+#include <map>
+#include <string>
+#include "parameter_mapping/parameter_mapping.hpp"
+
+using namespace std;
+using namespace ParameterMapping;
+
+extern map<string, ParameterMapper> ParameterDictionary;
+
+void example();
+
+#endif

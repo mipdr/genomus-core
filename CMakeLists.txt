@@ -7,9 +7,9 @@ enable_testing()
 set(EXEC_NAME "main")
 
 add_subdirectory(src)
-add_executable(EXEC_NAME src/main.cpp)
-target_link_libraries (EXEC_NAME LINK_PUBLIC genomus-core)
-set_target_properties(EXEC_NAME PROPERTIES LINKER_LANGUAGE CXX)
+add_executable(${EXEC_NAME} src/main.cpp)
+target_link_libraries(${EXEC_NAME} LINK_PUBLIC genomus-core)
+set_target_properties(${EXEC_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})

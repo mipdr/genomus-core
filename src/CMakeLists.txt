@@ -4,9 +4,10 @@ project(genomus-core VERSION 0.1.0)
 include(CTest)
 enable_testing()
 
-add_library(genomus-core genomus-core.cpp)
-set_target_properties(genomus-core PROPERTIES LINKER_LANGUAGE CXX)
+set(LIB_NAME genomus-core)
 
-set(CPACK_PROJECT_NAME ${PROJECT_NAME})
-set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
-include(CPack)
+add_subdirectory(parameter_dictionary)
+
+add_library(${LIB_NAME} genomus-core.cpp)
+target_link_libraries(${LIB_NAME} parameter_dictionary)
+set_target_properties(${LIB_NAME} PROPERTIES LINKER_LANGUAGE CXX)
