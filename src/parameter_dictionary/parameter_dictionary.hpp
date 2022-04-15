@@ -7,6 +7,11 @@
 
 using namespace std;
 
+/*
+    In this file a series of containers will be defined to access 
+    GenoMus functions
+*/
+
 extern map<string, ParameterMapper> ParameterDictionary;
 
 #endif
