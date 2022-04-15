@@ -6,10 +6,7 @@
 #include "parameter_mapping/parameter_mapping.hpp"
 
 using namespace std;
-using namespace ParameterMapping;
 
 extern map<string, ParameterMapper> ParameterDictionary;
-
-void example();
 
 #endif

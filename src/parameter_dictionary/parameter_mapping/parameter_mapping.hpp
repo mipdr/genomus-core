@@ -1,33 +1,49 @@
 #ifndef __GENOMUS_CORE_PARAMETER_MAPPING__
 #define __GENOMUS_CORE_PARAMETER_MAPPING__
 
-namespace ParameterMapping {
-    /*
-        Parameter mapping will be done by the use of functors.
-        Proposal:
-            - Encoding a parameter p:
-                const float normalized_p = notevalueF << p;
-                const float p = notevalueF >> normalized_p;
-    */
+#include <functional>
+#include <map>
+using namespace std;
 
-    class ParameterMapper {
-        private:
-            virtual float _encode(float generic_value) const;
-            virtual float _decode(float normalized_value) const;
-        public:
-            virtual const float operator>>(const float p) const final;
-            virtual const float operator<<(const float p) const final;
-    };
+struct ParameterMapperInitializer{
+    string name;
+    function<float(float)> encoder;
+    function<float(float)> decoder;
+};
 
-    class NoteValueF : public ParameterMapper {
-        private:
-            float _encode(float generic_value) const;
-            float _decode(float normalized_value) const;
-    };
-    // class MidiPitchF : ParameterMapper {};
-    // class FrequencyF : ParameterMapper {};
-    // class ArticulationF : ParameterMapper {};
-    // class IntensityF : ParameterMapper {};
-}
+class ParameterMapper {
+    private:
+        function<float(float)> _encode;
+        function<float(float)> _decode;
+        string _name;
+    public:
+        /*
+            Default constructor is only implemented for stl container requirements.
+            It instantiates a default mapper made out of identity functions.
+        */
+        ParameterMapper();
+        ParameterMapper(ParameterMapperInitializer params);
+
+        /*
+            Extraction and insertion operators are overloaded in this library to add
+            some sintax sugar to the code reflecting encoding and decoding of objects.
+
+             - Genomus encoding operator <<
+             - Genomus decoding operator >>
+        */
+        const float operator>>(const float p) const;
+        const float operator<<(const float p) const;
+};
+
+extern ParameterMapper 
+    NoteValueF, 
+    ParamF,
+    DurationF,
+    MidiPitchF,
+    FrequencyF,
+    ArticulationF,
+    IntensityF,
+    GoldenintegerF,
+    quantizedF;
 
 #endif
