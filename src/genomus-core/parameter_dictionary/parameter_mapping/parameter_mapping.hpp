@@ -22,7 +22,7 @@ class ParameterMapper {
             It instantiates a default mapper made out of identity functions.
         */
         ParameterMapper();
-        ParameterMapper(ParameterMapperInitializer params);
+        ParameterMapper(ParameterMapperInitializer);
 
         /*
             Extraction and insertion operators are overloaded in this library to add
@@ -31,10 +31,14 @@ class ParameterMapper {
              - Genomus encoding operator <<
              - Genomus decoding operator >>
         */
-        const float operator>>(const float p) const;
-        const float operator<<(const float p) const;
+        float operator>>(const float p);
+        float operator<<(const float p);
 };
 
+/*
+    Parameter mapper functions. This set of functions consists of those Genomus functions
+    that take a single number as input and output a single number.
+*/
 extern ParameterMapper 
     NoteValueF, 
     ParamF,
@@ -44,6 +48,6 @@ extern ParameterMapper
     ArticulationF,
     IntensityF,
     GoldenintegerF,
-    quantizedF;
+    QuantizedF;
 
 #endif

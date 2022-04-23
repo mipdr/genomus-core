@@ -14,8 +14,8 @@ GenoMus::GenoMus() {
 void GenoMus::hello() {
     cout << "Hello world from genomus-core library" << endl;
 
-    const ParameterMapper mapper = NoteValueF;
-    const float norm = 0.5;
+    ParameterMapper mapper = NoteValueF;
+    float norm = 0.19;
 
     const float unnorm = mapper << norm;
     cout << norm << "   " << unnorm << endl;

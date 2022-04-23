@@ -12,6 +12,7 @@ using namespace std;
     GenoMus functions
 */
 
+// Dictionary <function name, function instance pointer>
 extern map<string, ParameterMapper> ParameterDictionary;
 
 #endif
