@@ -6,7 +6,7 @@ enable_testing()
 
 set(EXEC_NAME "main")
 
-add_subdirectory(utils)
+add_subdirectory(common)
 add_subdirectory(genomus-core)
 add_subdirectory(tests)
 # add_executable(${EXEC_NAME} src/main.cpp)

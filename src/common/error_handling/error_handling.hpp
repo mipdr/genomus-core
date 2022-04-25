@@ -14,6 +14,6 @@ enum ErrorCode {
 
 extern const map<ErrorCode, string> ErrorMessages;
 
-void error(ErrorCode errorCode);
+void error(ErrorCode errorCode, string customMessage = "");
 
 #endif

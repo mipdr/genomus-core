@@ -1,4 +1,4 @@
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../utils/error_handling)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../common/error_handling)
 
 set(LIB_NAME testing_utils)
 add_library(${LIB_NAME} testing_utils.cpp)

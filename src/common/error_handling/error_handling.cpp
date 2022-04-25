@@ -12,8 +12,11 @@ const map<ErrorCode, string> ErrorMessages({
     { DEFAULT_ERROR, "default error" },
 });
 
-void error(ErrorCode errorCode) {
-    string message = ErrorMessages.find(errorCode) -> second;
-    cout << "Error was thrown: " << message << endl;
+void error(ErrorCode errorCode, string customMessage) {
+    string errorMessage = ErrorMessages.find(errorCode) -> second;
+    cout << "Error was thrown: " << errorMessage << endl;
+    if (customMessage != "") {
+        cout << "Message: " << customMessage << endl;
+    }
     throw errorCode;
 }

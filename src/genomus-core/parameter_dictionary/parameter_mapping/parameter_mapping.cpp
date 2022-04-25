@@ -1,31 +1,14 @@
-#include "parameter_mapping.hpp"
 #include <iostream>
 #include <functional>
 #include <cmath>
 #include <math.h>
 
+#include "parameter_mapping.hpp"
+#include "error_handling.hpp"
+
 static const double E = exp(1.0);
 static const double PHI = (1 + sqrt(5)) / 2;
 static const double PI = M_PI;
-
-enum ErrorCode {
-    NOT_IMPLEMENTED,
-    NOT_VALID
-};
-
-void error(ErrorCode errorCode) {
-    string message;
-    switch(errorCode) {
-        case NOT_IMPLEMENTED:
-            message = "not implemented";
-        case NOT_VALID:
-            message = "not valid call";
-        default:
-            message = "defult error message";
-    }
-    cout << "Error was thrown: " << message << endl;
-    throw errorCode;
-}
 
 ParameterMapper::ParameterMapper() {
     this -> _name = "DefaultMapper";
@@ -92,7 +75,7 @@ ParameterMapper IntensityF = ParameterMapper({
 ParameterMapper GoldenintegerF = ParameterMapper({
     .name = "GoldenintegerF",
     .encoder = [](int z){ return z * PHI - (int)(z * PHI); },
-    .decoder = [](int p){ error(NOT_VALID); return 0; }
+    .decoder = [](int p){ error(INVALID_CALL); return 0; }
 });
 
 ParameterMapper QuantizedF = ParameterMapper({

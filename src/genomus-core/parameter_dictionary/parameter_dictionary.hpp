@@ -13,6 +13,6 @@ using namespace std;
 */
 
 // Dictionary <function name, function instance pointer>
-extern map<string, ParameterMapper> ParameterDictionary;
+// extern map<string, ParameterMapper> ParameterDictionary;
 
 #endif

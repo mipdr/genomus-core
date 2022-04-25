@@ -1,11 +1,8 @@
-cmake_minimum_required(VERSION 3.0.0)
-project(genomus-core VERSION 0.1.0)
+set(LIB_NAME parameter_mapping)
 
-include(CTest)
-enable_testing()
+add_library(${LIB_NAME} parameter_mapping.cpp)
+set_target_properties(${LIB_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 
-# file(GLOB_RECURSE ParameterMappingSources *.cpp)
-# message(STATUS "Found following source files: ${ParameterMappingSources}")
-# add_library(parameter_mapping ${ParameterMappingSources})
-add_library(parameter_mapping parameter_mapping.cpp)
-set_target_properties(parameter_mapping PROPERTIES LINKER_LANGUAGE CXX)
+target_include_directories(${LIB_NAME} PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../../common/error_handling
+)
