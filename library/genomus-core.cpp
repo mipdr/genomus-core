@@ -1,8 +1,7 @@
 #include <iostream>
 #include "genomus-core.hpp"
 
-#include "parameter_dictionary/parameter_dictionary.hpp"
-#include "parameter_dictionary/parameter_mapping/parameter_mapping.hpp"
+#include "parameter_mapping.hpp"
 
 using namespace std;
 
