@@ -4,7 +4,7 @@
 #include <math.h>
 
 #include "parameter_mapping.hpp"
-#include "error_handling.hpp"
+#include "../common/error_handling/error_handling.hpp"
 
 static const double E = exp(1.0);
 static const double PHI = (1 + sqrt(5)) / 2;
