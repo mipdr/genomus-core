@@ -3,6 +3,8 @@
 
 #include <functional>
 #include <map>
+#include "features.hpp"
+
 using namespace std;
 
 struct ParameterMapperInitializer{
@@ -11,11 +13,12 @@ struct ParameterMapperInitializer{
     function<float(float)> decoder;
 };
 
-class ParameterMapper {
+class ParameterMapper : public GenomusFeature {
     private:
+        string _name;
+        FeatureType _type;
         function<float(float)> _encode;
         function<float(float)> _decode;
-        string _name;
     public:
         /*
             Default constructor is only implemented for stl container requirements.
@@ -33,6 +36,10 @@ class ParameterMapper {
         */
         float operator>>(const float p);
         float operator<<(const float p);
+
+        // Accessors
+        std::string getName();
+        FeatureType getType();
 };
 
 /*

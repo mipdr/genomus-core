@@ -2,6 +2,7 @@
 #define __GENOMUS_CORE__
 
 #include "parameter_mapping.hpp"
+#include "features.hpp"
 
 class GenoMus {
     private:

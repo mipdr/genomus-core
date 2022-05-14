@@ -1,8 +1,6 @@
 #include <iostream>
 #include "genomus-core.hpp"
 
-#include "parameter_mapping.hpp"
-
 using namespace std;
 
 GenoMus::GenoMus() {
