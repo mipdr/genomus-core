@@ -3,8 +3,9 @@
 #include <cmath>
 #include <math.h>
 
-#include "parameter_mapping.hpp"
 #include "../common/error_handling/error_handling.hpp"
+#include "parameter_mapping.hpp"
+#include "features.hpp"
 
 static const double E = exp(1.0);
 static const double PHI = (1 + sqrt(5)) / 2;
@@ -12,12 +13,14 @@ static const double PI = M_PI;
 
 ParameterMapper::ParameterMapper() {
     this -> _name = "DefaultMapper";
+    this -> _type = parameterMapper;
     this -> _encode = [](float x){ return x; };
     this -> _decode = [](float y){ return y; };
 }
 
 ParameterMapper::ParameterMapper(ParameterMapperInitializer params) {
     this -> _name = params.name;
+    this -> _type = parameterMapper;
     this -> _encode = params.decoder;
     this -> _decode = params.decoder;
 }
@@ -29,6 +32,9 @@ float ParameterMapper::operator>>(const float p) {
 float ParameterMapper::operator<<(const float p) {
     return this -> _decode(p);
 }
+
+std::string ParameterMapper::getName() { return this -> _name; }
+FeatureType ParameterMapper::getType() { return this -> _type; }
 
 ParameterMapper ParamF = ParameterMapper({
     .name = "ParamF",

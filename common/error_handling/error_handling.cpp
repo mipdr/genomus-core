@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <stdexcept>
 
 #include "error_handling.hpp"
 
@@ -14,9 +15,9 @@ const map<ErrorCode, string> ErrorMessages({
 
 void error(ErrorCode errorCode, string customMessage) {
     string errorMessage = ErrorMessages.find(errorCode) -> second;
-    cout << "Error was thrown: " << errorMessage << endl;
-    if (customMessage != "") {
-        cout << "Message: " << customMessage << endl;
-    }
-    throw errorCode;
+    // cout << "Error was thrown: " << errorMessage << endl;
+    // if (customMessage != "") {
+    //     cout << "Message: " << customMessage << endl;
+    // }
+    throw runtime_error(errorMessage);
 }
