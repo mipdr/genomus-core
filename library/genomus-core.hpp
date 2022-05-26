@@ -3,6 +3,7 @@
 
 #include "parameter_mapping.hpp"
 #include "features.hpp"
+#include "decoded_genotype.hpp"
 
 class GenoMus {
     private:

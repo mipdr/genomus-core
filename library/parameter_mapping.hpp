@@ -17,8 +17,8 @@ class ParameterMapper : public GenomusFeature {
     private:
         string _name;
         FeatureType _type;
-        function<float(float)> _encode;
-        function<float(float)> _decode;
+        function<float(float)> _encode = 0;
+        function<float(float)> _decode = 0;
     public:
         /*
             Default constructor is only implemented for stl container requirements.
