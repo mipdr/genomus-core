@@ -1,4 +1,5 @@
 #include "decoded_genotype.hpp"
+#include "encoded_phenotype.hpp"
 #include <functional>
 #include <stdexcept>
 #include <vector>
@@ -8,7 +9,7 @@
 
 string functionTypeToString(FunctionType ft) {
     switch (ft) {
-        case leafF:
+        case paramF:
             return "leafF";
         case listF:
             return "listF";
@@ -23,7 +24,7 @@ GFunction::GFunction(){
     this -> _name = "Not initialized decoded_genotype_level_function";
     this -> _type = decoded_genotype_level_function;
     this -> _param_types = vector<FunctionType>();
-    this -> _compute = [](vector<GFunction> x) -> enc_phen_t { throw runtime_error("Not Initialized"); };
+    this -> _compute = [](vector<enc_phen_t> x) -> enc_phen_t { throw runtime_error("Not Initialized"); };
     this -> _output_type = defaultF;
 }
 
@@ -35,7 +36,7 @@ GFunction::GFunction(GFunctionInitializer init) {
     this -> _output_type = init.type;
 }
 
-enc_phen_t GFunction::evaluate(vector<GFunction> arg) { return this -> _compute(arg); }
+enc_phen_t GFunction::evaluate(vector<enc_phen_t> arg) { return this -> _compute(arg); }
 
 string GFunction::toString() { 
     string ret = "--- GFunction object ---";
@@ -51,15 +52,28 @@ string GFunction::toString() {
     return ret + "\n";
 }
 
+// GTree method implementation
+
+
+enc_phen_t GTree::evaluate() {
+    vector<enc_phen_t> evaluated_children;
+    transform(this -> _children.begin(), this -> _children.end(), evaluated_children, [](GTree* node){ return node -> evaluate(); });
+    return this -> _function.evaluate(evaluated_children);
+}
+
+
 // GFunction instances
 GFunction dec_gen_lvl_expl_function;
 
 void initialize_dec_gen_lvl_functions() {
     dec_gen_lvl_expl_function = GFunction({
         .name = "dec_gen_lvl_expl_function",
-        .param_types = {leafF, leafF},
+        .param_types = {paramF, paramF},
         .type = listF,
-        .compute = [](vector<GFunction> a){ return a[0].toString() + "////" + a[1].toString(); }
+        .compute = [](vector<enc_phen_t> a){ return "not implemented"; },
+        .build_explicit_form = [](vector<string> children){ 
+            return string("dec_gen_lvl_expl_function(") + children[0] + ", " + children[1] + ")"; 
+        }
     });
 }
 

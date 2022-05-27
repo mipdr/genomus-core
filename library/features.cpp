@@ -18,6 +18,7 @@ FeatureType GenomusFeature::getType() { return this -> _type; }
 std::string GenomusFeature::getTypeString() { return featureTypeToString(this -> _type); }
 
 std::vector<GenomusFeature*> genomusFeatures({
+    // ParameterMappers (ParamF)
     &NoteValueF, 
     &ParamF,
     &DurationF,

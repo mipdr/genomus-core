@@ -1,0 +1,7 @@
+{
+    "recommendations": [
+        "notskm.clang-tidy",
+        "llvm-vs-code-extensions.vscode-clangd",
+        "ms-vscode.cpptools"
+    ]
+}
