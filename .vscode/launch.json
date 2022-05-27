@@ -8,7 +8,7 @@
             "name": "(gdb) Iniciar",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/main",
+            "program": "${workspaceFolder}/build/tests/dec_gen_lvl_functions",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",

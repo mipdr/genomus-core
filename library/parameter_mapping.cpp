@@ -13,14 +13,14 @@ static const double PI = M_PI;
 
 ParameterMapper::ParameterMapper() {
     this -> _name = "DefaultMapper";
-    this -> _type = parameterMapper;
+    this -> _type = parameter_mapper;
     this -> _encode = [](float x){ return x; };
     this -> _decode = [](float y){ return y; };
 }
 
 ParameterMapper::ParameterMapper(ParameterMapperInitializer params) {
     this -> _name = params.name;
-    this -> _type = parameterMapper;
+    this -> _type = parameter_mapper;
     this -> _encode = params.decoder;
     this -> _decode = params.decoder;
 }

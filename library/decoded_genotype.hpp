@@ -5,12 +5,14 @@
 #include <vector>
 
 #include "encoded_phenotype.hpp"
+#include "features.hpp"
 
 using namespace std;
 
 enum FunctionType {
     leafF,
     listF,
+    defaultF,
 };
 
 /*
@@ -20,15 +22,21 @@ enum FunctionType {
     The instance itself represents a node in the function tree. It stores a reference to
     its parameters and the function to evaluate itself
 */
-class GFunction {
+class GFunction : GenomusFeature {
     public:
     struct GFunctionInitializer {
+        string name;
         vector<FunctionType> param_types;
         FunctionType type;
         function<enc_phen_t(vector<GFunction>)> compute;
     };
 
     private:
+        // GenomusFeature fields
+        string _name;
+        FeatureType _type;
+
+        // GFunction fields
         vector<FunctionType> _param_types;
         FunctionType _output_type;
         vector<GFunction*> _children;
@@ -42,8 +50,10 @@ class GFunction {
         string toStringPretty();
 };
 
+// GFunction instances declaration
 extern GFunction dec_gen_lvl_expl_function;
 
+// GFunction instances initialization
 void initialize_dec_gen_lvl_functions();
 
 using dec_gen_t = GFunction;

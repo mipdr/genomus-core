@@ -3,6 +3,8 @@ set(LIBRARY_NAME genomus-core)
 add_library(${LIBRARY_NAME}
     genomus-core.cpp 
     parameter_mapping.cpp
+    decoded_genotype.cpp
+    features.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/../common/error_handling/error_handling.cpp
 )
 

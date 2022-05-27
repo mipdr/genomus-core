@@ -5,8 +5,11 @@
 #include <vector>
 
 enum FeatureType {
-    parameterMapper,
+    parameter_mapper = 0,
+    decoded_genotype_level_function = 1,
 };
+
+std::string featureTypeToString(FeatureType ft);
 
 class GenomusFeature {
     private:
@@ -15,6 +18,7 @@ class GenomusFeature {
     public:
         std::string getName();
         FeatureType getType();
+        std::string getTypeString();
 };
 
 extern std::vector<GenomusFeature*> genomusFeatures;
