@@ -37,6 +37,8 @@ Species::Species(SpeciesInitializer init) {
     this -> _parameter_types = init.parameter_types;
 }
 
+vector<EventParameterType> Species::getParameterTypes() { return this -> _parameter_types; }
+
 string Species::toString() {
     string ret = "---SPECIES---";
     ret += "\n\t_name: " + this -> _name;
@@ -51,7 +53,7 @@ string Species::toString() {
 
 Species piano = Species({
     .name = "piano",
-    .parameter_types = {duration}
+    .parameter_types = {duration, pitch, intensity}
 });
 
 Species CURRENT_SPECIES = piano;

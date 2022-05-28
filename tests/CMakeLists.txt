@@ -1,6 +1,8 @@
 add_subdirectory(testing_utils)
 
-add_executable(run_tests run_tests.cpp)
+file(GLOB sources *.cpp)
+
+add_executable(run_tests ${sources})
 
 target_include_directories(run_tests PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/../library

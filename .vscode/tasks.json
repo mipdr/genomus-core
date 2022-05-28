@@ -1,0 +1,17 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "CMake Build All",
+            "command": "${command:cmake.build}",
+            "type": "shell",
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "clean-build",
+            "command": "rm -rf build; mkdir build; cmake -B${workspaceFolder}/build -S${workspaceFolder}; cd build; make; cd ..;",
+            "type": "shell",
+        }
+    ]
+}

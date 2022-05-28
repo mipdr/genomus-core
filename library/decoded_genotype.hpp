@@ -95,7 +95,7 @@ extern GFunction dec_gen_lvl_expl_function;
 // GFunction instances initialization
 void initialize_dec_gen_lvl_functions();
 
-using dec_gen_t = GTree;
+using dec_gen_t = GNode;
 
 
 #endif
