@@ -16,9 +16,9 @@ class GenomusFeature {
         std::string _name;
         FeatureType _type;
     public:
-        std::string getName();
-        FeatureType getType();
-        std::string getTypeString();
+        virtual std::string getName();
+        virtual FeatureType getType();
+        virtual std::string getTypeString();
 };
 
 extern std::vector<GenomusFeature*> genomusFeatures;

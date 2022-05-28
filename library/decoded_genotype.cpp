@@ -1,5 +1,6 @@
 #include "decoded_genotype.hpp"
 #include "encoded_phenotype.hpp"
+#include "species.hpp"
 #include <functional>
 #include <stdexcept>
 #include <vector>
@@ -52,13 +53,22 @@ string GFunction::toString() {
     return ret + "\n";
 }
 
+vector<FunctionType> GFunction::getParamTypes() { return this -> _param_types; }
+function<string(vector<string>)> GFunction::getBuildExplicitForm() { return this -> _build_explicit_form; }
+
 // GTree method implementation
 
 
-enc_phen_t GTree::evaluate() {
+enc_phen_t GNode::evaluate() {
     vector<enc_phen_t> evaluated_children;
-    transform(this -> _children.begin(), this -> _children.end(), evaluated_children, [](GTree* node){ return node -> evaluate(); });
-    return this -> _function.evaluate(evaluated_children);
+    transform(this -> _children.begin(), this -> _children.end(), evaluated_children.begin(), [](GTree* node){ return node -> evaluate(); });
+    return this -> _function -> evaluate(evaluated_children);
+}
+
+string GNode::toString() {
+    vector<string> string_children;
+    transform(this -> _children.begin(), this -> _children.end(), string_children.begin(), [](GTree* node){ return node -> toString(); });
+    return this -> _function -> getBuildExplicitForm()(string_children);
 }
 
 
@@ -70,8 +80,10 @@ void initialize_dec_gen_lvl_functions() {
         .name = "dec_gen_lvl_expl_function",
         .param_types = {paramF, paramF},
         .type = listF,
-        .compute = [](vector<enc_phen_t> a){ return "not implemented"; },
-        .build_explicit_form = [](vector<string> children){ 
+        .compute = [](vector<enc_phen_t> a) -> enc_phen_t { 
+            return Event({.parameter_types = {}, .parameter_values = {}}, CURRENT_SPECIES); 
+        },
+        .build_explicit_form = [](vector<string> children) -> string { 
             return string("dec_gen_lvl_expl_function(") + children[0] + ", " + children[1] + ")"; 
         }
     });

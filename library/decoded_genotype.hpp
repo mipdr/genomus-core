@@ -6,6 +6,7 @@
 
 #include "encoded_phenotype.hpp"
 #include "features.hpp"
+#include "parameter_mapping.hpp"
 
 using namespace std;
 
@@ -18,8 +19,10 @@ enum FunctionType {
 /*
     GFunction is the ADT chosen to represent the functions on the decoded genotype function tree.
     These functions are also genomus features, so they will be exposed in JS.
+
+    Instances of GFunction are intended to be static. Built and initialized within the library.
 */
-class GFunction : GenomusFeature {
+class GFunction : public GenomusFeature {
     public:
     struct GFunctionInitializer {
         string name;
@@ -37,12 +40,15 @@ class GFunction : GenomusFeature {
         // GFunction fields
         vector<FunctionType> _param_types;
         FunctionType _output_type;
-        vector<GFunction*> _children;
         function<enc_phen_t(vector<enc_phen_t>)> _compute;
         function<string(vector<string>)> _build_explicit_form;
     public:
         GFunction();
         GFunction(GFunctionInitializer);
+
+        vector<FunctionType> getParamTypes();
+        function<string(vector<string>)> getBuildExplicitForm();
+
         FunctionType type();
         enc_phen_t evaluate(vector<enc_phen_t>);
         string toString();
@@ -52,18 +58,34 @@ class GFunction : GenomusFeature {
     GTree class is the ADT for decoded genotypes. Its instances will hold what is needed
     to instantiate and evaluate a decoded genotype.
 
-    The instance itself represents a node in the function tree. It stores a reference to
-    its parameters and the function to evaluate itself.
+    GTree is an abstract class, derived by the GNode and GLeaf classes to reflect the 
+    differences between function nodes and parameter leafs in the function tree.
+
+    Instances of GTree are intended to be built at runtime.
 */
 
 class GTree {
-    private:
-        GFunction _function;
-        vector<GTree*> _children;
-        bool _isLeaf;
     public:
-        enc_phen_t evaluate();
-        string toString();
+        virtual enc_phen_t evaluate() = 0;
+        virtual string toString() = 0;
+};
+
+class GNode : public GTree {
+    private:
+        GFunction* _function;
+        vector<GTree*> _children;
+    public:
+        virtual enc_phen_t evaluate() override;
+        virtual string toString() override;
+};
+
+class GLeaf : public GTree {
+    private:
+        ParameterMapper* _function;
+        float _param;
+    public:
+        enc_phen_t evaluate() override;
+        string toString() override;
 };
 
 
