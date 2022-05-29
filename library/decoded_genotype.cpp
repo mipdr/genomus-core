@@ -6,27 +6,15 @@
 #include <vector>
 #include <algorithm>
 
-// FunctionType -> std::string
-
-string functionTypeToString(FunctionType ft) {
-    switch (ft) {
-        case paramF:
-            return "leafF";
-        case listF:
-            return "listF";
-        default:
-            return "invalid function type";
-    }
-}
 
 // GFunction method implementation
 
 GFunction::GFunction(){ 
     this -> _name = "Not initialized decoded_genotype_level_function";
     this -> _type = decoded_genotype_level_function;
-    this -> _param_types = vector<FunctionType>();
-    this -> _compute = [](vector<enc_phen_t> x) -> enc_phen_t { throw runtime_error("Not Initialized"); };
-    this -> _output_type = defaultF;
+    this -> _param_types = vector<EncodedPhenotypeType>();
+    this -> _compute = [](vector<enc_phen_t> x) -> enc_phen_t { return Parameter({.parameter_type = duration, .value = 1.0}); };
+    this -> _output_type = ept_event;
 }
 
 GFunction::GFunction(GFunctionInitializer init) {
@@ -45,15 +33,15 @@ string GFunction::toString() {
     ret += "\n\t_name: " + this -> getName();
     ret += "\n\t_type: " + this -> getTypeString();
     ret += "\n\t_param_types: ";
-    for_each(this -> _param_types.begin(), this -> _param_types.end(), [&ret](FunctionType ft){ ret += functionTypeToString(ft) + ", "; });
+    for_each(this -> _param_types.begin(), this -> _param_types.end(), [&ret](EncodedPhenotypeType ft){ ret += EncodedPhenotypeTypeToString(ft) + ", "; });
     ret = ret.substr(0, ret.length() - 2) + ";";
 
-    ret += "\n\t_output_type: " + functionTypeToString(this -> _output_type) + ";";
+    ret += "\n\t_output_type: " + EncodedPhenotypeTypeToString(this -> _output_type) + ";";
 
     return ret + "\n";
 }
 
-vector<FunctionType> GFunction::getParamTypes() { return this -> _param_types; }
+vector<EncodedPhenotypeType> GFunction::getParamTypes() { return this -> _param_types; }
 function<string(vector<string>)> GFunction::getBuildExplicitForm() { return this -> _build_explicit_form; }
 
 // GTree method implementation
@@ -73,15 +61,28 @@ string GNode::toString() {
 
 
 // GFunction instances
-GFunction dec_gen_lvl_expl_function;
+GFunction dec_gen_lvl_expl_function,
+    event_identity;
 
 void initialize_dec_gen_lvl_functions() {
     dec_gen_lvl_expl_function = GFunction({
         .name = "dec_gen_lvl_expl_function",
-        .param_types = {paramF, paramF},
-        .type = listF,
+        .param_types = { ept_parameter, ept_parameter},
+        .type = ept_event,
         .compute = [](vector<enc_phen_t> a) -> enc_phen_t { 
-            return Event({.parameter_types = {}, .parameter_values = {}}, CURRENT_SPECIES); 
+            return Event({.parameters = {}}, CURRENT_SPECIES); 
+        },
+        .build_explicit_form = [](vector<string> children) -> string { 
+            return string("dec_gen_lvl_expl_function(") + children[0] + ", " + children[1] + ")"; 
+        }
+    });
+
+    eventF = GFunction({
+        .name = "dec_gen_lvl_expl_function",
+        .param_types = { ept_parameter, ept_parameter},
+        .type = ept_event,
+        .compute = [](vector<enc_phen_t> a) -> enc_phen_t { 
+            return Event({.parameters = a}, CURRENT_SPECIES); 
         },
         .build_explicit_form = [](vector<string> children) -> string { 
             return string("dec_gen_lvl_expl_function(") + children[0] + ", " + children[1] + ")"; 

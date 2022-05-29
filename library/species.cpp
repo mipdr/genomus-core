@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <stdexcept>
 
-string eventParameterTypeToString(EventParameterType pt) {
+string ParameterTypeToString(ParameterType pt) {
     switch (pt) {
         case duration:
             return "duration";
@@ -37,15 +37,15 @@ Species::Species(SpeciesInitializer init) {
     this -> _parameter_types = init.parameter_types;
 }
 
-vector<EventParameterType> Species::getParameterTypes() { return this -> _parameter_types; }
+vector<ParameterType> Species::getParameterTypes() { return this -> _parameter_types; }
 
 string Species::toString() {
     string ret = "---SPECIES---";
     ret += "\n\t_name: " + this -> _name;
     ret += "\n\t_parameter_types: (";
     
-    for_each(this -> _parameter_types.begin(), this -> _parameter_types.end(), [&](EventParameterType pt) {
-        ret += eventParameterTypeToString(pt) + ", ";
+    for_each(this -> _parameter_types.begin(), this -> _parameter_types.end(), [&](ParameterType pt) {
+        ret += ParameterTypeToString(pt) + ", ";
     });
 
     return ret.substr(0, ret.length() - 2) + ")";

@@ -10,12 +10,6 @@
 
 using namespace std;
 
-enum FunctionType {
-    paramF,
-    listF,
-    defaultF,
-};
-
 /*
     GFunction is the ADT chosen to represent the functions on the decoded genotype function tree.
     These functions are also genomus features, so they will be exposed in JS.
@@ -26,8 +20,8 @@ class GFunction : public GenomusFeature {
     public:
     struct GFunctionInitializer {
         string name;
-        vector<FunctionType> param_types;
-        FunctionType type;
+        vector<EncodedPhenotypeType> param_types;
+        EncodedPhenotypeType type;
         function<enc_phen_t(vector<enc_phen_t>)> compute;
         function<string(vector<string>)> build_explicit_form;
     };
@@ -38,18 +32,18 @@ class GFunction : public GenomusFeature {
         FeatureType _type;
 
         // GFunction fields
-        vector<FunctionType> _param_types;
-        FunctionType _output_type;
+        vector<EncodedPhenotypeType> _param_types;
+        EncodedPhenotypeType _output_type;
         function<enc_phen_t(vector<enc_phen_t>)> _compute;
         function<string(vector<string>)> _build_explicit_form;
     public:
         GFunction();
         GFunction(GFunctionInitializer);
 
-        vector<FunctionType> getParamTypes();
+        vector<EncodedPhenotypeType> getParamTypes();
         function<string(vector<string>)> getBuildExplicitForm();
 
-        FunctionType type();
+        EncodedPhenotypeType type();
         enc_phen_t evaluate(vector<enc_phen_t>);
         string toString();
 };
@@ -90,7 +84,9 @@ class GLeaf : public GTree {
 
 
 // GFunction instances declaration
-extern GFunction dec_gen_lvl_expl_function;
+extern GFunction dec_gen_lvl_expl_function,
+    eventF;
+    
 
 // GFunction instances initialization
 void initialize_dec_gen_lvl_functions();

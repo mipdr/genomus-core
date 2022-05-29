@@ -6,29 +6,29 @@
 
 using namespace std;
 
-enum EventParameterType {
+enum ParameterType {
     duration,
     pitch,
     articulation,
     intensity,
 };
 
-string eventParameterTypeToString(EventParameterType);
+string ParameterTypeToString(ParameterType);
 
 class Species {
     struct SpeciesInitializer {
         string name;
-        vector<EventParameterType> parameter_types;
+        vector<ParameterType> parameter_types;
     };
 
     private:
         string _name;
-        vector<EventParameterType> _parameter_types;
+        vector<ParameterType> _parameter_types;
     public:
         Species();
         Species(SpeciesInitializer);
         string getName();
-        vector<EventParameterType> getParameterTypes();
+        vector<ParameterType> getParameterTypes();
         string toString();
 };
 
