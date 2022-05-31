@@ -77,12 +77,12 @@ void initialize_dec_gen_lvl_functions() {
         }
     });
 
-    eventF = GFunction({
+    event_identity = GFunction({
         .name = "dec_gen_lvl_expl_function",
         .param_types = { ept_parameter, ept_parameter},
         .type = ept_event,
         .compute = [](vector<enc_phen_t> a) -> enc_phen_t { 
-            return Event({.parameters = a}, CURRENT_SPECIES); 
+            return Event({.parameters = {}}, CURRENT_SPECIES); 
         },
         .build_explicit_form = [](vector<string> children) -> string { 
             return string("dec_gen_lvl_expl_function(") + children[0] + ", " + children[1] + ")"; 
