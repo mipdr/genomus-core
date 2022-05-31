@@ -20,6 +20,9 @@ string EncodedPhenotypeTypeToString(EncodedPhenotypeType ept) {
     }
 }
 
+// Just for linker to be happy
+EncodedPhenotypeType EncodedPhenotype::getEptType() { throw runtime_error("Invalid call"); }
+
 EncodedPhenotypeType Parameter::getEptType() { return ept_parameter; }
 
 Parameter::Parameter(ParameterInitializer init) {
