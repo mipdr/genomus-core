@@ -62,7 +62,7 @@ string GNode::toString() {
 
 // GFunction instances
 GFunction dec_gen_lvl_expl_function,
-    event_identity;
+    eventF;
 
 void initialize_dec_gen_lvl_functions() {
     dec_gen_lvl_expl_function = GFunction({
@@ -81,8 +81,12 @@ void initialize_dec_gen_lvl_functions() {
         .name = "dec_gen_lvl_expl_function",
         .param_types = { ept_parameter, ept_parameter},
         .type = ept_event,
-        .compute = [](vector<enc_phen_t> a) -> enc_phen_t { 
-            return Event({.parameters = a}, CURRENT_SPECIES); 
+        .compute = [](vector<enc_phen_t> params) -> enc_phen_t { 
+            // vector<Parameter> v = vector<Parameter>();
+            // for (enc_phen_t param : params) {
+            //     v.push_back(*dynamic_cast<Parameter*>(&param));
+            // }
+            return Event({.parameters = {}}, CURRENT_SPECIES); 
         },
         .build_explicit_form = [](vector<string> children) -> string { 
             return string("dec_gen_lvl_expl_function(") + children[0] + ", " + children[1] + ")"; 
