@@ -69,6 +69,7 @@ class GNode : public GTree {
         GFunction* _function;
         vector<GTree*> _children;
     public:
+        GNode(GFunction*, vector<GTree*>);
         virtual enc_phen_t evaluate() override;
         virtual string toString() override;
 };
@@ -78,6 +79,7 @@ class GLeaf : public GTree {
         ParameterMapper* _function;
         float _param;
     public:
+        GLeaf(ParameterMapper*, float);
         enc_phen_t evaluate() override;
         string toString() override;
 };

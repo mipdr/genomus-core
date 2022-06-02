@@ -1,13 +1,17 @@
 #ifndef __GENOMUS_CORE_ENCODED_PHENOTYPE__
 #define __GENOMUS_CORE_ENCODED_PHENOTYPE__ 
 
+#include <functional>
 #include <string>
 #include <vector>
 #include "species.hpp"
 
+#define ENCODED_PHENOTYPES_TYPE_CHECK
+
 using namespace std;
 
 enum EncodedPhenotypeType {
+    ept_leaf,
     ept_parameter,
     ept_event,
     ept_voice,
@@ -17,73 +21,96 @@ enum EncodedPhenotypeType {
 string EncodedPhenotypeTypeToString(EncodedPhenotypeType ept);
 
 class EncodedPhenotype {
-    virtual EncodedPhenotypeType getEptType();
-};
-
-class Parameter : public EncodedPhenotype {
     public:
-        struct ParameterInitializer {
-            ParameterType parameter_type;
-            float value;
+        struct EncodedPhenotypeInitializer {
+            EncodedPhenotypeType type;
+            EncodedPhenotypeType child_type;
+            vector<EncodedPhenotype> children;
+            function<string(vector<string>)> to_string;
+            float leaf_value;
         };
-
+    
     private:
-        ParameterType _parameter_type;
-        float _value;
+        EncodedPhenotypeType _type;
+        EncodedPhenotypeType _child_type;
+        vector<EncodedPhenotype> _children;
+        function<string(vector<string>)> _to_string;
+        float _leaf_value;
     public:
-        EncodedPhenotypeType getEptType() override;
-
-        Parameter(ParameterInitializer);
-        ParameterType getParameterType();
-        float getValue();
+        EncodedPhenotype(EncodedPhenotypeInitializer);
+        EncodedPhenotypeType getType();
+        EncodedPhenotypeType getChildType();
+        string toString();
 };
 
-class Event : public EncodedPhenotype {
-    public:
-    struct EventInitializer {
-        vector<Parameter> parameters;
-    };
+EncodedPhenotype Parameter(float value) ;
+EncodedPhenotype Event(vector<EncodedPhenotype> parameters);
+EncodedPhenotype Voice(vector<EncodedPhenotype> parameters);
 
-    private:
-        vector<Parameter> _parameters;
-    public:
-        EncodedPhenotypeType getEptType() override;
+// class Parameter : public EncodedPhenotype {
+//     public:
+//         struct ParameterInitializer {
+//             ParameterType parameter_type;
+//             float value;
+//         };
 
-        Event(EventInitializer, Species s = CURRENT_SPECIES);
-        vector<ParameterType> getParameterTypes();
-        vector<float> getParameterValues();
-        string toString(bool pretty_print = false, int indentation_level = 0);
-};
+//     private:
+//         ParameterType _parameter_type;
+//         float _value;
+//     public:
+//         EncodedPhenotypeType getEptType() override;
 
-class Voice : public EncodedPhenotype {
-    struct VoiceInitializer {
-        vector<Event> events;
-    };
+//         Parameter(ParameterInitializer);
+//         ParameterType getParameterType();
+//         float getValue();
+// };
 
-    private:
-        vector<Event> _events;
-    public:
-        EncodedPhenotypeType getEptType() override;
+// class Event : public EncodedPhenotype {
+//     public:
+//     struct EventInitializer {
+//         vector<EncodedPhenotype> parameters;
+//     };
 
-        Voice(VoiceInitializer);
-        vector<Event> getEvents();
-        string toString(bool pretty_print = false, int indentation_level = 0);
-};
+//     private:
+//         vector<Parameter> _parameters;
+//     public:
+//         EncodedPhenotypeType getEptType() override;
 
-class Score : public EncodedPhenotype {
-    struct ScoreInitializer {
-        vector<Voice> voices;
-    };
+//         Event(EventInitializer);
+//         vector<ParameterType> getParameterTypes();
+//         vector<float> getParameterValues();
+//         string toString(bool pretty_print = false, int indentation_level = 0);
+// };
 
-    private:
-        vector<Voice> _voices;
-    public:
-        EncodedPhenotypeType getEptType() override;
+// class Voice : public EncodedPhenotype {
+//     struct VoiceInitializer {
+//         vector<EncodedPhenotype> events;
+//     };
 
-        Score(ScoreInitializer);
-        vector<Voice> getVoices();
-        string toString(bool pretty_print = false);
-};
+//     private:
+//         vector<Event> _events;
+//     public:
+//         EncodedPhenotypeType getEptType() override;
+
+//         Voice(VoiceInitializer);
+//         vector<Event> getEvents();
+//         string toString(bool pretty_print = false, int indentation_level = 0);
+// };
+
+// class Score : public EncodedPhenotype {
+//     struct ScoreInitializer {
+//         vector<EncodedPhenotype> voices;
+//     };
+
+//     private:
+//         vector<Voice> _voices;
+//     public:
+//         EncodedPhenotypeType getEptType() override;
+
+//         Score(ScoreInitializer);
+//         vector<Voice> getVoices();
+//         string toString(bool pretty_print = false);
+// };
 
 using enc_phen_t = EncodedPhenotype;
 
