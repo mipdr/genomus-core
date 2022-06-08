@@ -97,10 +97,34 @@ EncodedPhenotype Voice(vector<EncodedPhenotype> parameters) {
     #endif
 
     return EncodedPhenotype({
-        .type = ept_event,
-        .child_type = ept_parameter,
+        .type = ept_voice,
+        .child_type = ept_event,
         .children = parameters,
         .to_string = [](vector<string> children_strings) { return "voice(\n\t" + join(children_strings, ",\n\t") + "\n)"; },
+        .leaf_value = -1.0
+    });
+}
+
+EncodedPhenotype Score(vector<EncodedPhenotype> parameters) {
+    #ifdef ENCODED_PHENOTYPES_TYPE_CHECK
+        string error_message = "Error in typecheck for Voice construction:\n";
+        bool error = false;
+
+        if (any_of(parameters.begin(), parameters.end(), [](EncodedPhenotype p) { return p.getType() != ept_voice; })) {
+            error = true;
+            error_message += " - Not all parameters are of type ept_parameter.\n";
+        }
+
+        if (error) {
+            throw runtime_error(error_message);
+        }
+    #endif
+
+    return EncodedPhenotype({
+        .type = ept_score,
+        .child_type = ept_voice,
+        .children = parameters,
+        .to_string = [](vector<string> children_strings) { return "score(\n\t\t" + join(children_strings, ",\n\t\t") + "\n)"; },
         .leaf_value = -1.0
     });
 }

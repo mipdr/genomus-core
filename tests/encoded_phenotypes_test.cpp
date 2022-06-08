@@ -51,5 +51,20 @@ GTest EncodedPhenotypesTest = GTest("Encoded Phenotypes Test")
             Event({Parameter(4.0), Parameter(2.0), Parameter(3.0)}),
         });
         os << v.toString() << endl;
+    })
+
+    .testCase("Score declaration", [](ostream& os) {
+        auto s = Score({
+            Voice({
+                Event({Parameter(1.0), Parameter(2.0), Parameter(3.0)}),
+                Event({Parameter(2.0), Parameter(2.0), Parameter(3.0)}),
+                Event({Parameter(3.0), Parameter(2.0), Parameter(3.0)}),
+                Event({Parameter(4.0), Parameter(2.0), Parameter(3.0)}),
+            }),
+            Voice({
+                Event({Parameter(1.0), Parameter(2.0), Parameter(3.0)}),
+            })
+        });
+        os << s.toString() << endl;
     });
 
