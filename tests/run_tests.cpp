@@ -1,14 +1,13 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "tests.hpp"
+#include "testing_utils.hpp"
 
 using namespace std;
 
 int main() {
     try {
-        EncodedPhenotypesTest::run();
-        //DecodedGenotypesTest::run();
+        EncodedPhenotypesTest.run();
     } catch (runtime_error e) {
         cout << e.what() << endl;
         return 1;
