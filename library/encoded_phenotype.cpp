@@ -42,7 +42,23 @@ string EncodedPhenotype::toString() {
     return this -> _to_string(children_strings); 
 }
 
+float EncodedPhenotype::getLeafValue() { return this -> _leaf_value; }
+
 EncodedPhenotype Parameter(float value) {
+    return EncodedPhenotype({
+        .type = ept_parameter,
+        .child_type = ept_leaf,
+        .children = {},
+        .to_string = [=](vector<string>) { return to_string(value); },
+        .leaf_value = value
+    });
+}
+
+EncodedPhenotype Parameter(vector<EncodedPhenotype> parameters) {
+    if (parameters.size() != 1) { throw runtime_error("Bad parameter construction. Only one ept_leaf argument allowed."); }
+    if (parameters[0].getType() != ept_leaf) {throw runtime_error("Bad parameter construction. Argument is not of type ept_leaf.");}
+
+    const float value = parameters[0].getLeafValue();
     return EncodedPhenotype({
         .type = ept_parameter,
         .child_type = ept_leaf,

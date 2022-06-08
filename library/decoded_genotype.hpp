@@ -1,7 +1,7 @@
 #ifndef __GENOMUS_CORE_DECODED_GENOTYPE__
 #define __GENOMUS_CORE_DECODED_GENOTYPE__ 
 
-#include<functional>
+#include <functional>
 #include <vector>
 
 #include "encoded_phenotype.hpp"
@@ -21,7 +21,7 @@ class GFunction : public GenomusFeature {
     struct GFunctionInitializer {
         string name;
         vector<EncodedPhenotypeType> param_types;
-        EncodedPhenotypeType type;
+        EncodedPhenotypeType output_type;
         function<enc_phen_t(vector<enc_phen_t>)> compute;
         function<string(vector<string>)> build_explicit_form;
     };
@@ -40,12 +40,13 @@ class GFunction : public GenomusFeature {
         void _assert_parameter_format(const vector<enc_phen_t>&);
     public:
         GFunction();
+        GFunction(const GFunction&);
         GFunction(GFunctionInitializer);
 
         vector<EncodedPhenotypeType> getParamTypes();
         function<string(vector<string>)> getBuildExplicitForm();
 
-        EncodedPhenotypeType type();
+        EncodedPhenotypeType getOutputType();
         enc_phen_t evaluate(const vector<enc_phen_t>&);
         enc_phen_t operator()(const vector<enc_phen_t>&);
         string toString();
@@ -61,42 +62,27 @@ class GFunction : public GenomusFeature {
     Instances of GTree are intended to be built at runtime.
 */
 
-// class GTree {
-//     public:
-//         virtual enc_phen_t evaluate() = 0;
-//         virtual string toString() = 0;
-// };
+class GTree {
+    private:
+        GFunction& _function;
+        vector<GTree*> _children;
 
-// class GNode : public GTree {
-//     private:
-//         GFunction* _function;
-//         vector<GTree*> _children;
-//     public:
-//         GNode(GFunction*, vector<GTree*>);
-//         virtual enc_phen_t evaluate() override;
-//         virtual string toString() override;
-// };
+        float _leaf_value; // Temporary, I just don't know where to put leaf values on trees
+    public:
+        GTree(GFunction&, vector<GTree*>, float leaf_value = 0);
 
-// class GLeaf : public GTree {
-//     private:
-//         ParameterMapper* _function;
-//         float _param;
-//     public:
-//         GLeaf(ParameterMapper*, float);
-//         enc_phen_t evaluate() override;
-//         string toString() override;
-// };
+        enc_phen_t evaluate();
+        string toString();
+};
+
+using dec_gen_t = GTree;
 
 
 // GFunction instances declaration
-extern GFunction dec_gen_lvl_expl_function,
-    eventF;
-    
+extern GFunction eventF, paramF;  
 
 // GFunction instances initialization
 void initialize_dec_gen_lvl_functions();
-
-using dec_gen_t = int;
 
 
 #endif

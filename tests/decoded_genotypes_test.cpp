@@ -1,4 +1,3 @@
-#include <iostream>
 #include <stdexcept>
 #include "decoded_genotype.hpp"
 #include "encoded_phenotype.hpp"
@@ -14,10 +13,23 @@ GTest DecodedGenotypesTest = GTest("Decoded GenotypesTest")
         initialize_dec_gen_lvl_functions();
     })
     
-    .testCase("GFunction call: eventF", [](ostream&) {
+    .testCase("GFunction call: eventF", []() {
         eventF({
             Parameter(0.1),
             Parameter(0.2),
             Parameter(0.3)
         });
+    })
+
+    .testCase("GTree declaration and evaluation", [](ostream& os) {
+        auto param_tree = GTree(
+            paramF,
+            {},
+            1.0
+        );
+
+        auto event_tree = GTree(
+            eventF,
+            {&param_tree, &param_tree, &param_tree}
+        );
     });

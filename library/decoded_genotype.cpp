@@ -1,11 +1,12 @@
-#include "decoded_genotype.hpp"
-#include "encoded_phenotype.hpp"
-#include "species.hpp"
 #include <functional>
 #include <stdexcept>
 #include <vector>
 #include <algorithm>
 
+#include "decoded_genotype.hpp"
+#include "encoded_phenotype.hpp"
+#include "species.hpp"
+#include "utils.hpp"
 
 // GFunction method implementation
 
@@ -17,12 +18,20 @@ GFunction::GFunction(){
     this -> _output_type = ept_event;
 }
 
+GFunction::GFunction(const GFunction& gf) {
+    this -> _name = gf._name;
+    this -> _type = gf._type;
+    this -> _param_types = gf._param_types;
+    this -> _compute = gf._compute;
+    this -> _output_type = gf._output_type;
+}
+
 GFunction::GFunction(GFunctionInitializer init) {
     this -> _name = init.name;
     this -> _type = decoded_genotype_level_function;
     this -> _param_types = init.param_types;
     this -> _compute = init.compute;
-    this -> _output_type = init.type;
+    this -> _output_type = init.output_type;
 }
 
 void GFunction::_assert_parameter_format(const vector<enc_phen_t>& arg) {
@@ -32,6 +41,8 @@ void GFunction::_assert_parameter_format(const vector<enc_phen_t>& arg) {
         throw runtime_error("Bad call to GFunction: bad parameter array.");
     }
 }
+
+EncodedPhenotypeType GFunction::getOutputType() { return this -> _output_type; }
 
 enc_phen_t GFunction::evaluate(const vector<enc_phen_t>& arg) { 
     this -> _assert_parameter_format(arg);
@@ -56,47 +67,58 @@ string GFunction::toString() {
 vector<EncodedPhenotypeType> GFunction::getParamTypes() { return this -> _param_types; }
 function<string(vector<string>)> GFunction::getBuildExplicitForm() { return this -> _build_explicit_form; }
 
+
 // GTree method implementation
 
-// GNode::GNode(GFunction* function, vector<GTree*> children) {
-//     this -> _function = function;
-//     this -> _children = children;
-// }
+GTree::GTree(GFunction& function, vector<GTree*> children, float leaf_value): _function(function) {
+    this -> _children = children;
+    this -> _leaf_value = leaf_value;
+}
 
-// enc_phen_t GNode::evaluate() {
-//     vector<enc_phen_t> evaluated_children;
-//     transform(this -> _children.begin(), this -> _children.end(), evaluated_children.begin(), [](GTree* node){ return node -> evaluate(); });
-//     return this -> _function -> evaluate(evaluated_children);
-// }
-
-// string GNode::toString() {
-//     vector<string> string_children;
-//     transform(this -> _children.begin(), this -> _children.end(), string_children.begin(), [](GTree* node){ return node -> toString(); });
-//     return this -> _function -> getBuildExplicitForm()(string_children);
-// }
-
-// GLeaf::GLeaf(ParameterMapper* pm, float value) {
-//     this -> _function = pm;
-//     this -> _param = value;
-// }
-
+enc_phen_t GTree::evaluate() {
+    if (this -> _function.getOutputType() == ept_parameter) {
+        return this -> _function({
+            EncodedPhenotype({
+                .type = ept_leaf,
+                .child_type = ept_leaf,
+                .children = {},
+                .to_string = [&](vector<string>) { return "# to do #"; },
+                .leaf_value = this -> _leaf_value,
+            })
+        });
+    }
+    // Future work: store evaluation so that each node is only evaluated once.
+    vector<enc_phen_t> evaluated_children;
+    for_each(this -> _children.begin(), this -> _children.end(), [&](GTree* child_ptr) { evaluated_children.push_back(child_ptr -> evaluate()); });
+    return this -> _function(evaluated_children);
+}
 
 // GFunction instances
-GFunction eventF;
+GFunction eventF, paramF;
 
 void initialize_dec_gen_lvl_functions() {
 
     eventF = GFunction({
-        .name = "dec_gen_lvl_expl_function",
+        .name = "eventF",
         .param_types = { ept_parameter, ept_parameter, ept_parameter },
-        .type = ept_event,
+        .output_type = ept_event,
         .compute = [](vector<enc_phen_t> params) -> enc_phen_t {
             return Event(params);
         },
         .build_explicit_form = [](vector<string> children) -> string { 
-            return string("eventF(") + children[0] + ", " + children[1] + ")"; 
+            return string("eventF(") + join(children, ", ") + ")"; 
+        }
+    });
+
+    paramF = GFunction({
+        .name = "paramF",
+        .param_types = { ept_leaf },
+        .output_type = ept_parameter,
+        .compute = [](vector<enc_phen_t> params) -> enc_phen_t {
+            return Parameter(params);
+        },
+        .build_explicit_form = [](vector<string> children) -> string { 
+            return "paramF()"; 
         }
     });
 }
-
-

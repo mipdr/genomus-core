@@ -41,9 +41,11 @@ class EncodedPhenotype {
         EncodedPhenotypeType getType();
         EncodedPhenotypeType getChildType();
         string toString();
+        float getLeafValue();
 };
 
-EncodedPhenotype Parameter(float value) ;
+EncodedPhenotype Parameter(float value);
+EncodedPhenotype Parameter(vector<EncodedPhenotype> parameters);
 EncodedPhenotype Event(vector<EncodedPhenotype> parameters);
 EncodedPhenotype Voice(vector<EncodedPhenotype> parameters);
 EncodedPhenotype Score(vector<EncodedPhenotype> parameters);
