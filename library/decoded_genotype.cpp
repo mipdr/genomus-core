@@ -25,7 +25,19 @@ GFunction::GFunction(GFunctionInitializer init) {
     this -> _output_type = init.type;
 }
 
-enc_phen_t GFunction::evaluate(vector<enc_phen_t> arg) { return this -> _compute(arg); }
+void GFunction::_assert_parameter_format(const vector<enc_phen_t>& arg) {
+    vector<EncodedPhenotypeType> arg_types;
+    for_each(arg.begin(), arg.end(), [&](enc_phen_t argument) { arg_types.push_back(argument.getType()); });
+    if (arg_types != this -> _param_types) {
+        throw runtime_error("Bad call to GFunction: bad parameter array.");
+    }
+}
+
+enc_phen_t GFunction::evaluate(const vector<enc_phen_t>& arg) { 
+    this -> _assert_parameter_format(arg);
+    return this -> _compute(arg); 
+}
+enc_phen_t GFunction::operator()(const vector<enc_phen_t>& arg) { return this -> evaluate(arg); }
 
 string GFunction::toString() { 
     string ret = "--- GFunction object ---";
@@ -46,27 +58,27 @@ function<string(vector<string>)> GFunction::getBuildExplicitForm() { return this
 
 // GTree method implementation
 
-GNode::GNode(GFunction* function, vector<GTree*> children) {
-    this -> _function = function;
-    this -> _children = children;
-}
+// GNode::GNode(GFunction* function, vector<GTree*> children) {
+//     this -> _function = function;
+//     this -> _children = children;
+// }
 
-enc_phen_t GNode::evaluate() {
-    vector<enc_phen_t> evaluated_children;
-    transform(this -> _children.begin(), this -> _children.end(), evaluated_children.begin(), [](GTree* node){ return node -> evaluate(); });
-    return this -> _function -> evaluate(evaluated_children);
-}
+// enc_phen_t GNode::evaluate() {
+//     vector<enc_phen_t> evaluated_children;
+//     transform(this -> _children.begin(), this -> _children.end(), evaluated_children.begin(), [](GTree* node){ return node -> evaluate(); });
+//     return this -> _function -> evaluate(evaluated_children);
+// }
 
-string GNode::toString() {
-    vector<string> string_children;
-    transform(this -> _children.begin(), this -> _children.end(), string_children.begin(), [](GTree* node){ return node -> toString(); });
-    return this -> _function -> getBuildExplicitForm()(string_children);
-}
+// string GNode::toString() {
+//     vector<string> string_children;
+//     transform(this -> _children.begin(), this -> _children.end(), string_children.begin(), [](GTree* node){ return node -> toString(); });
+//     return this -> _function -> getBuildExplicitForm()(string_children);
+// }
 
-GLeaf::GLeaf(ParameterMapper* pm, float value) {
-    this -> _function = pm;
-    this -> _param = value;
-}
+// GLeaf::GLeaf(ParameterMapper* pm, float value) {
+//     this -> _function = pm;
+//     this -> _param = value;
+// }
 
 
 // GFunction instances
@@ -76,7 +88,7 @@ void initialize_dec_gen_lvl_functions() {
 
     eventF = GFunction({
         .name = "dec_gen_lvl_expl_function",
-        .param_types = { ept_parameter, ept_parameter},
+        .param_types = { ept_parameter, ept_parameter, ept_parameter },
         .type = ept_event,
         .compute = [](vector<enc_phen_t> params) -> enc_phen_t {
             return Event(params);

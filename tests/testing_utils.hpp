@@ -29,12 +29,20 @@ class GTest {
     private:
         string _name;
         vector<GTestCase> _test_cases;
+        function<void(ostream&)> _before;
+        function<void(ostream&)> _after;
         unsigned int _n_success;
     public:
         GTest(string title);
         void run();
-        GTest testCase(string title, function<void(ostream&)>);
+        GTest& testCase(string title, function<void(ostream&)>);
+        GTest& testCase(string title, function<void()>);
+        GTest& before(function<void(ostream&)>);
+        GTest& before(function<void()>);
+        GTest& after(function<void(ostream&)>);
+        GTest& after(function<void()>);
 };
 
 extern GTest 
-    EncodedPhenotypesTest;
+    EncodedPhenotypesTest,
+    DecodedGenotypesTest;

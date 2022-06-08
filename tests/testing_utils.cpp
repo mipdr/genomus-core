@@ -3,7 +3,7 @@
 #include <regex>
 #include <sstream>
 
-static int test_case_counter = 0;
+static int test_case_counter = 1;
 static bool verbose = false;
 
 GTest::GTestCase::GTestCase(string name, function<void(ostream&)> run) {
@@ -38,15 +38,45 @@ GTest::GTest(string title) {
     this -> _name = title;
     this -> _test_cases = vector<GTestCase>();
     this -> _n_success = 0;
+    this -> _before = [](ostream&) { return; };
+    this -> _after = [](ostream&) { return; };
 }
 
-GTest GTest::testCase(string title, function<void (ostream &)> run) {
-    this -> _test_cases.push_back(GTestCase(title, run));
+GTest& GTest::testCase(string title, function<void(ostream &)> run_test_case) {
+    this -> _test_cases.push_back(GTestCase(title, run_test_case));
+    return *this;
+}
+
+GTest& GTest::testCase(string title, function<void()> run_test_case) {
+    this -> _test_cases.push_back(GTestCase(title, [=](ostream&) { run_test_case(); }));
+    return *this;
+}
+
+GTest& GTest::before(function<void(ostream &)> run) {
+    this -> _before = run;
+    return *this;
+}
+
+GTest& GTest::before(function<void()> run) {
+    this -> _before = [=](ostream&) { run(); };
+    return *this;
+}
+
+GTest& GTest::after(function<void(ostream &)> run) {
+    this -> _after = run;
+    return *this;
+}
+
+GTest& GTest::after(function<void()> run) {
+    this -> _after = [=](ostream&) { run(); };
     return *this;
 }
 
 void GTest::run() {
     cout << " + TEST: " << this -> _name << endl;
+
+    this -> _before(cout); 
+
     for (auto testCase : this -> _test_cases) {
         auto result = testCase.run();
         if (result.error_state == g_success) {
@@ -56,5 +86,9 @@ void GTest::run() {
         cout.flush();
     }
 
-    cout << this -> _n_success << "/" << this -> _test_cases.size() << " test cases were successful" << endl;
+    test_case_counter = 1;
+
+    this -> _after(cout);
+
+    cout << " - " <<  this -> _n_success << "/" << this -> _test_cases.size() << " test cases were successful" << endl << endl;
 }

@@ -36,6 +36,8 @@ class GFunction : public GenomusFeature {
         EncodedPhenotypeType _output_type;
         function<enc_phen_t(vector<enc_phen_t>)> _compute;
         function<string(vector<string>)> _build_explicit_form;
+
+        void _assert_parameter_format(const vector<enc_phen_t>&);
     public:
         GFunction();
         GFunction(GFunctionInitializer);
@@ -44,7 +46,8 @@ class GFunction : public GenomusFeature {
         function<string(vector<string>)> getBuildExplicitForm();
 
         EncodedPhenotypeType type();
-        enc_phen_t evaluate(vector<enc_phen_t>);
+        enc_phen_t evaluate(const vector<enc_phen_t>&);
+        enc_phen_t operator()(const vector<enc_phen_t>&);
         string toString();
 };
 
@@ -58,31 +61,31 @@ class GFunction : public GenomusFeature {
     Instances of GTree are intended to be built at runtime.
 */
 
-class GTree {
-    public:
-        virtual enc_phen_t evaluate() = 0;
-        virtual string toString() = 0;
-};
+// class GTree {
+//     public:
+//         virtual enc_phen_t evaluate() = 0;
+//         virtual string toString() = 0;
+// };
 
-class GNode : public GTree {
-    private:
-        GFunction* _function;
-        vector<GTree*> _children;
-    public:
-        GNode(GFunction*, vector<GTree*>);
-        virtual enc_phen_t evaluate() override;
-        virtual string toString() override;
-};
+// class GNode : public GTree {
+//     private:
+//         GFunction* _function;
+//         vector<GTree*> _children;
+//     public:
+//         GNode(GFunction*, vector<GTree*>);
+//         virtual enc_phen_t evaluate() override;
+//         virtual string toString() override;
+// };
 
-class GLeaf : public GTree {
-    private:
-        ParameterMapper* _function;
-        float _param;
-    public:
-        GLeaf(ParameterMapper*, float);
-        enc_phen_t evaluate() override;
-        string toString() override;
-};
+// class GLeaf : public GTree {
+//     private:
+//         ParameterMapper* _function;
+//         float _param;
+//     public:
+//         GLeaf(ParameterMapper*, float);
+//         enc_phen_t evaluate() override;
+//         string toString() override;
+// };
 
 
 // GFunction instances declaration
@@ -93,7 +96,7 @@ extern GFunction dec_gen_lvl_expl_function,
 // GFunction instances initialization
 void initialize_dec_gen_lvl_functions();
 
-using dec_gen_t = GNode;
+using dec_gen_t = int;
 
 
 #endif
