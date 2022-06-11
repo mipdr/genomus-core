@@ -4,8 +4,6 @@
 #include <string>
 #include <vector>
 
-using namespace std;
-
 enum ParameterType {
     duration,
     pitch,
@@ -13,23 +11,23 @@ enum ParameterType {
     intensity,
 };
 
-string ParameterTypeToString(ParameterType);
+std::string ParameterTypeToString(ParameterType);
 
 class Species {
     struct SpeciesInitializer {
-        string name;
-        vector<ParameterType> parameter_types;
+        std::string name;
+        std::vector<ParameterType> parameter_types;
     };
 
     private:
-        string _name;
-        vector<ParameterType> _parameter_types;
+        std::string _name;
+        std::vector<ParameterType> _parameter_types;
     public:
         Species();
         Species(SpeciesInitializer);
-        string getName();
-        vector<ParameterType> getParameterTypes();
-        string toString();
+        std::string getName();
+        std::vector<ParameterType> getParameterTypes();
+        std::string toString();
 };
 
 extern Species CURRENT_SPECIES,

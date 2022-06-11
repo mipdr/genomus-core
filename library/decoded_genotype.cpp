@@ -8,14 +8,15 @@
 #include "encoded_phenotype.hpp"
 #include "species.hpp"
 #include "utils.hpp"
+#include "errorCodes.hpp"
 
 // GFunction method implementation
 
 GFunction::GFunction(){ 
     this -> _name = "Not initialized decoded_genotype_level_function";
     this -> _type = decoded_genotype_level_function;
-    this -> _param_types = vector<EncodedPhenotypeType>();
-    this -> _compute = [](vector<enc_phen_t> x) -> enc_phen_t { return Parameter(-1.0); };
+    this -> _param_types = std::vector<EncodedPhenotypeType>();
+    this -> _compute = [](std::vector<enc_phen_t> x) -> enc_phen_t { return Parameter(-1.0); };
     this -> _output_type = ept_event;
 }
 
@@ -36,24 +37,24 @@ GFunction::GFunction(GFunctionInitializer init) {
     this -> _output_type = init.output_type;
 }
 
-void GFunction::_assert_parameter_format(const vector<enc_phen_t>& arg) {
-    vector<EncodedPhenotypeType> arg_types;
+void GFunction::_assert_parameter_format(const std::vector<enc_phen_t>& arg) {
+    std::vector<EncodedPhenotypeType> arg_types;
     for_each(arg.begin(), arg.end(), [&](enc_phen_t argument) { arg_types.push_back(argument.getType()); });
     if (arg_types != this -> _param_types) {
-        throw runtime_error("Bad call to GFunction: bad parameter array.");
+        throw std::runtime_error(ErrorCodes::BAD_GFUNCTION_PARAMETERS);
     }
 }
 
 EncodedPhenotypeType GFunction::getOutputType() { return this -> _output_type; }
 
-enc_phen_t GFunction::evaluate(const vector<enc_phen_t>& arg) { 
+enc_phen_t GFunction::evaluate(const std::vector<enc_phen_t>& arg) { 
     this -> _assert_parameter_format(arg);
     return this -> _compute(arg); 
 }
-enc_phen_t GFunction::operator()(const vector<enc_phen_t>& arg) { return this -> evaluate(arg); }
+enc_phen_t GFunction::operator()(const std::vector<enc_phen_t>& arg) { return this -> evaluate(arg); }
 
-string GFunction::toString() { 
-    string ret = "--- GFunction object ---";
+std::string GFunction::toString() { 
+    std::string ret = "--- GFunction object ---";
 
     ret += "\n\t_name: " + this -> getName();
     ret += "\n\t_type: " + this -> getTypeString();
@@ -66,16 +67,16 @@ string GFunction::toString() {
     return ret + "\n";
 }
 
-vector<EncodedPhenotypeType> GFunction::getParamTypes() { return this -> _param_types; }
+std::vector<EncodedPhenotypeType> GFunction::getParamTypes() { return this -> _param_types; }
 // function<string(vector<string>)>& GFunction::getBuildExplicitForm() { return this -> _build_explicit_form; }
-string GFunction::buildExplicitForm(vector<string> v) {
+std::string GFunction::buildExplicitForm(std::vector<std::string> v) {
     return this -> _build_explicit_form(v);
 }
 
 
 // GTree method implementation
 
-GTree::GTree(GFunction& function, vector<GTree*> children, float leaf_value): _function(function) {
+GTree::GTree(GFunction& function, std::vector<GTree*> children, float leaf_value): _function(function) {
     this -> _children = children;
     this -> _leaf_value = leaf_value;
 }
@@ -87,30 +88,26 @@ enc_phen_t GTree::evaluate() {
                 .type = ept_leaf,
                 .child_type = ept_leaf,
                 .children = {},
-                .to_string = [](vector<string>) { return "# to do #"; },
+                .to_string = [](std::vector<std::string>) { return "# to do #"; },
                 .leaf_value = this -> _leaf_value,
             })
         });
     }
     // Future work: store evaluation so that each node is only evaluated once.
-    vector<enc_phen_t> evaluated_children;
+    std::vector<enc_phen_t> evaluated_children;
     for_each(this -> _children.begin(), this -> _children.end(), [&](GTree* child_ptr) { evaluated_children.push_back(child_ptr -> evaluate()); });
     return this -> _function(evaluated_children);
 }
 
-string GTree::toString() {
+std::string GTree::toString() {
     if (this -> _function.getOutputType() == ept_parameter) {
         return "parameter(to do)";
     }
 
-    vector<string> string_children;
+    std::vector<std::string> string_children;
     for_each(this -> _children.begin(), this -> _children.end(), [&](GTree* child_ptr) { 
         string_children.push_back(child_ptr -> toString()); 
     });
-
-    cout << [](vector<string> children) -> string { 
-            return string("eventF(") + join(children, ", ") + ")"; 
-        }(string_children) << endl;
     
     return this -> _function.buildExplicitForm(string_children);
 }
@@ -124,11 +121,11 @@ void initialize_dec_gen_lvl_functions() {
         .name = "eventF",
         .param_types = { ept_parameter, ept_parameter, ept_parameter },
         .output_type = ept_event,
-        .compute = [](vector<enc_phen_t> params) -> enc_phen_t {
+        .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
             return Event(params);
         },
-        .build_explicit_form = [](vector<string> children) -> string { 
-            return string("eventF(") + join(children, ", ") + ")"; 
+        .build_explicit_form = [](std::vector<std::string> children) -> std::string { 
+            return std::string("eventF(") + join(children, ", ") + ")"; 
         }
     });
 
@@ -136,10 +133,10 @@ void initialize_dec_gen_lvl_functions() {
         .name = "paramF",
         .param_types = { ept_leaf },
         .output_type = ept_parameter,
-        .compute = [](vector<enc_phen_t> params) -> enc_phen_t {
+        .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
             return Parameter(params);
         },
-        .build_explicit_form = [](vector<string> children) -> string { 
+        .build_explicit_form = [](std::vector<std::string> children) -> std::string { 
             return "paramF()"; 
         }
     });
@@ -148,10 +145,10 @@ void initialize_dec_gen_lvl_functions() {
         .name = "voiceF",
         .param_types = { ept_event, ept_event },
         .output_type = ept_voice,
-        .compute = [](vector<enc_phen_t> params) -> enc_phen_t {
+        .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
             return Voice(params);
         },
-        .build_explicit_form = [](vector<string> children) -> string { 
+        .build_explicit_form = [](std::vector<std::string> children) -> std::string { 
             return "voiceF(" + join(children, ", ") + ")"; 
         }
     });

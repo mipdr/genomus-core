@@ -1,15 +1,16 @@
-#include "encoded_phenotype.hpp"
-#include "species.hpp"
-#include "utils.hpp"
 #include <algorithm>
-#include <cstdio>
 #include <iostream>
 #include <stdexcept>
 #include <string>
 
+#include "encoded_phenotype.hpp"
+#include "errorCodes.hpp"
+#include "species.hpp"
+#include "utils.hpp"
+
 #define ENCODED_PHENOTYPES_TYPE_CHECK
 
-string EncodedPhenotypeTypeToString(EncodedPhenotypeType ept) {
+std::string EncodedPhenotypeTypeToString(EncodedPhenotypeType ept) {
     switch (ept) {
         case ept_parameter:
             return "ept_parameter";
@@ -20,7 +21,7 @@ string EncodedPhenotypeTypeToString(EncodedPhenotypeType ept) {
         case ept_score:
             return "ept_score";
         default:
-            throw runtime_error("Invalid encoded phenotype type.");
+            throw std::runtime_error("Invalid encoded phenotype type.");
     }
 }
 
@@ -34,8 +35,8 @@ EncodedPhenotype::EncodedPhenotype(EncodedPhenotype::EncodedPhenotypeInitializer
 
 EncodedPhenotypeType EncodedPhenotype::getType() { return this -> _type; }
 EncodedPhenotypeType EncodedPhenotype::getChildType() { return this -> _child_type; }
-string EncodedPhenotype::toString() { 
-    vector<string> children_strings;
+std::string EncodedPhenotype::toString() { 
+    std::vector<std::string> children_strings;
     for (auto child: this -> _children) {
         children_strings.push_back(child.toString());
     }
@@ -49,28 +50,28 @@ EncodedPhenotype Parameter(float value) {
         .type = ept_parameter,
         .child_type = ept_leaf,
         .children = {},
-        .to_string = [=](vector<string>) { return to_string(value); },
+        .to_string = [=](std::vector<std::string>) { return std::to_string(value); },
         .leaf_value = value
     });
 }
 
-EncodedPhenotype Parameter(vector<EncodedPhenotype> parameters) {
-    if (parameters.size() != 1) { throw runtime_error("Bad parameter construction. Only one ept_leaf argument allowed."); }
-    if (parameters[0].getType() != ept_leaf) {throw runtime_error("Bad parameter construction. Argument is not of type ept_leaf.");}
+EncodedPhenotype Parameter(std::vector<EncodedPhenotype> parameters) {
+    if (parameters.size() != 1) { throw std::runtime_error(ErrorCodes::BAD_ENC_PHEN_CONSTRUCTION_BAD_LEAF_VALUE); }
+    if (parameters[0].getType() != ept_leaf) { throw std::runtime_error(ErrorCodes::BAD_ENC_PHEN_CONSTRUCTION_BAD_CHILD_TYPE); }
 
     const float value = parameters[0].getLeafValue();
     return EncodedPhenotype({
         .type = ept_parameter,
         .child_type = ept_leaf,
         .children = {},
-        .to_string = [=](vector<string>) { return to_string(value); },
+        .to_string = [=](std::vector<std::string>) { return std::to_string(value); },
         .leaf_value = value
     });
 }
 
-EncodedPhenotype Event(vector<EncodedPhenotype> parameters) {
+EncodedPhenotype Event(std::vector<EncodedPhenotype> parameters) {
     #ifdef ENCODED_PHENOTYPES_TYPE_CHECK
-        string error_message = "Error in typecheck for Event construction:\n";
+        std::string error_message = "Error in typecheck for Event construction:\n";
         bool error = false;
 
         if (any_of(parameters.begin(), parameters.end(), [](EncodedPhenotype p) { return p.getType() != ept_parameter; })) {
@@ -84,7 +85,7 @@ EncodedPhenotype Event(vector<EncodedPhenotype> parameters) {
         }
 
         if (error) {
-            throw runtime_error(error_message);
+            throw std::runtime_error(error_message);
         }
     #endif
 
@@ -92,14 +93,14 @@ EncodedPhenotype Event(vector<EncodedPhenotype> parameters) {
         .type = ept_event,
         .child_type = ept_parameter,
         .children = parameters,
-        .to_string = [](vector<string> children_strings) { return "event(" + join(children_strings) + ")"; },
+        .to_string = [](std::vector<std::string> children_strings) { return "event(" + join(children_strings) + ")"; },
         .leaf_value = -1.0
     });
 }
 
-EncodedPhenotype Voice(vector<EncodedPhenotype> parameters) {
+EncodedPhenotype Voice(std::vector<EncodedPhenotype> parameters) {
     #ifdef ENCODED_PHENOTYPES_TYPE_CHECK
-        string error_message = "Error in typecheck for Voice construction:\n";
+        std::string error_message = "Error in typecheck for Voice construction:\n";
         bool error = false;
 
         if (any_of(parameters.begin(), parameters.end(), [](EncodedPhenotype p) { return p.getType() != ept_event; })) {
@@ -108,7 +109,7 @@ EncodedPhenotype Voice(vector<EncodedPhenotype> parameters) {
         }
 
         if (error) {
-            throw runtime_error(error_message);
+            throw std::runtime_error(error_message);
         }
     #endif
 
@@ -116,23 +117,23 @@ EncodedPhenotype Voice(vector<EncodedPhenotype> parameters) {
         .type = ept_voice,
         .child_type = ept_event,
         .children = parameters,
-        .to_string = [](vector<string> children_strings) { return "voice(\n\t" + join(children_strings, ",\n\t") + "\n)"; },
+        .to_string = [](std::vector<std::string> children_strings) { return "voice(\n\t" + join(children_strings, ",\n\t") + "\n)"; },
         .leaf_value = -1.0
     });
 }
 
-EncodedPhenotype Score(vector<EncodedPhenotype> parameters) {
+EncodedPhenotype Score(std::vector<EncodedPhenotype> parameters) {
     #ifdef ENCODED_PHENOTYPES_TYPE_CHECK
-        string error_message = "Error in typecheck for Voice construction:\n";
+        std::string error_message = "Error in typecheck for Voice construction:\n";
         bool error = false;
 
         if (any_of(parameters.begin(), parameters.end(), [](EncodedPhenotype p) { return p.getType() != ept_voice; })) {
             error = true;
-            error_message += " - Not all parameters are of type ept_parameter.\n";
+            error_message += ErrorCodes::BAD_ENC_PHEN_CONSTRUCTION_BAD_CHILD_TYPE;
         }
 
         if (error) {
-            throw runtime_error(error_message);
+            throw std::runtime_error(error_message);
         }
     #endif
 
@@ -140,7 +141,7 @@ EncodedPhenotype Score(vector<EncodedPhenotype> parameters) {
         .type = ept_score,
         .child_type = ept_voice,
         .children = parameters,
-        .to_string = [](vector<string> children_strings) { return "score(\n\t\t" + join(children_strings, ",\n\t\t") + "\n)"; },
+        .to_string = [](std::vector<std::string> children_strings) { return "score(\n\t\t" + join(children_strings, ",\n\t\t") + "\n)"; },
         .leaf_value = -1.0
     });
 }

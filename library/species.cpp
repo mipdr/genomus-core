@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <stdexcept>
 
-string ParameterTypeToString(ParameterType pt) {
+std::string ParameterTypeToString(ParameterType pt) {
     switch (pt) {
         case duration:
             return "duration";
@@ -15,7 +15,7 @@ string ParameterTypeToString(ParameterType pt) {
         default:
             char* error_message;
             snprintf(error_message, 50, "Invalid event parameter type: %d", (int)pt);
-            throw runtime_error(error_message);
+            throw std::runtime_error(error_message);
     }
 }
 
@@ -26,21 +26,21 @@ Species::Species() {
 
 Species::Species(SpeciesInitializer init) {
     if (!init.name.length()) {
-        throw runtime_error("Cannot asign empty name to species.");
+        throw std::runtime_error("Cannot asign empty name to species.");
     }
 
     if (!init.parameter_types.size()) {
-        throw runtime_error("Cannot assign empty parameter types vector to species.");
+        throw std::runtime_error("Cannot assign empty parameter types vector to species.");
     }
 
     this -> _name = init.name;
     this -> _parameter_types = init.parameter_types;
 }
 
-vector<ParameterType> Species::getParameterTypes() { return this -> _parameter_types; }
+std::vector<ParameterType> Species::getParameterTypes() { return this -> _parameter_types; }
 
-string Species::toString() {
-    string ret = "---SPECIES---";
+std::string Species::toString() {
+    std::string ret = "---SPECIES---";
     ret += "\n\t_name: " + this -> _name;
     ret += "\n\t_parameter_types: (";
     

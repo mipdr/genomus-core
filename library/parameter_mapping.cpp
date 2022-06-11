@@ -2,8 +2,9 @@
 #include <functional>
 #include <cmath>
 #include <math.h>
+#include <stdexcept>
 
-#include "../common/error_handling/error_handling.hpp"
+#include "errorCodes.hpp"
 #include "parameter_mapping.hpp"
 #include "features.hpp"
 
@@ -81,14 +82,14 @@ ParameterMapper IntensityF = ParameterMapper({
 ParameterMapper GoldenintegerF = ParameterMapper({
     .name = "GoldenintegerF",
     .encoder = [](int z){ return z * PHI - (int)(z * PHI); },
-    .decoder = [](int p){ error(INVALID_CALL); return 0; }
+    .decoder = [](int p){ throw std::runtime_error(ErrorCodes::INVALID_CALL); return 0; }
 });
 
 ParameterMapper QuantizedF = ParameterMapper({
     .name = "QuantizedF",
     .encoder = [](int z){ return round((asin(pow(2 * z - 1, 17.0 / 11)) / PI + 0.5) * 72 - 36); },
     .decoder = [](float p){ 
-        static const map<float, int> LookUpTable({
+        static const std::map<float, int> LookUpTable({
             { 0, -36 },
             { 0.0005, -35 },
             { 0.001, -34 },

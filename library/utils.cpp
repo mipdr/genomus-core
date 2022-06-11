@@ -1,9 +1,9 @@
 #include "utils.hpp"
 
-string join(vector<string> arg, string separator) {
-    string result = "";
+std::string join(std::vector<std::string> arg, std::string separator) {
+    std::string result = "";
 
-    for (string item: arg) {
+    for (std::string item: arg) {
         result += item + separator;
     }
 

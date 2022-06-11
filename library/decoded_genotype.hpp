@@ -8,8 +8,6 @@
 #include "features.hpp"
 #include "parameter_mapping.hpp"
 
-using namespace std;
-
 /*
     GFunction is the ADT chosen to represent the functions on the decoded genotype function tree.
     These functions are also genomus features, so they will be exposed in JS.
@@ -19,38 +17,38 @@ using namespace std;
 class GFunction : public GenomusFeature {
     public:
     struct GFunctionInitializer {
-        string name;
-        vector<EncodedPhenotypeType> param_types;
+        std::string name;
+        std::vector<EncodedPhenotypeType> param_types;
         EncodedPhenotypeType output_type;
-        function<enc_phen_t(vector<enc_phen_t>)> compute;
-        function<string(vector<string>)> build_explicit_form;
+        std::function<enc_phen_t(std::vector<enc_phen_t>)> compute;
+        std::function<std::string(std::vector<std::string>)> build_explicit_form;
     };
 
     private:
         // GenomusFeature fields
-        string _name;
+        std::string _name;
         FeatureType _type;
 
         // GFunction fields
-        vector<EncodedPhenotypeType> _param_types;
+        std::vector<EncodedPhenotypeType> _param_types;
         EncodedPhenotypeType _output_type;
-        function<enc_phen_t(vector<enc_phen_t>)> _compute;
-        function<string(vector<string>)> _build_explicit_form;
+        std::function<enc_phen_t(std::vector<enc_phen_t>)> _compute;
+        std::function<std::string(std::vector<std::string>)> _build_explicit_form;
 
-        void _assert_parameter_format(const vector<enc_phen_t>&);
+        void _assert_parameter_format(const std::vector<enc_phen_t>&);
     public:
         GFunction();
         GFunction(const GFunction&);
         GFunction(GFunctionInitializer);
 
-        vector<EncodedPhenotypeType> getParamTypes();
+        std::vector<EncodedPhenotypeType> getParamTypes();
         // function<string(vector<string>)>& getBuildExplicitForm();
-        string buildExplicitForm(vector<string>);
+        std::string buildExplicitForm(std::vector<std::string>);
 
         EncodedPhenotypeType getOutputType();
-        enc_phen_t evaluate(const vector<enc_phen_t>&);
-        enc_phen_t operator()(const vector<enc_phen_t>&);
-        string toString();
+        enc_phen_t evaluate(const std::vector<enc_phen_t>&);
+        enc_phen_t operator()(const std::vector<enc_phen_t>&);
+        std::string toString();
 };
 
 /*
@@ -66,14 +64,14 @@ class GFunction : public GenomusFeature {
 class GTree {
     private:
         GFunction& _function;
-        vector<GTree*> _children;
+        std::vector<GTree*> _children;
 
         float _leaf_value; // Temporary, I just don't know where to put leaf values on trees
     public:
-        GTree(GFunction&, vector<GTree*>, float leaf_value = 0);
+        GTree(GFunction&, std::vector<GTree*>, float leaf_value = 0);
 
         enc_phen_t evaluate();
-        string toString();
+        std::string toString();
 };
 
 using dec_gen_t = GTree;

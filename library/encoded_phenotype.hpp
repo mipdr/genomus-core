@@ -6,9 +6,8 @@
 #include <vector>
 #include "species.hpp"
 
-#define ENCODED_PHENOTYPES_TYPE_CHECK
 
-using namespace std;
+#define ENCODED_PHENOTYPES_TYPE_CHECK
 
 enum EncodedPhenotypeType {
     ept_leaf,
@@ -18,37 +17,37 @@ enum EncodedPhenotypeType {
     ept_score
 };
 
-string EncodedPhenotypeTypeToString(EncodedPhenotypeType ept);
+std::string EncodedPhenotypeTypeToString(EncodedPhenotypeType ept);
 
 class EncodedPhenotype {
     public:
         struct EncodedPhenotypeInitializer {
             EncodedPhenotypeType type;
             EncodedPhenotypeType child_type;
-            vector<EncodedPhenotype> children;
-            function<string(vector<string>)> to_string;
+            std::vector<EncodedPhenotype> children;
+            std::function<std::string(std::vector<std::string>)> to_string;
             float leaf_value;
         };
     
     private:
         EncodedPhenotypeType _type;
         EncodedPhenotypeType _child_type;
-        vector<EncodedPhenotype> _children;
-        function<string(vector<string>)> _to_string;
+        std::vector<EncodedPhenotype> _children;
+        std::function<std::string(std::vector<std::string>)> _to_string;
         float _leaf_value;
     public:
         EncodedPhenotype(EncodedPhenotypeInitializer);
         EncodedPhenotypeType getType();
         EncodedPhenotypeType getChildType();
-        string toString();
+        std::string toString();
         float getLeafValue();
 };
 
 EncodedPhenotype Parameter(float value);
-EncodedPhenotype Parameter(vector<EncodedPhenotype> parameters);
-EncodedPhenotype Event(vector<EncodedPhenotype> parameters);
-EncodedPhenotype Voice(vector<EncodedPhenotype> parameters);
-EncodedPhenotype Score(vector<EncodedPhenotype> parameters);
+EncodedPhenotype Parameter(std::vector<EncodedPhenotype> parameters);
+EncodedPhenotype Event(std::vector<EncodedPhenotype> parameters);
+EncodedPhenotype Voice(std::vector<EncodedPhenotype> parameters);
+EncodedPhenotype Score(std::vector<EncodedPhenotype> parameters);
 
 using enc_phen_t = EncodedPhenotype;
 
