@@ -1,4 +1,5 @@
 #include "testing_utils.hpp"
+#include <functional>
 #include <iostream>
 #include <regex>
 #include <sstream>
@@ -25,6 +26,19 @@ GTest::GTestCase::GTestCaseOutput GTest::GTestCase::run() {
             regular_out << regex_replace(verbose_out.str(), regex("\n"), "\n\t") << endl;
         }
         regular_out << "\n" << e.what() << "\n";
+        return { .text = regular_out.str(), .error_state = g_failure };
+    } catch (bad_function_call bfc) {
+        regular_out << "FAILED" << endl;
+        if (verbose_out.str().length()) {
+            regular_out << "\tTest output:" << endl;
+            regular_out << regex_replace(verbose_out.str(), regex("\n"), "\n\t") << endl;
+        }
+        regular_out << "\n" << bfc.what() << "\n";
+        return { .text = regular_out.str(), .error_state = g_failure };
+    } catch (...) {
+        regular_out << "FAILED" << endl;
+        std::exception_ptr p = std::current_exception();
+        regular_out << (p ? p.__cxa_exception_type() -> name() : "null") << endl;
         return { .text = regular_out.str(), .error_state = g_failure };
     }
     regular_out << "OK"; 

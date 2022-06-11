@@ -30,6 +30,11 @@ GTest DecodedGenotypesTest = GTest("Decoded GenotypesTest")
 
         auto event_tree = GTree(
             eventF,
-            {&param_tree, &param_tree, &param_tree}
+            { &param_tree, &param_tree, &param_tree }
         );
+
+        os << event_tree.evaluate().toString();
+        os << event_tree.toString();
+
+        throw runtime_error("dummy error");
     });

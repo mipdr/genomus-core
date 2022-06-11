@@ -44,7 +44,8 @@ class GFunction : public GenomusFeature {
         GFunction(GFunctionInitializer);
 
         vector<EncodedPhenotypeType> getParamTypes();
-        function<string(vector<string>)> getBuildExplicitForm();
+        // function<string(vector<string>)>& getBuildExplicitForm();
+        string buildExplicitForm(vector<string>);
 
         EncodedPhenotypeType getOutputType();
         enc_phen_t evaluate(const vector<enc_phen_t>&);
