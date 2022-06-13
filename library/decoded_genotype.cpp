@@ -186,43 +186,39 @@ std::string GTree::toString() {
 }
 
 // GFunction instances
-GFunction eventF, paramF, voiceF;
 
-void initialize_dec_gen_lvl_functions() {
+GFunction eventF({
+    .name = "eventF",
+    .param_types = { ept_parameters },
+    .output_type = ept_event,
+    .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
+        return Event(params);
+    },
+    .build_explicit_form = [](std::vector<std::string> children) -> std::string { 
+        return std::string("eventF(") + join(children, ", ") + ")"; 
+    }
+}),
 
-    eventF = GFunction({
-        .name = "eventF",
-        .param_types = { ept_parameters },
-        .output_type = ept_event,
-        .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
-            return Event(params);
-        },
-        .build_explicit_form = [](std::vector<std::string> children) -> std::string { 
-            return std::string("eventF(") + join(children, ", ") + ")"; 
-        }
-    });
+paramF({
+    .name = "paramF",
+    .param_types = { ept_leaf },
+    .output_type = ept_parameter,
+    .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
+        return Parameter(params);
+    },
+    .build_explicit_form = [](std::vector<std::string> children) -> std::string { 
+        return "paramF()"; 
+    }
+}),
 
-    paramF = GFunction({
-        .name = "paramF",
-        .param_types = { ept_leaf },
-        .output_type = ept_parameter,
-        .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
-            return Parameter(params);
-        },
-        .build_explicit_form = [](std::vector<std::string> children) -> std::string { 
-            return "paramF()"; 
-        }
-    });
-
-    voiceF = GFunction({
-        .name = "voiceF",
-        .param_types = { ept_events },
-        .output_type = ept_voice,
-        .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
-            return Voice(params);
-        },
-        .build_explicit_form = [](std::vector<std::string> children) -> std::string { 
-            return "voiceF(" + join(children, ", ") + ")"; 
-        }
-    });
-}
+voiceF({
+    .name = "voiceF",
+    .param_types = { ept_events },
+    .output_type = ept_voice,
+    .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
+        return Voice(params);
+    },
+    .build_explicit_form = [](std::vector<std::string> children) -> std::string { 
+        return "voiceF(" + join(children, ", ") + ")"; 
+    }
+});
