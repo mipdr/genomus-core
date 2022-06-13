@@ -10,7 +10,7 @@
 
 #define ENCODED_PHENOTYPES_TYPE_CHECK
 
-std::string EncodedPhenotypeTypeToString(EncodedPhenotypeType ept) {
+std::string EncodedPhenotypeTypeToString(const EncodedPhenotypeType& ept) {
     switch (ept) {
         case ept_parameter:
             return "ept_parameter";
@@ -20,6 +20,12 @@ std::string EncodedPhenotypeTypeToString(EncodedPhenotypeType ept) {
             return "ept_voice";
         case ept_score:
             return "ept_score";
+        case ept_parameters:
+            return "ept_parameters";
+        case ept_events:
+            return "ept_events";
+        case ept_voices:
+            return "ept_voices";
         default:
             throw std::runtime_error("Invalid encoded phenotype type.");
     }

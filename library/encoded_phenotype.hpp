@@ -10,14 +10,20 @@
 #define ENCODED_PHENOTYPES_TYPE_CHECK
 
 enum EncodedPhenotypeType {
+    // Base types
     ept_leaf,
     ept_parameter,
     ept_event,
     ept_voice,
-    ept_score
+    ept_score,
+
+    // Types for functions with arbitrary parameters
+    ept_parameters,
+    ept_events,
+    ept_voices,
 };
 
-std::string EncodedPhenotypeTypeToString(EncodedPhenotypeType ept);
+std::string EncodedPhenotypeTypeToString(const EncodedPhenotypeType& ept);
 
 class EncodedPhenotype {
     public:

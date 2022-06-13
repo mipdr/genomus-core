@@ -10,6 +10,79 @@
 #include "utils.hpp"
 #include "errorCodes.hpp"
 
+static const std::map<EncodedPhenotypeType, EncodedPhenotypeType> packed_unpacked_pairs({
+    { ept_parameters, ept_parameter },
+    { ept_events, ept_event },
+    { ept_voices, ept_voice },
+});
+
+bool isPackedType(EncodedPhenotypeType eptt) {
+    return packed_unpacked_pairs.find(eptt) != packed_unpacked_pairs.end();
+}
+
+EncodedPhenotypeType getUnpackedVersion(EncodedPhenotypeType eptt) {
+    if (!isPackedType(eptt)) { throw std::runtime_error(ErrorCodes::INVALID_CALL); }
+    return packed_unpacked_pairs.find(eptt) -> second;
+}
+
+bool areParameterTypeListsCompatible(const std::vector<EncodedPhenotypeType>& packed, const std::vector<EncodedPhenotypeType>& unpacked) {
+    // { ept_event, ept_event } is equivalent to { ept_events }
+    if (std::any_of(unpacked.begin(), unpacked.end(), [](auto eptt) { return isPackedType(eptt); })) {
+        std::cerr << "Only unpacked ept types allowed here\n";
+        throw std::runtime_error(ErrorCodes::INVALID_CALL);
+    }
+
+    if (packed.size() > unpacked.size()) {
+        return false;
+    }
+
+    if (packed == unpacked) {
+        return true;
+    }
+
+    auto packed_it = packed.begin();
+    auto unpacked_it = unpacked.begin();
+    bool packed_validated = false;
+    while (packed_it != packed.end() && unpacked_it != unpacked.end()) {
+        if (*packed_it == *unpacked_it) {
+            packed_it++;
+            unpacked_it++;
+        } else if (isPackedType(*packed_it)) {
+            if (getUnpackedVersion(*packed_it) == *unpacked_it) {
+                packed_validated = true;
+                unpacked_it++;
+            } else if (packed_validated) {
+                packed_validated = false;
+                packed_it++;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    if (packed_it == packed.end() && unpacked_it == unpacked.end()) {
+        return true;
+    }
+
+    if (packed_it == packed.end()) {
+        return false;
+    }
+
+    if (unpacked_it == unpacked.end()) {
+        packed_it++;
+        if (packed_validated && packed_it == packed.end()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    // never happens
+    return false;
+}
+
 // GFunction method implementation
 
 GFunction::GFunction(){ 
@@ -40,7 +113,7 @@ GFunction::GFunction(GFunctionInitializer init) {
 void GFunction::_assert_parameter_format(const std::vector<enc_phen_t>& arg) {
     std::vector<EncodedPhenotypeType> arg_types;
     for_each(arg.begin(), arg.end(), [&](enc_phen_t argument) { arg_types.push_back(argument.getType()); });
-    if (arg_types != this -> _param_types) {
+    if (!areParameterTypeListsCompatible(this -> _param_types, arg_types)) {
         throw std::runtime_error(ErrorCodes::BAD_GFUNCTION_PARAMETERS);
     }
 }
@@ -119,7 +192,7 @@ void initialize_dec_gen_lvl_functions() {
 
     eventF = GFunction({
         .name = "eventF",
-        .param_types = { ept_parameter, ept_parameter, ept_parameter },
+        .param_types = { ept_parameters },
         .output_type = ept_event,
         .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
             return Event(params);
@@ -143,7 +216,7 @@ void initialize_dec_gen_lvl_functions() {
 
     voiceF = GFunction({
         .name = "voiceF",
-        .param_types = { ept_event, ept_event },
+        .param_types = { ept_events },
         .output_type = ept_voice,
         .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
             return Voice(params);

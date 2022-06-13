@@ -78,10 +78,15 @@ using dec_gen_t = GTree;
 
 
 // GFunction instances declaration
-extern GFunction eventF, paramF;  
+extern GFunction eventF, paramF, voiceF;  
 
 // GFunction instances initialization
 void initialize_dec_gen_lvl_functions();
+
+// Utils
+bool areParameterTypeListsCompatible(
+    const std::vector<EncodedPhenotypeType>& packed, 
+    const std::vector<EncodedPhenotypeType>& unpacked);
 
 
 #endif
