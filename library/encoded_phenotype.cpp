@@ -12,20 +12,6 @@
 
 std::string EncodedPhenotypeTypeToString(const EncodedPhenotypeType& ept) {
     switch (ept) {
-        // case ept_parameter:
-        //     return "ept_parameter";
-        // case ept_event:
-        //     return "ept_event";
-        // case ept_voice:
-        //     return "ept_voice";
-        // case ept_score:
-        //     return "ept_score";
-        // case ept_parameters:
-        //     return "ept_parameters";
-        // case ept_events:
-        //     return "ept_events";
-        // case ept_voices:
-        //     return "ept_voices";
         case scoreF:
             return "scoreF";
         case voiceF:
@@ -145,7 +131,7 @@ EncodedPhenotype Event(std::vector<EncodedPhenotype> parameters) {
         .type = eventF,
         .child_type = paramF,
         .children = parameters,
-        .to_string = [](std::vector<std::string> children_strings) { return "event(" + join(children_strings) + ")"; },
+        .to_string = [](std::vector<std::string> children_strings) { return "e(" + join(children_strings) + ")"; },
         .leaf_value = -1.0
     });
 }
@@ -169,7 +155,7 @@ EncodedPhenotype Voice(std::vector<EncodedPhenotype> parameters) {
         .type = voiceF,
         .child_type = eventF,
         .children = parameters,
-        .to_string = [](std::vector<std::string> children_strings) { return "voice(\n\t" + join(children_strings, ",\n\t") + "\n)"; },
+        .to_string = [](std::vector<std::string> children_strings) { return "v(" + join(children_strings, ", ") + ")"; },
         .leaf_value = -1.0
     });
 }
@@ -193,7 +179,7 @@ EncodedPhenotype Score(std::vector<EncodedPhenotype> parameters) {
         .type = scoreF,
         .child_type = voiceF,
         .children = parameters,
-        .to_string = [](std::vector<std::string> children_strings) { return "score(\n\t\t" + join(children_strings, ",\n\t\t") + "\n)"; },
+        .to_string = [](std::vector<std::string> children_strings) { return "s(\n\t\t" + join(children_strings, ",\n\t\t") + "\n)"; },
         .leaf_value = -1.0
     });
 }

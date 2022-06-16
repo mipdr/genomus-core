@@ -16,3 +16,5 @@ template<typename T>
 bool includes(std::vector<T> v, T elem) {
     return std::any_of(v.begin(), v.end(), [&](T t) { return t == elem; });
 }
+
+std::string prettyPrint(std::string s);

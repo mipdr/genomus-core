@@ -11,79 +11,6 @@
 #include "utils.hpp"
 #include "errorCodes.hpp"
 
-// static const std::map<EncodedPhenotypeType, EncodedPhenotypeType> packed_unpacked_pairs({
-//     { paramFs, paramF },
-//     { eventFs, eventF },
-//     { ept_voices, ept_voice },
-// });
-
-// bool isPackedType(EncodedPhenotypeType eptt) {
-//     return packed_unpacked_pairs.find(eptt) != packed_unpacked_pairs.end();
-// }
-
-// EncodedPhenotypeType getUnpackedVersion(EncodedPhenotypeType eptt) {
-//     if (!isPackedType(eptt)) { throw std::runtime_error(ErrorCodes::INVALID_CALL); }
-//     return packed_unpacked_pairs.find(eptt) -> second;
-// }
-
-// bool areParameterTypeListsCompatible(const std::vector<EncodedPhenotypeType>& packed, const std::vector<EncodedPhenotypeType>& unpacked) {
-//     // { eventF, eventF } is equivalent to { eventFs }
-//     if (std::any_of(unpacked.begin(), unpacked.end(), [](auto eptt) { return isPackedType(eptt); })) {
-//         std::cerr << "Only unpacked ept types allowed here\n";
-//         throw std::runtime_error(ErrorCodes::INVALID_CALL);
-//     }
-
-//     if (packed.size() > unpacked.size()) {
-//         return false;
-//     }
-
-//     if (packed == unpacked) {
-//         return true;
-//     }
-
-//     auto packed_it = packed.begin();
-//     auto unpacked_it = unpacked.begin();
-//     bool packed_validated = false;
-//     while (packed_it != packed.end() && unpacked_it != unpacked.end()) {
-//         if (*packed_it == *unpacked_it) {
-//             packed_it++;
-//             unpacked_it++;
-//         } else if (isPackedType(*packed_it)) {
-//             if (getUnpackedVersion(*packed_it) == *unpacked_it) {
-//                 packed_validated = true;
-//                 unpacked_it++;
-//             } else if (packed_validated) {
-//                 packed_validated = false;
-//                 packed_it++;
-//             } else {
-//                 return false;
-//             }
-//         } else {
-//             return false;
-//         }
-//     }
-
-//     if (packed_it == packed.end() && unpacked_it == unpacked.end()) {
-//         return true;
-//     }
-
-//     if (packed_it == packed.end()) {
-//         return false;
-//     }
-
-//     if (unpacked_it == unpacked.end()) {
-//         packed_it++;
-//         if (packed_validated && packed_it == packed.end()) {
-//             return true;
-//         }
-
-//         return false;
-//     }
-
-//     // never happens
-//     return false;
-// }
-
 // GTree::GFunction method implementation
 
 std::vector<GTree> GTree::tree_nodes;
@@ -131,20 +58,20 @@ enc_phen_t GTree::GFunction::evaluate(const std::vector<enc_phen_t>& arg) {
     return this -> _compute(arg); 
 }
 
-enc_phen_t GTree::GFunction::operator()(const std::vector<enc_phen_t>& arg) { return this -> evaluate(arg); }
+// enc_phen_t GTree::GFunction::operator()(const std::vector<enc_phen_t>& arg) { return this -> evaluate(arg); }
 
-GTree* GTree::GFunction::operator()(const std::vector<GTree*> children) {
-    std::vector<GTree*> ptr_v;
+size_t GTree::GFunction::operator()(const std::vector<size_t> children) {
+    // std::vector<size_t> ptr_v;
 
-    std::for_each(children.begin(), children.end(), [&](GTree* gt) { ptr_v.push_back(gt); });
+    // std::for_each(children.begin(), children.end(), [&](size_t gt) { ptr_v.push_back(gt); });
 
     GTree::tree_nodes.push_back(GTree(
         *this,
-        ptr_v,
+        children,
         0
     ));
 
-    return &GTree::tree_nodes[tree_nodes.size() - 1];
+    return tree_nodes.size() - 1;
 }
 
 std::string GTree::GFunction::toString() { 
@@ -170,14 +97,14 @@ std::string GTree::GFunction::buildExplicitForm(std::vector<std::string> v) {
 
 // GTree method implementation
 
-GTree::GTree(GTree::GFunction& function, std::vector<GTree*> children, float leaf_value): _function(function) {
+GTree::GTree(GTree::GFunction& function, std::vector<size_t> children, float leaf_value): _function(function) {
     this -> _children = children;
     this -> _leaf_value = leaf_value;
 }
 
 enc_phen_t GTree::evaluate() {
     if (this -> _function.getOutputType() == paramF) {
-        return this -> _function({
+        return this -> _function.evaluate({
             EncodedPhenotype({
                 .type = leafF,
                 .child_type = leafF,
@@ -189,22 +116,8 @@ enc_phen_t GTree::evaluate() {
     }
     // Future work: store evaluation so that each node is only evaluated once.
     std::vector<enc_phen_t> evaluated_children;
-    for_each(this -> _children.begin(), this -> _children.end(), [&](GTree* child_ptr) { evaluated_children.push_back(child_ptr -> evaluate()); });
-    return this -> _function(evaluated_children);
-}
-
-std::string GTree::toString() {
-    std::cout << "AQUIIII" << std::endl;
-    if (this -> _function.getOutputType() == paramF) {
-        return "parameter(to do)";
-    }
-
-    std::vector<std::string> string_children;
-    for_each(this -> _children.begin(), this -> _children.end(), [&](GTree* child_ptr) { 
-        string_children.push_back(child_ptr -> toString()); 
-    });
-    
-    return this -> _function.buildExplicitForm(string_children);
+    for_each(this -> _children.begin(), this -> _children.end(), [&](size_t child_index) { evaluated_children.push_back(tree_nodes[child_index].evaluate()); });
+    return this -> _function.evaluate(evaluated_children);
 }
 
 bool isEncodedPhenotypeTypeAParameterType(EncodedPhenotypeType eptt) {
@@ -217,6 +130,19 @@ bool isEncodedPhenotypeTypeAParameterType(EncodedPhenotypeType eptt) {
         intensityF,
     });
     return includes(parameterTypes, eptt);
+}
+
+std::string GTree::toString() {
+    if (isEncodedPhenotypeTypeAParameterType(this -> _function.getOutputType())) {
+        return this -> _function.buildExplicitForm({Parameter(tree_nodes[this -> _children[0]]._leaf_value).toString()});
+    }
+
+    std::vector<std::string> string_children;
+    for_each(this -> _children.begin(), this -> _children.end(), [&](size_t index) { 
+        string_children.push_back(tree_nodes[index].toString()); 
+    });
+    
+    return this -> _function.buildExplicitForm(string_children);
 }
 
 std::function<enc_phen_t(std::vector<enc_phen_t>)> 
@@ -362,7 +288,7 @@ vConcatV({
         return Voice(events);
     },
     .build_explicit_form = [](std::vector<std::string> children) -> std::string { 
-        return "vConcatE(" + join(children, ", ") + ")"; 
+        return "vConcatV(" + join(children, ", ") + ")"; 
     }
 });;
 

@@ -60,19 +60,19 @@ class GTree {
 
             EncodedPhenotypeType getOutputType();
             enc_phen_t evaluate(const std::vector<enc_phen_t>&);
-            enc_phen_t operator()(const std::vector<enc_phen_t>&);
-            GTree* operator()(const std::vector<GTree*>);
+            // enc_phen_t operator()(const std::vector<enc_phen_t>&);
+            size_t operator()(const std::vector<size_t>);
             std::string toString();
     };
     
     private:
         GFunction& _function;
-        std::vector<GTree*> _children;
+        std::vector<size_t> _children;
 
         float _leaf_value; // Temporary, I just don't know where to put leaf values on trees
     public:
         static std::vector<GTree> tree_nodes;
-        GTree(GFunction&, std::vector<GTree*>, float leaf_value = 0);
+        GTree(GFunction&, std::vector<size_t>, float leaf_value = 0);
 
         enc_phen_t evaluate();
         std::string toString();

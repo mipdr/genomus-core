@@ -20,15 +20,21 @@ GTest DecodedGenotypesTest = GTest("Decoded GenotypesTest")
             1.0
         );
 
-        auto tree = e_piano({
-            n({&p_tree}),
-            m({&p_tree}),
-            a({&p_tree}),
-            i({&p_tree}),
+        GTree::tree_nodes.push_back((p_tree));
+
+        size_t leaf = 0;
+
+        size_t event = e_piano({
+            n({leaf}),
+            m({leaf}),
+            a({leaf}),
+            i({leaf}),
         });
 
-        os << tree -> toString() << endl;
-        os << tree -> evaluate().toString() << endl;
+        size_t tree = vConcatV({vConcatE({event, event}), vConcatE({event, event})});
+
+        os << prettyPrint(GTree::tree_nodes[tree].toString()) << endl;
+        os << prettyPrint(GTree::tree_nodes[tree].evaluate().toString()) << endl;
 
         printOutput();
     });
