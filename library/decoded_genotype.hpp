@@ -8,6 +8,31 @@
 #include "features.hpp"
 #include "parameter_mapping.hpp"
 
+enum GFunctionType {
+    scoreF,
+    voiceF,
+    eventF,
+    listF,
+    paramF,
+    leafF,
+    noteValueF,
+    durationF,
+    midiPitchF,
+    frequencyF,
+    articulationF,
+    intensityF,
+    goldenintegerF,
+    quantizedF,
+    lnoteValueF,
+    ldurationF,
+    lmidiPitchF,
+    lfrequencyF,
+    larticulationF,
+    lintensityF,
+    lgoldenintegerF,
+    lquantizedF,
+};
+
 /*
     GFunction is the ADT chosen to represent the functions on the decoded genotype function tree.
     These functions are also genomus features, so they will be exposed in JS.
@@ -77,13 +102,7 @@ class GTree {
 using dec_gen_t = GTree;
 
 // GFunction instances declaration
-extern GFunction 
-    eventF,
-    paramF,
-    voiceF;
-
-// GFunction instances initialization
-void initialize_dec_gen_lvl_functions();
+extern GFunction p, l, e, v, s, n, d, m, f, a, i, z, q; 
 
 // Utils
 bool areParameterTypeListsCompatible(

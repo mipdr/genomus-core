@@ -10,13 +10,9 @@
 using namespace std;
 
 GTest DecodedGenotypesTest = GTest("Decoded GenotypesTest")
-
-    .before([]() {
-        initialize_dec_gen_lvl_functions();
-    })
     
     .testCase("GFunction call: eventF", []() {
-        eventF({
+        e({
             Parameter(0.1),
             Parameter(0.2),
             Parameter(0.3)
@@ -25,13 +21,13 @@ GTest DecodedGenotypesTest = GTest("Decoded GenotypesTest")
 
     .testCase("GTree declaration and evaluation", [](ostream& os) {
         auto param_tree = GTree(
-            paramF,
+            p,
             {},
             1.0
         );
 
         auto event_tree = GTree(
-            eventF,
+            e,
             { &param_tree, &param_tree, &param_tree }
         );
 
@@ -82,10 +78,36 @@ GTest DecodedGenotypesTest = GTest("Decoded GenotypesTest")
     })
 
     .testCase("GFunction arbitrary parameters", []() {
-        auto e = eventF({
+        auto event = e({
             Parameter(1.0),
             Parameter(1.0),
             Parameter(1.0)
         });
-        voiceF({ e, e, e, e, e, e });
+        v({ event, event, event, event, event });
+    })
+
+    .testCase("Ejemplo para Pepe", [](ostream& os) {
+        auto fenotipo = Voice({
+            Event({
+                Parameter(1.0), Parameter(1.0), Parameter(1.0)
+            }),
+        });
+
+        os << fenotipo.toString();
+
+        throw runtime_error("dummy");
+    })
+
+    .testCase("Ejemplo para Pepe 2", [](ostream& os) {
+        auto fenotipo = v({
+            e({
+                Parameter(1.0),
+                Parameter(1.0),
+                Parameter(1.0),
+            })
+        });
+
+        os << fenotipo.toString();
+
+        throw runtime_error("dummy");
     });

@@ -187,38 +187,60 @@ std::string GTree::toString() {
 
 // GFunction instances
 
-GFunction eventF({
-    .name = "eventF",
+GFunction
+
+p({
+    .name = "p",
+    .param_types = { ept_leaf },
+    .output_type = ept_parameter,
+    .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
+        return Parameter(params[0].getLeafValue());
+    },
+    .build_explicit_form = [](std::vector<std::string> children) -> std::string {
+        return "p(" + children[0] + ")";
+    },
+}),
+
+e({
+    .name = "e",
     .param_types = { ept_parameters },
     .output_type = ept_event,
     .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
         return Event(params);
     },
     .build_explicit_form = [](std::vector<std::string> children) -> std::string { 
-        return std::string("eventF(") + join(children, ", ") + ")"; 
-    }
-}),
-
-paramF({
-    .name = "paramF",
-    .param_types = { ept_leaf },
-    .output_type = ept_parameter,
-    .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
-        return Parameter(params);
+        return std::string("e(") + join(children, ", ") + ")"; 
     },
-    .build_explicit_form = [](std::vector<std::string> children) -> std::string { 
-        return "paramF()"; 
-    }
 }),
 
-voiceF({
-    .name = "voiceF",
+v({
+    .name = "v",
     .param_types = { ept_events },
     .output_type = ept_voice,
     .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
         return Voice(params);
     },
     .build_explicit_form = [](std::vector<std::string> children) -> std::string { 
-        return "voiceF(" + join(children, ", ") + ")"; 
+        return "v(" + join(children, ", ") + ")"; 
+    }
+}),
+
+s({
+    .name = "s",
+    .param_types = { ept_voices },
+    .output_type = ept_voice,
+    .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
+        return Score(params);
+    },
+    .build_explicit_form = [](std::vector<std::string> children) -> std::string { 
+        return "s(" + join(children, ", ") + ")"; 
     }
 });
+
+// n({
+//     .name = "n",
+//     .param_types = { ept_leaf },
+//     .output_type = { ept_leaf },
+//     .compute = []
+// })
+
