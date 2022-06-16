@@ -1,14 +1,11 @@
-add_subdirectory(testing_utils)
-set(EXEC_NAME parameter_mapping_test)
+file(GLOB sources *.cpp)
 
-add_executable(${EXEC_NAME} parameter_mapping_test.cpp)
+add_executable(run_tests ${sources})
 
-target_include_directories(${EXEC_NAME} PUBLIC
+target_include_directories(run_tests PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/../library
-    testing_utils
 )
 
-target_link_libraries(${EXEC_NAME} LINK_PUBLIC 
-    genomus-core 
-    testing_utils 
+target_link_libraries(run_tests LINK_PUBLIC 
+    genomus-core
 )

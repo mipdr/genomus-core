@@ -8,7 +8,7 @@
             "name": "(gdb) Iniciar",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/main",
+            "program": "${workspaceFolder}/build/tests/run_tests",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
@@ -19,9 +19,10 @@
                 {
                     "description": "Habilitar la impresión con sangría para gdb",
                     "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
+                    "ignoreFailures": false
                 }
-            ]
+            ],
+            "preLaunchTask": "clean-build"
         },
         {
             "name": "(Windows) Iniciar",

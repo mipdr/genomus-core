@@ -4,12 +4,8 @@
 #include "parameter_mapping.hpp"
 #include "features.hpp"
 
-class GenoMus {
-    private:
-        int sample_member;
-    public:
-        GenoMus();
-        void hello();
-};
+#include "encoded_genotype.hpp"
+#include "decoded_genotype.hpp"
+#include "encoded_phenotype.hpp"
 
 #endif

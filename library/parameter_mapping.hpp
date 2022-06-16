@@ -5,20 +5,19 @@
 #include <map>
 #include "features.hpp"
 
-using namespace std;
 
 struct ParameterMapperInitializer{
-    string name;
-    function<float(float)> encoder;
-    function<float(float)> decoder;
+    std::string name;
+    std::function<float(float)> encoder;
+    std::function<float(float)> decoder;
 };
 
 class ParameterMapper : public GenomusFeature {
     private:
-        string _name;
+        std::string _name;
         FeatureType _type;
-        function<float(float)> _encode;
-        function<float(float)> _decode;
+        std::function<float(float)> _encode = 0;
+        std::function<float(float)> _decode = 0;
     public:
         /*
             Default constructor is only implemented for stl container requirements.
