@@ -18,3 +18,6 @@ bool includes(std::vector<T> v, T elem) {
 }
 
 std::string prettyPrint(std::string s);
+
+
+uint32_t mulberry_32(uint32_t);

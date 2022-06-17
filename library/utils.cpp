@@ -42,3 +42,12 @@ std::string prettyPrint(std::string s) {
 
     return result.str();
 }
+
+uint32_t mulberry_32(uint32_t x) {
+    // Code mostly copied from tommyettinger's gist:
+    // https://gist.github.com/tommyettinger/46a874533244883189143505d203312c
+    uint32_t z = (x += 0x6D2B79F5UL);
+    z = (z ^ (z >> 15)) * (z | 1UL);
+    z ^= z + (z ^ (z >> 7)) * (z | 61UL);
+    return z ^ (z >> 14);
+}

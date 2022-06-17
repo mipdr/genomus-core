@@ -21,6 +21,19 @@
 class GTree {
     public:
 
+    class GTreeIndex {
+        private:
+            size_t _index;
+        public:
+            GTreeIndex(size_t);
+            enc_phen_t evaluate();
+            std::string toString();
+            operator size_t() const;
+            float getLeafValue();
+            static void clean();
+    };
+    
+
     /*
         GFunction is the ADT chosen to represent the functions on the decoded genotype function tree.
         These functions are also genomus features, so they will be exposed in JS.
@@ -61,24 +74,27 @@ class GTree {
             EncodedPhenotypeType getOutputType();
             enc_phen_t evaluate(const std::vector<enc_phen_t>&);
             // enc_phen_t operator()(const std::vector<enc_phen_t>&);
-            size_t operator()(const std::vector<size_t>);
+            GTreeIndex operator()(std::initializer_list<GTreeIndex>);
+            GTreeIndex operator()(const std::vector<GTreeIndex>);
+            GTreeIndex operator()(float);
             std::string toString();
     };
     
     private:
         GFunction& _function;
-        std::vector<size_t> _children;
+        std::vector<GTreeIndex> _children;
 
         float _leaf_value; // Temporary, I just don't know where to put leaf values on trees
     public:
         static std::vector<GTree> tree_nodes;
-        GTree(GFunction&, std::vector<size_t>, float leaf_value = 0);
+        static void clean();
+        GTree(GFunction&, std::vector<GTreeIndex>, float leaf_value = 0);
 
         enc_phen_t evaluate();
         std::string toString();
 };
 
-using dec_gen_t = GTree;
+using dec_gen_t = GTree::GTreeIndex;
 
 // GFunction instances declaration
 extern GTree::GFunction
@@ -99,10 +115,5 @@ extern GTree::GFunction
     vConcatE,
     vConcatV
     ; 
-
-// Utils
-// bool areParameterTypeListsCompatible(
-//     const std::vector<EncodedPhenotypeType>& packed, 
-//     const std::vector<EncodedPhenotypeType>& unpacked);
 
 #endif
