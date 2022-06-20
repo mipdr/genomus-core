@@ -5,6 +5,7 @@
 #include <vector>
 
 enum ParameterType {
+    noteValue,
     duration,
     pitch,
     articulation,

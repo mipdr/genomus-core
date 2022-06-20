@@ -19,17 +19,6 @@ GTest EncodedPhenotypesTest = GTest("Encoded Phenotypes Test")
         os << Parameter(1.0).toString() << endl;
     })
 
-    .testCase("Event declaration", [](ostream& os) {
-        auto e = Event({
-            Parameter(1.0),
-            Parameter(0.5),
-            Parameter(0.3)
-        });
-
-        os << e.toString() << endl;
-        flush(cout);
-    })
-
     .testCase("Bad Event declaration", [](ostream& os) {
         try {
             auto e2 = Event({
@@ -41,30 +30,5 @@ GTest EncodedPhenotypesTest = GTest("Encoded Phenotypes Test")
             return;
         }
         throw runtime_error("Expected bad Event initialization to throw an error.");
-    })
-
-    .testCase("Voice declaration", [](ostream& os) {
-        auto v = Voice({
-            Event({Parameter(1.0), Parameter(2.0), Parameter(3.0)}),
-            Event({Parameter(2.0), Parameter(2.0), Parameter(3.0)}),
-            Event({Parameter(3.0), Parameter(2.0), Parameter(3.0)}),
-            Event({Parameter(4.0), Parameter(2.0), Parameter(3.0)}),
-        });
-        os << v.toString() << endl;
-    })
-
-    .testCase("Score declaration", [](ostream& os) {
-        auto s = Score({
-            Voice({
-                Event({Parameter(1.0), Parameter(2.0), Parameter(3.0)}),
-                Event({Parameter(2.0), Parameter(2.0), Parameter(3.0)}),
-                Event({Parameter(3.0), Parameter(2.0), Parameter(3.0)}),
-                Event({Parameter(4.0), Parameter(2.0), Parameter(3.0)}),
-            }),
-            Voice({
-                Event({Parameter(1.0), Parameter(2.0), Parameter(3.0)}),
-            })
-        });
-        os << s.toString() << endl;
     });
 

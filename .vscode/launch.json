@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "(gdb) Iniciar",
+            "name": "Debug Tests (gdb)",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/tests/run_tests",
@@ -22,7 +22,7 @@
                     "ignoreFailures": false
                 }
             ],
-            "preLaunchTask": "clean-build"
+            // "preLaunchTask": "clean-build"
         },
         {
             "name": "(Windows) Iniciar",

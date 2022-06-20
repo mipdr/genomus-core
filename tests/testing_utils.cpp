@@ -23,7 +23,7 @@ GTest::GTestCase::GTestCaseOutput GTest::GTestCase::run() {
         regular_out << "FAILED" << endl;
         if (verbose_out.str().length()) {
             regular_out << "\tTest output:" << endl;
-            regular_out << regex_replace(verbose_out.str(), regex("\n"), "\n\t") << endl;
+            regular_out << verbose_out.str() << endl;
         }
         regular_out << "\n" << e.what() << "\n";
         return { .text = regular_out.str(), .error_state = g_failure };
@@ -31,7 +31,7 @@ GTest::GTestCase::GTestCaseOutput GTest::GTestCase::run() {
         regular_out << "FAILED" << endl;
         if (verbose_out.str().length()) {
             regular_out << "\tTest output:" << endl;
-            regular_out << regex_replace(verbose_out.str(), regex("\n"), "\n\t") << endl;
+            regular_out << verbose_out.str() << endl;
         }
         regular_out << "\n" << bfc.what() << "\n";
         return { .text = regular_out.str(), .error_state = g_failure };

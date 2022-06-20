@@ -1,4 +1,5 @@
 #include "species.hpp"
+#include "encoded_phenotype.hpp"
 #include <algorithm>
 #include <stdexcept>
 
@@ -53,7 +54,7 @@ std::string Species::toString() {
 
 Species piano = Species({
     .name = "piano",
-    .parameter_types = {duration, pitch, intensity}
+    .parameter_types = { noteValue, duration, pitch, intensity}
 });
 
 Species CURRENT_SPECIES = piano;
