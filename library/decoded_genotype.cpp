@@ -1,6 +1,7 @@
 #include <functional>
 #include <iostream>
 #include <math.h>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -26,6 +27,10 @@ bool isEncodedPhenotypeTypeAParameterType(EncodedPhenotypeType eptt) {
     return includes(parameterTypes, eptt);
 }
 
+bool gfunctionAcceptsFloatParameter(const GTree::GFunction& gf) {
+    return gf.getIsAutoreference() || isEncodedPhenotypeTypeAParameterType(gf.getOutputType());
+}
+
 // GTree::GTreeIndex method implementation
 
 GTree::GTreeIndex::GTreeIndex(size_t i) { this -> _index = i; }
@@ -37,14 +42,52 @@ GTree::GTreeIndex::operator size_t() const { return this -> _index; }
 float GTree::GTreeIndex::getLeafValue() {
     return tree_nodes[this -> _index]._leaf_value;
 }
+size_t GTree::GTreeIndex::getIndex() { return this -> _index; }
 
 void GTree::GTreeIndex::clean() {
     GTree::clean();
 }
 
+EncodedPhenotype GTree::evaluateAutoReference(EncodedPhenotypeType eptt, size_t index) {
+    std::vector<GTree::GTreeIndex> available_subexpressions_for_type = GTree::available_subexpressions[eptt];
+    const size_t mod_index = index % available_subexpressions_for_type.size();
+
+    return available_subexpressions_for_type[mod_index].evaluate();
+}
+
+void GTree::registerLastInsertedNodeAsSubexpression() {
+    const size_t last_index = tree_nodes.size() - 1;
+    const EncodedPhenotypeType node_type = tree_nodes[last_index]._function.getOutputType();
+    GTree::available_subexpressions[node_type].push_back(tree_nodes.size() - 1);
+}
+
+std::string GTree::printStaticData() {
+    std::stringstream ss;
+
+    ss << "TREE NODES\n"; 
+
+    for (int i = 0; i < GTree::tree_nodes.size(); ++i) {
+        ss << "    " <<  i << ": " << tree_nodes[i].toString() << '\n';
+    }
+
+    ss << "\nSUBEXPRESSIONS";
+
+    for (auto it = GTree::available_subexpressions.begin(); it != GTree::available_subexpressions.end(); it++) {
+        ss << "\n    " << EncodedPhenotypeTypeToString(it -> first) << ":";
+        for (auto vit = it -> second.begin(); vit != it -> second.end(); vit++) {
+            ss << " " << vit -> getIndex();
+        }
+    }
+
+    ss << '\n';
+
+    return ss.str();
+}
+
 // GTree::GFunction method implementation
 
 std::vector<GTree> GTree::tree_nodes;
+std::map<EncodedPhenotypeType, std::vector<GTree::GTreeIndex>> GTree::available_subexpressions;
 
 GTree::GFunction::GFunction(){ 
     this -> _name = "Not initialized decoded_genotype_level_function";
@@ -70,17 +113,21 @@ GTree::GFunction::GFunction(GFunctionInitializer init) {
     this -> _compute = init.compute;
     this -> _build_explicit_form = init.build_explicit_form;
     this -> _output_type = init.output_type;
+
+    // autoReference functions contain "autoref" in their name
+    this -> _is_autoreference  = this -> _name.find("AutoRef") != std::string::npos;
 }
 
 void GTree::GFunction::_assert_parameter_format(const std::vector<enc_phen_t>& arg) {
     std::vector<EncodedPhenotypeType> arg_types;
     for_each(arg.begin(), arg.end(), [&](enc_phen_t argument) { arg_types.push_back(argument.getType()); });
-    if (this -> _param_types != arg_types) {
+    if (!this -> _is_autoreference && (this -> _param_types != arg_types)) {
         throw std::runtime_error(ErrorCodes::BAD_GFUNCTION_PARAMETERS);
     }
 }
 
-EncodedPhenotypeType GTree::GFunction::getOutputType() { return this -> _output_type; }
+EncodedPhenotypeType GTree::GFunction::getOutputType() const { return this -> _output_type; }
+bool GTree::GFunction::getIsAutoreference() const { return this -> _is_autoreference; }
 
 enc_phen_t GTree::GFunction::evaluate(const std::vector<enc_phen_t>& arg) { 
     this -> _assert_parameter_format(arg);
@@ -94,6 +141,8 @@ GTree::GTreeIndex GTree::GFunction::operator()(std::initializer_list<GTree::GTre
         0
     ));
 
+    GTree::registerLastInsertedNodeAsSubexpression();
+
     return tree_nodes.size() - 1;
 }
 
@@ -104,11 +153,13 @@ GTree::GTreeIndex GTree::GFunction::operator()(const std::vector<GTree::GTreeInd
         0
     ));
 
+    GTree::registerLastInsertedNodeAsSubexpression();
+
     return tree_nodes.size() - 1;
 }
 
 GTree::GTreeIndex GTree::GFunction::operator()(float x) {
-    if (!isEncodedPhenotypeTypeAParameterType(this ->_output_type)) {
+    if (gfunctionAcceptsFloatParameter(*this)) {
         // Only parameter GFunctions like n, f or i are allowed to receive
         // a float as a parameter
         throw std::runtime_error(ErrorCodes::BAD_GFUNCTION_PARAMETERS);
@@ -117,6 +168,8 @@ GTree::GTreeIndex GTree::GFunction::operator()(float x) {
     GTree p_tree = GTree(*this, {}, x);
     
     GTree::tree_nodes.push_back((p_tree));
+
+    GTree::registerLastInsertedNodeAsSubexpression();
 
     return tree_nodes.size() - 1;
 }
@@ -140,11 +193,11 @@ std::string GTree::GFunction::buildExplicitForm(std::vector<std::string> v) {
     return this -> _build_explicit_form(v);
 }
 
-
 // GTree method implementation
 
 void GTree::clean() {
     tree_nodes.clear();
+    available_subexpressions.clear();
 }
 
 GTree::GTree(GTree::GFunction& function, std::vector<GTree::GTreeIndex> children, float leaf_value): _function(function) {
@@ -175,7 +228,7 @@ enc_phen_t GTree::evaluate() {
 }
 
 std::string GTree::toString() {
-    if (isEncodedPhenotypeTypeAParameterType(this -> _function.getOutputType())) {
+    if (gfunctionAcceptsFloatParameter(this -> _function)) {
         return this -> _function.buildExplicitForm({Parameter(this -> _leaf_value).toString()});
     }
 
@@ -309,6 +362,17 @@ i({
     }
 }),
 
+// q({
+//     .name = "q",
+//     .param_types = { leafF },
+//     .output_type = quantizedF,
+//     .compute = buildParameterComputeFunction(quantizedF, "q", [](float f){ return f; }),
+//     .build_explicit_form = [](std::vector<std::string> children) -> std::string { 
+//         return "i(" + children[0] + ")"; 
+//     }
+// }),
+
+
 vConcatE({
     .name = "vConcatE",
     .param_types = { eventF, eventF },
@@ -331,6 +395,18 @@ vConcatV({
         events.insert(events.end(), params[1].getChildren().begin(), params[1].getChildren().end());
         
         return Voice(events);
+    },
+    .build_explicit_form = [](std::vector<std::string> children) -> std::string { 
+        return "vConcatV(" + join(children, ", ") + ")"; 
+    }
+}),
+
+eAutoRef({
+    .name = "eAutoRef",
+    .param_types = { quantizedF },
+    .output_type = eventF,
+    .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
+        return GTree::evaluateAutoReference(eventF, (size_t) params[0].getLeafValue());
     },
     .build_explicit_form = [](std::vector<std::string> children) -> std::string { 
         return "vConcatV(" + join(children, ", ") + ")"; 

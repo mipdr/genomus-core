@@ -25,12 +25,16 @@ GTest DecodedGenotypesTest = GTest("Decoded GenotypesTest")
             i(1),
         });
 
-        GTree::GTreeIndex tree = vConcatV({vConcatE({event, event}), vConcatE({event, event})});
+        GTree::GTreeIndex tree = vConcatV({vConcatE({event, event}), vConcatE({event, eAutoRef(0)})});
 
         os << prettyPrint(tree.toString()) << endl;
         os << prettyPrint(tree.evaluate().toString()) << endl;
 
+        os << GTree::printStaticData() << endl;
+
         tree.clean();
+
+        printOutput();
     })
 
     .testCase("Concat functions", [](ostream& os) {

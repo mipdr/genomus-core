@@ -30,6 +30,7 @@ class GTree {
             std::string toString();
             operator size_t() const;
             float getLeafValue();
+            size_t getIndex();
             static void clean();
     };
     
@@ -60,6 +61,7 @@ class GTree {
             EncodedPhenotypeType _output_type;
             std::function<enc_phen_t(std::vector<enc_phen_t>)> _compute;
             std::function<std::string(std::vector<std::string>)> _build_explicit_form;
+            bool _is_autoreference;
 
             void _assert_parameter_format(const std::vector<enc_phen_t>&);
         public:
@@ -71,7 +73,8 @@ class GTree {
             // function<string(vector<string>)>& getBuildExplicitForm();
             std::string buildExplicitForm(std::vector<std::string>);
 
-            EncodedPhenotypeType getOutputType();
+            EncodedPhenotypeType getOutputType() const;
+            bool getIsAutoreference() const;
             enc_phen_t evaluate(const std::vector<enc_phen_t>&);
             // enc_phen_t operator()(const std::vector<enc_phen_t>&);
             GTreeIndex operator()(std::initializer_list<GTreeIndex>);
@@ -87,6 +90,10 @@ class GTree {
         float _leaf_value; // Temporary, I just don't know where to put leaf values on trees
     public:
         static std::vector<GTree> tree_nodes;
+        static std::map<EncodedPhenotypeType, std::vector<GTree::GTreeIndex>> available_subexpressions;
+        static EncodedPhenotype evaluateAutoReference(EncodedPhenotypeType, size_t index);
+        static void registerLastInsertedNodeAsSubexpression();
+        static std::string printStaticData();
         static void clean();
         GTree(GFunction&, std::vector<GTreeIndex>, float leaf_value = 0);
 
@@ -113,7 +120,8 @@ extern GTree::GFunction
     // q,
     e_piano,
     vConcatE,
-    vConcatV
+    vConcatV,
+    eAutoRef
     ; 
 
 #endif
