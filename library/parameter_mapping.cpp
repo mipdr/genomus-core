@@ -37,55 +37,55 @@ float ParameterMapper::operator<<(const float p) {
 std::string ParameterMapper::getName() { return this -> _name; }
 FeatureType ParameterMapper::getType() { return this -> _type; }
 
-ParameterMapper ParamF = ParameterMapper({
+ParameterMapper ParamF({
     .name = "ParamF",
     .encoder = [](float a){ return a; },
     .decoder = [](float a){ return a; }
 });
 
-ParameterMapper DurationF = ParameterMapper({
+ParameterMapper DurationF({
     .name = "DurationF",
     .encoder = [](float p){ return pow(10 * p - 6, 2); },
     .decoder = [](float s){ return (log(s) + 6 * log(2)) / (10 * log(2)); }
 });
 
-ParameterMapper NoteValueF = ParameterMapper({
+ParameterMapper NoteValueF({
     .name = "NoteValueF",
     .encoder = [](float v){ return (log(v) + 8 * log(2)) / 10 * log(2); },
     .decoder = [](float p){ return pow(10 * p - 8, 2); }
 });
 
-ParameterMapper MidiPitchF = ParameterMapper({
+ParameterMapper MidiPitchF({
     .name = "MidiPitchF",
     .encoder = [](float m){ return (m - 12) / 100; },
     .decoder = [](float p){ return 100 * p + 12; }
 });
 
-ParameterMapper FrequencyF = ParameterMapper({
+ParameterMapper FrequencyF({
     .name = "FrequencyF",
     .encoder = [](float h){ return pow(h / 20000, 1/4); },
     .decoder = [](float p){ return 20000 * pow(p, 4); }
 });
 
-ParameterMapper ArticulationF = ParameterMapper({
+ParameterMapper ArticulationF({
     .name = "ArticulationF",
     .encoder = [](float a){ return pow(a / 3, 1 / E); },
     .decoder = [](float p){ return exp(3 * p); }
 });
 
-ParameterMapper IntensityF = ParameterMapper({
+ParameterMapper IntensityF({
     .name = "IntensityF",
     .encoder = [](float i){ return i / 127; },
     .decoder = [](float p){ return 127 * p; }
 });
 
-ParameterMapper GoldenintegerF = ParameterMapper({
+ParameterMapper GoldenintegerF({
     .name = "GoldenintegerF",
     .encoder = [](int z){ return z * PHI - (int)(z * PHI); },
     .decoder = [](int p){ throw std::runtime_error(ErrorCodes::INVALID_CALL); return 0; }
 });
 
-ParameterMapper QuantizedF = ParameterMapper({
+ParameterMapper QuantizedF({
     .name = "QuantizedF",
     .encoder = [](int z){ return round((asin(pow(2 * z - 1, 17.0 / 11)) / PI + 0.5) * 72 - 36); },
     .decoder = [](float p){ 

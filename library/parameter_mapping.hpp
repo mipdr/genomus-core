@@ -16,9 +16,9 @@ class ParameterMapper : public GenomusFeature {
     private:
         std::string _name;
         FeatureType _type;
+    public:
         std::function<float(float)> _encode = 0;
         std::function<float(float)> _decode = 0;
-    public:
         /*
             Default constructor is only implemented for stl container requirements.
             It instantiates a default mapper made out of identity functions.

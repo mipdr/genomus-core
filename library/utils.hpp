@@ -1,7 +1,15 @@
+#ifndef __GENOMUS_CORE_UTILS__
+#define __GENOMUS_CORE_UTILS__ 
+
 #include <algorithm>
 #include <functional>
+#include <math.h>
 #include <string>
 #include <vector>
+
+static const double E = exp(1.0);
+static const double PHI = (1 + sqrt(5)) / 2;
+static const double PI = M_PI;
 
 std::string join(std::vector<std::string>, std::string separator = ", ");
 
@@ -21,3 +29,5 @@ std::string prettyPrint(std::string s);
 
 
 uint32_t mulberry_32(uint32_t);
+
+#endif

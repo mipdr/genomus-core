@@ -1,5 +1,6 @@
 #include <functional>
 #include <iostream>
+#include <math.h>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -187,18 +188,21 @@ std::string GTree::toString() {
 }
 
 std::function<enc_phen_t(std::vector<enc_phen_t>)> 
-    buildParameterComputeFunction(EncodedPhenotypeType parameterType, std::string name) {
+    buildParameterComputeFunction(EncodedPhenotypeType parameterType, std::string name, std::function<float(float)> parameter_encoder) {
         if (!isEncodedPhenotypeTypeAParameterType(parameterType)) {
             throw std::runtime_error(ErrorCodes::INVALID_CALL);
         }
+
+        // TO DO: mapper is not correctly initialized
         
         return [=](std::vector<enc_phen_t> params) -> enc_phen_t {
+            const float encoded_parameter_value = parameter_encoder(params[0].getLeafValue());
             return EncodedPhenotype({
                 .type = parameterType,
-                .child_type = paramF,
+                .child_type = leafF,
                 .children = params,
-                .to_string = [=](std::vector<std::string> children_strings) { return name + "(" + children_strings[0] + ")"; },
-                .leaf_value = 0,
+                .to_string = [=](std::vector<std::string> children_strings) { return name + "(" + std::to_string(encoded_parameter_value) + ")"; },
+                .leaf_value = encoded_parameter_value,
             });
         };
     };
@@ -259,7 +263,7 @@ n({
     .name = "n",
     .param_types = { leafF },
     .output_type = noteValueF,
-    .compute = buildParameterComputeFunction(noteValueF, "n"),
+    .compute = buildParameterComputeFunction(noteValueF, "n", [](float v){ return (log(v) + 8 * log(2)) / 10 * log(2); }),
     .build_explicit_form = [](std::vector<std::string> children) -> std::string { 
         return "n(" + children[0] + ")"; 
     }
@@ -269,7 +273,7 @@ d({
     .name = "d",
     .param_types = { leafF },
     .output_type = durationF,
-    .compute = buildParameterComputeFunction(durationF, "d"),
+    .compute = buildParameterComputeFunction(durationF, "d", [](float p){ return pow(10 * p - 6, 2); }),
     .build_explicit_form = [](std::vector<std::string> children) -> std::string { 
         return "d(" + children[0] + ")"; 
     }
@@ -279,7 +283,7 @@ m({
     .name = "m",
     .param_types = { leafF },
     .output_type = midiPitchF,
-    .compute = buildParameterComputeFunction(midiPitchF, "m"),
+    .compute = buildParameterComputeFunction(midiPitchF, "m", [](float m){ return (m - 12) / 100; }),
     .build_explicit_form = [](std::vector<std::string> children) -> std::string { 
         return "m(" + children[0] + ")"; 
     }
@@ -289,7 +293,7 @@ a({
     .name = "a",
     .param_types = { leafF },
     .output_type = articulationF,
-    .compute = buildParameterComputeFunction(articulationF, "a"),
+    .compute = buildParameterComputeFunction(articulationF, "a", [](float a){ return pow(a / 3, 1 / E); }),
     .build_explicit_form = [](std::vector<std::string> children) -> std::string { 
         return "a(" + children[0] + ")"; 
     }
@@ -299,7 +303,7 @@ i({
     .name = "i",
     .param_types = { leafF },
     .output_type = intensityF,
-    .compute = buildParameterComputeFunction(intensityF, "i"),
+    .compute = buildParameterComputeFunction(intensityF, "i", [](float i){ return i / 127; }),
     .build_explicit_form = [](std::vector<std::string> children) -> std::string { 
         return "i(" + children[0] + ")"; 
     }
