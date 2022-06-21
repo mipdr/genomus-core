@@ -65,6 +65,8 @@ class GTree {
 
             void _assert_parameter_format(const std::vector<enc_phen_t>&);
         public:
+            std::string getName();
+
             GFunction();
             GFunction(const GFunction&);
             GFunction(GFunctionInitializer);
@@ -103,25 +105,28 @@ class GTree {
 
 using dec_gen_t = GTree::GTreeIndex;
 
-// GFunction instances declaration
-extern GTree::GFunction
-    p,
-    l,
-    e,
-    v,
-    s,
-    n,
-    d,
-    m,
-    // f,
-    a,
-    i,
-    // z,
-    // q,
-    e_piano,
-    vConcatE,
-    vConcatV,
+#define GENOTYPE_FUNCTIONS \
+    p, \
+    e, \
+    v, \
+    s, \
+    n, \
+    d, \
+    m, \
+    a, \
+    i, \
+    e_piano, \
+    vConcatE, \
+    vConcatV, \
     eAutoRef
-    ; 
+    // f, \
+    // z, \
+    // q, \
+
+// GFunction instances declaration
+extern GTree::GFunction GENOTYPE_FUNCTIONS;
+
+extern std::vector<GTree::GFunction> available_functions;
+void init_available_functions(); 
 
 #endif

@@ -12,6 +12,8 @@ GTest::GTestCase::GTestCase(string name, function<void(ostream&)> run) {
     this -> _run_test_case = run;
 }
 
+void printOutput(){ throw runtime_error("Dummy print error"); }
+
 GTest::GTestCase::GTestCaseOutput GTest::GTestCase::run() {
     stringstream regular_out, verbose_out;
     regular_out << "\t - Test case #" << test_case_counter << ": " << this -> _name << " -> ";

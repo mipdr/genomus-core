@@ -8,7 +8,8 @@ using namespace std;
 int main() {
     try {
         // EncodedPhenotypesTest.run();
-        DecodedGenotypesTest.run();
+        // DecodedGenotypesTest.run();
+        ParserTest.run();
     } catch (runtime_error e) {
         cout << e.what() << endl;
         return 1;

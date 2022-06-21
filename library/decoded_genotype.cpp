@@ -93,6 +93,8 @@ std::string GTree::printStaticData() {
 std::vector<GTree> GTree::tree_nodes;
 std::map<EncodedPhenotypeType, std::vector<GTree::GTreeIndex>> GTree::available_subexpressions;
 
+std::string GTree::GFunction::getName() { return this -> _name; };
+
 GTree::GFunction::GFunction(){ 
     this -> _name = "Not initialized decoded_genotype_level_function";
     this -> _type = decoded_genotype_level_function;
@@ -108,6 +110,7 @@ GTree::GFunction::GFunction(const GTree::GFunction& gf) {
     this -> _compute = gf._compute;
     this -> _build_explicit_form = gf._build_explicit_form;
     this -> _output_type = gf._output_type;
+    this -> _is_autoreference = gf._is_autoreference;
 }
 
 GTree::GFunction::GFunction(GFunctionInitializer init) {
@@ -126,7 +129,7 @@ void GTree::GFunction::_assert_parameter_format(const std::vector<enc_phen_t>& a
     std::vector<EncodedPhenotypeType> arg_types;
     for_each(arg.begin(), arg.end(), [&](enc_phen_t argument) { arg_types.push_back(argument.getType()); });
     if (!this -> _is_autoreference && (this -> _param_types != arg_types)) {
-        throw std::runtime_error(ErrorCodes::BAD_GFUNCTION_PARAMETERS);
+        throw std::runtime_error(ErrorCodes::BAD_GFUNCTION_PARAMETERS + ": " + this -> _name);
     }
 }
 
@@ -164,9 +167,9 @@ GTree::GTreeIndex GTree::GFunction::operator()(const std::vector<GTree::GTreeInd
 
 GTree::GTreeIndex GTree::GFunction::operator()(float x) {
     if (!gfunctionAcceptsFloatParameter(*this)) {
-        // Only parameter GFunctions like n, f or i are allowed to receive
-        // a float as a parameter
-        throw std::runtime_error(ErrorCodes::BAD_GFUNCTION_PARAMETERS);
+        // Only parameter. GFunctions like n, f or i are allowed to receive
+        // a float as a parameter.
+        throw std::runtime_error(ErrorCodes::BAD_GFUNCTION_PARAMETERS + ": " + this -> _name + " does not accept a float parameter.");
     }
     
     if (this -> _is_autoreference) {
@@ -413,7 +416,7 @@ eAutoRef({
 }),
 
 vAutoRef({
-    .name = "eAutoRef",
+    .name = "vAutoRef",
     .param_types = { leafF },
     .output_type = eventF,
     .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
@@ -425,3 +428,8 @@ vAutoRef({
 });
 
 GTree::GFunction e = e_piano;
+
+std::vector<GTree::GFunction> available_functions;
+void init_available_functions() {
+    available_functions = std::vector<GTree::GFunction>({ GENOTYPE_FUNCTIONS });
+}

@@ -9,6 +9,8 @@ enum GTestErrorState {
     g_failure,
 };
 
+void printOutput();
+
 class GTest {
     public:
 
@@ -45,4 +47,5 @@ class GTest {
 
 extern GTest 
     EncodedPhenotypesTest,
-    DecodedGenotypesTest;
+    DecodedGenotypesTest,
+    ParserTest;

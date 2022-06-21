@@ -12,8 +12,6 @@
 
 using namespace std;
 
-void printOutput() { throw runtime_error("Dummy print error"); }
-
 GTest DecodedGenotypesTest = GTest("Decoded GenotypesTest")
 
     .testCase("Functional tree build", [](ostream& os) {
