@@ -50,8 +50,12 @@ void GTree::GTreeIndex::clean() {
 
 EncodedPhenotype GTree::evaluateAutoReference(EncodedPhenotypeType eptt, size_t index) {
     std::vector<GTree::GTreeIndex> available_subexpressions_for_type = GTree::available_subexpressions[eptt];
-    const size_t mod_index = index % available_subexpressions_for_type.size();
 
+    if (available_subexpressions_for_type.size() == 0) {
+        throw std::runtime_error(ErrorCodes::BAD_AUTOREFERENCE);
+    }
+
+    const size_t mod_index = index % available_subexpressions_for_type.size();
     return available_subexpressions_for_type[mod_index].evaluate();
 }
 
@@ -159,10 +163,16 @@ GTree::GTreeIndex GTree::GFunction::operator()(const std::vector<GTree::GTreeInd
 }
 
 GTree::GTreeIndex GTree::GFunction::operator()(float x) {
-    if (gfunctionAcceptsFloatParameter(*this)) {
+    if (!gfunctionAcceptsFloatParameter(*this)) {
         // Only parameter GFunctions like n, f or i are allowed to receive
         // a float as a parameter
         throw std::runtime_error(ErrorCodes::BAD_GFUNCTION_PARAMETERS);
+    }
+    
+    if (this -> _is_autoreference) {
+        if (x > tree_nodes.size() - 1) {
+            throw std::runtime_error(ErrorCodes::BAD_AUTOREFERENCE_INDEX);
+        }
     }
 
     GTree p_tree = GTree(*this, {}, x);
@@ -206,7 +216,7 @@ GTree::GTree(GTree::GFunction& function, std::vector<GTree::GTreeIndex> children
 }
 
 enc_phen_t GTree::evaluate() {
-    if (isEncodedPhenotypeTypeAParameterType(this -> _function.getOutputType())) {
+    if (gfunctionAcceptsFloatParameter(this -> _function)) {
         return this -> _function.evaluate({
             EncodedPhenotype({
                 .type = leafF,
@@ -362,17 +372,6 @@ i({
     }
 }),
 
-// q({
-//     .name = "q",
-//     .param_types = { leafF },
-//     .output_type = quantizedF,
-//     .compute = buildParameterComputeFunction(quantizedF, "q", [](float f){ return f; }),
-//     .build_explicit_form = [](std::vector<std::string> children) -> std::string { 
-//         return "i(" + children[0] + ")"; 
-//     }
-// }),
-
-
 vConcatE({
     .name = "vConcatE",
     .param_types = { eventF, eventF },
@@ -403,13 +402,25 @@ vConcatV({
 
 eAutoRef({
     .name = "eAutoRef",
-    .param_types = { quantizedF },
+    .param_types = { leafF },
     .output_type = eventF,
     .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
         return GTree::evaluateAutoReference(eventF, (size_t) params[0].getLeafValue());
     },
     .build_explicit_form = [](std::vector<std::string> children) -> std::string { 
-        return "vConcatV(" + join(children, ", ") + ")"; 
+        return "eAutoRef(" + join(children, ", ") + ")"; 
+    }
+}),
+
+vAutoRef({
+    .name = "eAutoRef",
+    .param_types = { leafF },
+    .output_type = eventF,
+    .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
+        return GTree::evaluateAutoReference(eventF, (size_t) params[0].getLeafValue());
+    },
+    .build_explicit_form = [](std::vector<std::string> children) -> std::string { 
+        return "vAutoRef(" + join(children, ", ") + ")"; 
     }
 });
 

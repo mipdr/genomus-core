@@ -25,16 +25,18 @@ GTest DecodedGenotypesTest = GTest("Decoded GenotypesTest")
             i(1),
         });
 
-        GTree::GTreeIndex tree = vConcatV({vConcatE({event, event}), vConcatE({event, eAutoRef(0)})});
+        GTree::GTreeIndex tree = vConcatV({vConcatE({event, event}), vConcatE({event, event})});
 
+        os << "Decoded genotype\n";
         os << prettyPrint(tree.toString()) << endl;
+
+        os << "\nEncoded Phenotype\n";
         os << prettyPrint(tree.evaluate().toString()) << endl;
 
+        os << "\nStatic data members\n";
         os << GTree::printStaticData() << endl;
 
         tree.clean();
-
-        printOutput();
     })
 
     .testCase("Concat functions", [](ostream& os) {
@@ -52,4 +54,22 @@ GTest DecodedGenotypesTest = GTest("Decoded GenotypesTest")
         os << voice2.toString();
 
         dec_gen_t::clean();
+    })
+
+    .testCase("AutoReferences", [](ostream& os) {
+
+        GTree::GTreeIndex tree = vConcatV({vConcatE({e({n(1.0), m(2.0), a(3.0), i(1)}), eAutoRef(0)}), vConcatE({eAutoRef(1), eAutoRef(2)})});
+
+        os << "Decoded genotype\n";
+        os << prettyPrint(tree.toString()) << endl;
+
+        os << "\nEncoded Phenotype\n";
+        os << prettyPrint(tree.evaluate().toString()) << endl;
+
+        os << "\nStatic data members\n";
+        os << GTree::printStaticData() << endl;
+
+        tree.clean();
+
+        printOutput();
     });
