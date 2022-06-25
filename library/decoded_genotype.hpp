@@ -32,6 +32,7 @@ class GTree {
             operator std::string() const;
             float getLeafValue();
             size_t getIndex();
+            std::vector<float> toNormalizedVector();
             static void clean();
     };
     
@@ -46,10 +47,10 @@ class GTree {
         public:
         struct GFunctionInitializer {
             std::string name;
+            size_t index;
             std::vector<EncodedPhenotypeType> param_types;
             EncodedPhenotypeType output_type;
             std::function<enc_phen_t(std::vector<enc_phen_t>)> compute;
-            std::function<std::string(std::vector<std::string>)> build_explicit_form;
         };
 
         private:
@@ -58,13 +59,13 @@ class GTree {
             FeatureType _type;
 
             // GFunction fields
+            size_t _index;
             std::vector<EncodedPhenotypeType> _param_types;
             EncodedPhenotypeType _output_type;
             std::function<enc_phen_t(std::vector<enc_phen_t>)> _compute;
-            std::function<std::string(std::vector<std::string>)> _build_explicit_form;
             bool _is_autoreference;
 
-            void _assert_parameter_format(const std::vector<enc_phen_t>&);
+            void _assert_parameter_format(const std::vector<enc_phen_t>&) const;
         public:
             std::string getName();
 
@@ -73,14 +74,15 @@ class GTree {
             GFunction(const GFunction&, std::string name);
             GFunction(GFunctionInitializer);
 
-            std::vector<EncodedPhenotypeType> getParamTypes();
-            // function<string(vector<string>)>& getBuildExplicitForm();
+            // GFunction alias(std::string alias_name);
+
+            std::vector<EncodedPhenotypeType> getParamTypes() const;
+            size_t getIndex() const;
             std::string buildExplicitForm(std::vector<std::string>);
 
             EncodedPhenotypeType getOutputType() const;
             bool getIsAutoreference() const;
-            enc_phen_t evaluate(const std::vector<enc_phen_t>&);
-            // enc_phen_t operator()(const std::vector<enc_phen_t>&);
+            enc_phen_t evaluate(const std::vector<enc_phen_t>&) const;
             GTreeIndex operator()(std::initializer_list<GTreeIndex>);
             GTreeIndex operator()(const std::vector<GTreeIndex>);
             GTreeIndex operator()(float);
@@ -103,13 +105,13 @@ class GTree {
 
         enc_phen_t evaluate();
         std::string toString();
+        std::vector<float> toNormalizedVector();
 };
 
 using dec_gen_t = GTree::GTreeIndex;
 
 #define GENOTYPE_FUNCTIONS \
     p, \
-    e, \
     v, \
     s, \
     n, \
@@ -121,6 +123,7 @@ using dec_gen_t = GTree::GTreeIndex;
     vConcatE, \
     vConcatV, \
     eAutoRef
+    // e, \
     // f, \
     // z, \
     // q, \
@@ -128,7 +131,18 @@ using dec_gen_t = GTree::GTreeIndex;
 // GFunction instances declaration
 extern GTree::GFunction GENOTYPE_FUNCTIONS;
 
-extern std::vector<GTree::GFunction> available_functions;
+// Function access structures
+
+extern std::map<std::string, std::string> name_aliases;
+
+extern std::map<float, GTree::GFunction> available_functions;
+extern std::map<EncodedPhenotypeType, std::vector<float>> function_dictionary;
 void init_available_functions(); 
+
+
+// utils
+
+bool isEncodedPhenotypeTypeAParameterType(EncodedPhenotypeType);
+bool gfunctionAcceptsFloatParameter(const GTree::GFunction&);
 
 #endif

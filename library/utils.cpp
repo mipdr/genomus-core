@@ -51,3 +51,7 @@ uint32_t mulberry_32(uint32_t x) {
     z ^= z + (z ^ (z >> 7)) * (z | 61UL);
     return z ^ (z >> 14);
 }
+
+float roundTo6Decimals(float f) {
+    return round(f * 1000000) * 1.0 / 1000000.0;
+}

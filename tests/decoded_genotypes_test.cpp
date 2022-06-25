@@ -10,9 +10,11 @@ using namespace std;
 
 GTest DecodedGenotypesTest = GTest("Decoded GenotypesTest")
 
+    .after([]() { GTree::clean(); })
+
     .testCase("Functional tree build", [](ostream& os) {
 
-        GTree::GTreeIndex event = e({
+        GTree::GTreeIndex event = e_piano({
             n(1.0),
             m(2.0),
             a(3.0),
@@ -52,7 +54,7 @@ GTest DecodedGenotypesTest = GTest("Decoded GenotypesTest")
 
     .testCase("AutoReferences", [](ostream& os) {
 
-        GTree::GTreeIndex tree = vConcatV({vConcatE({e({n(1.0), m(2.0), a(3.0), i(1)}), eAutoRef(0)}), vConcatE({eAutoRef(1), eAutoRef(2)})});
+        GTree::GTreeIndex tree = vConcatV({vConcatE({e_piano({n(1.0), m(2.0), a(3.0), i(1)}), eAutoRef(0)}), vConcatE({eAutoRef(1), eAutoRef(2)})});
 
         os << "Decoded genotype\n";
         os << prettyPrint(tree.toString()) << endl;
