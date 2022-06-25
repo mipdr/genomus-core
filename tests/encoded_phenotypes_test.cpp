@@ -1,11 +1,10 @@
-#include "encoded_phenotype.hpp"
-#include "genomus-core.hpp"
 #include <iostream>
 #include <ostream>
 #include <sstream>
 #include <stdexcept>
 #include <bits/stdc++.h>
-#include "species.hpp"
+
+#include "genomus-core.hpp"
 #include "testing_utils.hpp"
 
 using namespace std;

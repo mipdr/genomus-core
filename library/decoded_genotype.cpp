@@ -35,10 +35,11 @@ bool gfunctionAcceptsFloatParameter(const GTree::GFunction& gf) {
 
 GTree::GTreeIndex::GTreeIndex(size_t i) { this -> _index = i; }
 enc_phen_t GTree::GTreeIndex::evaluate(){ return tree_nodes[this -> _index].evaluate(); }
-std::string GTree::GTreeIndex::toString(){ 
+std::string GTree::GTreeIndex::toString() const { 
     return tree_nodes[this -> _index].toString(); 
 }
 GTree::GTreeIndex::operator size_t() const { return this -> _index; }
+GTree::GTreeIndex::operator std::string() const { return this -> toString(); }
 float GTree::GTreeIndex::getLeafValue() {
     return tree_nodes[this -> _index]._leaf_value;
 }
@@ -105,6 +106,16 @@ GTree::GFunction::GFunction(){
 
 GTree::GFunction::GFunction(const GTree::GFunction& gf) {
     this -> _name = gf._name;
+    this -> _type = gf._type;
+    this -> _param_types = gf._param_types;
+    this -> _compute = gf._compute;
+    this -> _build_explicit_form = gf._build_explicit_form;
+    this -> _output_type = gf._output_type;
+    this -> _is_autoreference = gf._is_autoreference;
+}
+
+GTree::GFunction::GFunction(const GTree::GFunction& gf, std::string name) {
+    this -> _name = name != "" ? name : gf._name;
     this -> _type = gf._type;
     this -> _param_types = gf._param_types;
     this -> _compute = gf._compute;
@@ -427,7 +438,7 @@ vAutoRef({
     }
 });
 
-GTree::GFunction e = e_piano;
+GTree::GFunction e(e_piano, "e");
 
 std::vector<GTree::GFunction> available_functions;
 void init_available_functions() {

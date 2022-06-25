@@ -3,11 +3,7 @@
 #include <ostream>
 #include <stdexcept>
 
-#include "decoded_genotype.hpp"
-#include "encoded_phenotype.hpp"
-#include "features.hpp"
 #include "genomus-core.hpp"
-#include "utils.hpp"
 #include "testing_utils.hpp"
 
 using namespace std;
@@ -68,6 +64,4 @@ GTest DecodedGenotypesTest = GTest("Decoded GenotypesTest")
         os << GTree::printStaticData() << endl;
 
         tree.clean();
-
-        printOutput();
     });

@@ -27,8 +27,9 @@ class GTree {
         public:
             GTreeIndex(size_t);
             enc_phen_t evaluate();
-            std::string toString();
+            std::string toString() const;
             operator size_t() const;
+            operator std::string() const;
             float getLeafValue();
             size_t getIndex();
             static void clean();
@@ -69,6 +70,7 @@ class GTree {
 
             GFunction();
             GFunction(const GFunction&);
+            GFunction(const GFunction&, std::string name);
             GFunction(GFunctionInitializer);
 
             std::vector<EncodedPhenotypeType> getParamTypes();
