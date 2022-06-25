@@ -8,4 +8,7 @@
 #include "decoded_genotype.hpp"
 #include "encoded_phenotype.hpp"
 
+#include "parser.hpp"
+#include "utils.hpp"
+
 #endif

@@ -13,7 +13,9 @@ std::string featureTypeToString(FeatureType ft) {
     }
 }
 
-std::string GenomusFeature::getName() { return this -> _name; }
+std::string GenomusFeature::getName() { 
+    return this -> _name; 
+}
 FeatureType GenomusFeature::getType() { return this -> _type; }
 std::string GenomusFeature::getTypeString() { return featureTypeToString(this -> _type); }
 
