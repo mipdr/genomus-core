@@ -21,17 +21,6 @@ std::string join(std::vector<T> v, std::string separator = ", ") {
     return join(string_v, separator);
 }
 
-// template<typename T, typename K>
-// std::vector<K*> values(std::map<T, K> m) {
-//     std::vector<K*> result;
-
-//     for(std::pair<T, K> entry: m) {
-//         result.push_back(&entry.second);
-//     }
-
-//     return result;
-// }
-
 template<typename T, typename K>
 void values(std::map<T, K> m, std::vector<K>& v) {
     for(std::pair<T, K> entry: m) {

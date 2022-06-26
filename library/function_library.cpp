@@ -207,7 +207,4 @@ void init_available_functions() {
         }
 
     }
-
-    // std::cout << print_available_functions() << std::endl;
-    // std::cout << print_function_type_dictionary() << std::endl;
 }

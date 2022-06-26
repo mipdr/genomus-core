@@ -27,7 +27,7 @@ bool isEncodedPhenotypeTypeAParameterType(EncodedPhenotypeType eptt) {
     return includes(parameterTypes, eptt);
 }
 
-bool gfunctionAcceptsdoubleParameter(const GTree::GFunction& gf) {
+bool gfunctionAcceptsNumericParameter(const GTree::GFunction& gf) {
     return gf.getIsAutoreference() || isEncodedPhenotypeTypeAParameterType(gf.getOutputType());
 }
 
@@ -195,9 +195,8 @@ GTree::GTreeIndex GTree::GFunction::operator()(const std::vector<GTree::GTreeInd
 }
 
 GTree::GTreeIndex GTree::GFunction::operator()(double x) {
-    if (!gfunctionAcceptsdoubleParameter(*this)) {
-        // Only parameter. GFunctions like n, f or i are allowed to receive
-        // a double as a parameter.
+    if (!gfunctionAcceptsNumericParameter(*this)) {
+        // Only parameter functions and autoreferences are allowed to receive a numeric parameter
         throw std::runtime_error(ErrorCodes::BAD_GFUNCTION_PARAMETERS + ": " + this -> _name + " does not accept a double parameter.");
     }
     
@@ -251,7 +250,7 @@ GTree::GTree(GTree::GFunction& function, std::vector<GTree::GTreeIndex> children
 }
 
 enc_phen_t GTree::evaluate() {
-    if (gfunctionAcceptsdoubleParameter(this -> _function)) {
+    if (gfunctionAcceptsNumericParameter(this -> _function)) {
         return this -> _function.evaluate({
             EncodedPhenotype({
                 .type = leafF,
@@ -273,7 +272,7 @@ enc_phen_t GTree::evaluate() {
 }
 
 std::string GTree::toString() {
-    if (gfunctionAcceptsdoubleParameter(this -> _function)) {
+    if (gfunctionAcceptsNumericParameter(this -> _function)) {
         return this -> _function.buildExplicitForm({Parameter(this -> _leaf_value).toString()});
     }
 
@@ -283,8 +282,4 @@ std::string GTree::toString() {
     });
     
     return this -> _function.buildExplicitForm(string_children);
-}
-
-std::vector<double> toNormalizedVector() {
-    return {1, 0};
 }

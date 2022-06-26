@@ -32,7 +32,6 @@ class GTree {
             operator std::string() const;
             double getLeafValue();
             size_t getIndex();
-            std::vector<double> toNormalizedVector();
             static void clean();
     };
     
@@ -105,7 +104,6 @@ class GTree {
 
         enc_phen_t evaluate();
         std::string toString();
-        std::vector<double> toNormalizedVector();
 };
 
 using dec_gen_t = GTree::GTreeIndex;
@@ -145,6 +143,6 @@ void init_available_functions();
 // utils
 
 bool isEncodedPhenotypeTypeAParameterType(EncodedPhenotypeType);
-bool gfunctionAcceptsdoubleParameter(const GTree::GFunction&);
+bool gfunctionAcceptsNumericParameter(const GTree::GFunction&);
 
 #endif
