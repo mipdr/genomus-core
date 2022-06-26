@@ -3,10 +3,10 @@
 
 #include <functional>
 #include <vector>
+#include <map>
 
 #include "encoded_phenotype.hpp"
 #include "features.hpp"
-#include "parameter_mapping.hpp"
 
 /*
     GTree class is the ADT for decoded genotypes. Its instances will hold what is needed

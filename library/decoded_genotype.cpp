@@ -9,7 +9,6 @@
 
 #include "decoded_genotype.hpp"
 #include "encoded_phenotype.hpp"
-#include "parameter_mapping.hpp"
 #include "species.hpp"
 #include "utils.hpp"
 #include "errorCodes.hpp"

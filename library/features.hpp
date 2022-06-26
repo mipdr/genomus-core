@@ -21,6 +21,6 @@ class GenomusFeature {
         virtual std::string getTypeString();
 };
 
-extern std::vector<GenomusFeature*> genomusFeatures;
+// extern std::vector<GenomusFeature*> genomusFeatures;
 
 #endif
