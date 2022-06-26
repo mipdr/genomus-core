@@ -10,7 +10,7 @@ GTest ParserTest = GTest("Parser test")
     .after([]() { GTree::clean(); })
 
     .testCase("Check parser tokens", [](ostream& os) {
-        auto entry = "vConcatV(vConcatE(e_piano(n(1.0), m(2.0), a(3.0), i(1)), eAutoRef(0)), vConcatE(eAutoRef(1), eAutoRef(2)))";
+        auto entry = "vConcatV(vConcatE(e(n(1.0), m(2.0), a(3.0), i(1)), eAutoRef(0)), vConcatE(eAutoRef(1), eAutoRef(2)))";
         auto tree = parseString(entry);
 
         os << "Entry: " << entry << "\n\n";
@@ -19,12 +19,13 @@ GTest ParserTest = GTest("Parser test")
     }).
 
     testCase("Genotype to string to genotype", [](ostream& os) {
-        auto tree = vConcatV({vConcatE({e_piano({n(1.0), m(2.0), a(3.0), i(1)}), eAutoRef(0)}), vConcatE({eAutoRef(1), eAutoRef(2)})});
+        auto tree = vConcatV({vConcatE({e({n(1.0), m(2.0), a(3.0), i(1)}), eAutoRef(0)}), vConcatE({eAutoRef(1), eAutoRef(2)})});
         auto tree_string = tree.toString();
         auto parsed_tree = parseString(tree_string);
         auto parsed_tree_string = parsed_tree.toString();
 
         if (tree_string != parsed_tree_string) {
-            throw runtime_error("Assertion error");
+            std::string error_message = "Assertion error: expected\n\n" + tree_string + "\n\nto equal\n\n" + parsed_tree_string + "\n";
+            throw runtime_error(error_message);
         }
     });

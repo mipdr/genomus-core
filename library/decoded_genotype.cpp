@@ -137,22 +137,22 @@ GTree::GFunction::GFunction(GFunctionInitializer init) {
     this -> _is_autoreference  = this -> _name.find("AutoRef") != std::string::npos;
 }
 
-// GTree::GFunction GTree::GFunction::alias(std::string alias_name) {
-//     if (name_aliases.find(this -> _name) != name_aliases.end()) {
-//         throw std::runtime_error(ErrorCodes::ALIASING_AN_ALIAS_IS_NOT_SUPPORTED);
-//     }
+GTree::GFunction GTree::GFunction::alias(std::string alias_name) {
+    if (name_aliases.find(this -> _name) != name_aliases.end()) {
+        throw std::runtime_error(ErrorCodes::ALIASING_AN_ALIAS_IS_NOT_SUPPORTED);
+    }
 
-//     name_aliases[alias_name] = this -> _name;
-//     return GTree::GFunction({
-//         .name = alias_name,
-//         .index = this -> _index,
-//         .param_types = this -> _param_types,
-//         .output_type = this -> _output_type,
-//         .compute = [&](std::vector<enc_phen_t> params) -> enc_phen_t {
-//             return this -> _compute(params);
-//         },
-//     });
-// }
+    name_aliases[alias_name] = this -> _name;
+    return GTree::GFunction({
+        .name = alias_name,
+        .index = this -> _index,
+        .param_types = this -> _param_types,
+        .output_type = this -> _output_type,
+        .compute = [&](std::vector<enc_phen_t> params) -> enc_phen_t {
+            return this -> _compute(params);
+        },
+    });
+}
 
 void GTree::GFunction::_assert_parameter_format(const std::vector<enc_phen_t>& arg) const {
     std::vector<EncodedPhenotypeType> arg_types;
@@ -233,7 +233,9 @@ std::string GTree::GFunction::toString() {
 std::vector<EncodedPhenotypeType> GTree::GFunction::getParamTypes() const { return this -> _param_types; }
 size_t GTree::GFunction::getIndex() const { return this -> _index; }
 std::string GTree::GFunction::buildExplicitForm(std::vector<std::string> v) {
-    return this -> _name + "(" + join(v) + ")";
+    static std::string unaliased_name;
+    unaliased_name = name_aliases.find(this -> _name) == name_aliases.end() ? this -> _name : name_aliases[this -> _name];
+    return unaliased_name + "(" + join(v) + ")";
 }
 
 // GTree method implementation

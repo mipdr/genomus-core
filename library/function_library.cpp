@@ -155,9 +155,9 @@ vAutoRef({
     .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
         return GTree::evaluateAutoReference(eventF, (size_t) params[0].getLeafValue());
     },
-});
+}),
 
-// e = e_piano.alias("e");
+e = e_piano.alias("e");
 
 std::map<double, GTree::GFunction> available_functions;
 std::map<EncodedPhenotypeType, std::vector<double>> function_type_dictionary;

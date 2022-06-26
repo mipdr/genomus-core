@@ -74,7 +74,7 @@ class GTree {
             GFunction(const GFunction&, std::string name);
             GFunction(GFunctionInitializer);
 
-            // GFunction alias(std::string alias_name);
+            GFunction alias(std::string alias_name);
 
             std::vector<EncodedPhenotypeType> getParamTypes() const;
             size_t getIndex() const;
@@ -112,6 +112,7 @@ using dec_gen_t = GTree::GTreeIndex;
 
 #define GENOTYPE_FUNCTIONS \
     p, \
+    e, \
     v, \
     s, \
     n, \
@@ -123,7 +124,6 @@ using dec_gen_t = GTree::GTreeIndex;
     vConcatE, \
     vConcatV, \
     eAutoRef
-    // e, \
     // f, \
     // z, \
     // q, \
