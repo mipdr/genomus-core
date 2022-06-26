@@ -48,4 +48,5 @@ class GTest {
 extern GTest 
     EncodedPhenotypesTest,
     DecodedGenotypesTest,
-    ParserTest;
+    ParserTest,
+    EncodedGenotypesTest;

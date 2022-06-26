@@ -39,4 +39,13 @@ uint32_t mulberry_32(uint32_t);
 
 double roundTo6Decimals(double f);
 
+template<typename K, typename T>
+T findWithDefault(const std::map<K, T>& m, K k, T def_val) {
+    auto it = m.find(k);
+    if (it == m.end()) {
+        return def_val;
+    }
+    return it -> second;
+}
+
 #endif

@@ -35,7 +35,7 @@ GTree::GFunction
 
 p({
     .name = "p",
-    .index = 0,
+    .index = 1,
     .param_types = { leafF },
     .output_type = paramF,
     .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
@@ -76,7 +76,7 @@ s({
 n({
     .name = "n",
     .index = 5,
-    .param_types = { leafF },
+    .param_types = { noteValueF },
     .output_type = noteValueF,
     .compute = buildParameterComputeFunction(noteValueF, "n", [](double v){ return (log(v) + 8 * log(2)) / 10 * log(2); }),
 }),
@@ -84,7 +84,7 @@ n({
 d({
     .name = "d",
     .index = 6,
-    .param_types = { leafF },
+    .param_types = { durationF },
     .output_type = durationF,
     .compute = buildParameterComputeFunction(durationF, "d", [](double p){ return pow(10 * p - 6, 2); }),
 }),
@@ -92,7 +92,7 @@ d({
 m({
     .name = "m",
     .index = 7,
-    .param_types = { leafF },
+    .param_types = { midiPitchF },
     .output_type = midiPitchF,
     .compute = buildParameterComputeFunction(midiPitchF, "m", [](double m){ return (m - 12) / 100; }),
 }),
@@ -100,7 +100,7 @@ m({
 a({
     .name = "a",
     .index = 9,
-    .param_types = { leafF },
+    .param_types = { articulationF },
     .output_type = articulationF,
     .compute = buildParameterComputeFunction(articulationF, "a", [](double a){ return pow(a / 3, 1 / E); }),
 }),
@@ -108,7 +108,7 @@ a({
 i({
     .name = "i",
     .index = 10,
-    .param_types = { leafF },
+    .param_types = { intensityF },
     .output_type = intensityF,
     .compute = buildParameterComputeFunction(intensityF, "i", [](double i){ return i / 127; }),
 }),
@@ -140,7 +140,7 @@ vConcatV({
 eAutoRef({
     .name = "eAutoRef",
     .index = 27,
-    .param_types = { leafF },
+    .param_types = { quantizedF },
     .output_type = eventF,
     .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
         return GTree::evaluateAutoReference(eventF, (size_t) params[0].getLeafValue());
@@ -150,10 +150,24 @@ eAutoRef({
 vAutoRef({
     .name = "vAutoRef",
     .index = 28,
-    .param_types = { leafF },
+    .param_types = { quantizedF },
     .output_type = eventF,
     .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
         return GTree::evaluateAutoReference(eventF, (size_t) params[0].getLeafValue());
+    },
+}),
+
+sAddV({
+    .name = "sAddV",
+    .index = 109,
+    .param_types = { scoreF, voiceF },
+    .output_type = eventF,
+    .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
+        auto& score = params[0], new_voice = params[1];
+
+        std::vector<enc_phen_t> voices = score.getChildren();
+        voices.push_back(new_voice);
+        return Score(voices);
     },
 }),
 
@@ -191,6 +205,13 @@ std::string print_function_type_dictionary() {
 }
 
 void init_available_functions() {
+    static bool is_initialized = false;
+
+    if (is_initialized) 
+        return;
+
+    is_initialized = true;
+
     double encoded_index;
     bool isAlias;
     for (auto gf: { GENOTYPE_FUNCTIONS }) {

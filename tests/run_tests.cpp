@@ -7,9 +7,10 @@ using namespace std;
 
 int main() {
     try {
-        EncodedPhenotypesTest.run();
-        DecodedGenotypesTest.run();
-        ParserTest.run();
+        // EncodedPhenotypesTest.run();
+        // DecodedGenotypesTest.run();
+        // ParserTest.run();
+        EncodedGenotypesTest.run();
     } catch (runtime_error e) {
         cout << e.what() << endl;
         return 1;
