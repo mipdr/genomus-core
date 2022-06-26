@@ -14,6 +14,8 @@ static bool verbose = true;
 
 GTest EncodedPhenotypesTest = GTest("Encoded Phenotypes Test")
 
+    .after([]() { GTree::clean(); })
+
     .testCase("Parameter declaration", [](ostream& os){
         os << Parameter(1.0).toString() << endl;
     })

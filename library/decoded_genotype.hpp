@@ -30,7 +30,7 @@ class GTree {
             std::string toString() const;
             operator size_t() const;
             operator std::string() const;
-            float getLeafValue();
+            double getLeafValue();
             size_t getIndex();
             static void clean();
     };
@@ -46,10 +46,10 @@ class GTree {
         public:
         struct GFunctionInitializer {
             std::string name;
+            size_t index;
             std::vector<EncodedPhenotypeType> param_types;
             EncodedPhenotypeType output_type;
             std::function<enc_phen_t(std::vector<enc_phen_t>)> compute;
-            std::function<std::string(std::vector<std::string>)> build_explicit_form;
         };
 
         private:
@@ -58,13 +58,13 @@ class GTree {
             FeatureType _type;
 
             // GFunction fields
+            size_t _index;
             std::vector<EncodedPhenotypeType> _param_types;
             EncodedPhenotypeType _output_type;
             std::function<enc_phen_t(std::vector<enc_phen_t>)> _compute;
-            std::function<std::string(std::vector<std::string>)> _build_explicit_form;
             bool _is_autoreference;
 
-            void _assert_parameter_format(const std::vector<enc_phen_t>&);
+            void _assert_parameter_format(const std::vector<enc_phen_t>&) const;
         public:
             std::string getName();
 
@@ -73,17 +73,18 @@ class GTree {
             GFunction(const GFunction&, std::string name);
             GFunction(GFunctionInitializer);
 
-            std::vector<EncodedPhenotypeType> getParamTypes();
-            // function<string(vector<string>)>& getBuildExplicitForm();
+            GFunction alias(std::string alias_name);
+
+            std::vector<EncodedPhenotypeType> getParamTypes() const;
+            size_t getIndex() const;
             std::string buildExplicitForm(std::vector<std::string>);
 
             EncodedPhenotypeType getOutputType() const;
             bool getIsAutoreference() const;
-            enc_phen_t evaluate(const std::vector<enc_phen_t>&);
-            // enc_phen_t operator()(const std::vector<enc_phen_t>&);
+            enc_phen_t evaluate(const std::vector<enc_phen_t>&) const;
             GTreeIndex operator()(std::initializer_list<GTreeIndex>);
             GTreeIndex operator()(const std::vector<GTreeIndex>);
-            GTreeIndex operator()(float);
+            GTreeIndex operator()(double);
             std::string toString();
     };
     
@@ -91,7 +92,7 @@ class GTree {
         GFunction& _function;
         std::vector<GTreeIndex> _children;
 
-        float _leaf_value; // Temporary, I just don't know where to put leaf values on trees
+        double _leaf_value; // Temporary, I just don't know where to put leaf values on trees
     public:
         static std::vector<GTree> tree_nodes;
         static std::map<EncodedPhenotypeType, std::vector<GTree::GTreeIndex>> available_subexpressions;
@@ -99,7 +100,7 @@ class GTree {
         static void registerLastInsertedNodeAsSubexpression();
         static std::string printStaticData();
         static void clean();
-        GTree(GFunction&, std::vector<GTreeIndex>, float leaf_value = 0);
+        GTree(GFunction&, std::vector<GTreeIndex>, double leaf_value = 0);
 
         enc_phen_t evaluate();
         std::string toString();
@@ -128,7 +129,20 @@ using dec_gen_t = GTree::GTreeIndex;
 // GFunction instances declaration
 extern GTree::GFunction GENOTYPE_FUNCTIONS;
 
-extern std::vector<GTree::GFunction> available_functions;
+// Function access structures
+
+extern std::map<std::string, std::string> name_aliases;
+
+static const double invalid_function_index = -1;
+extern std::map<double, GTree::GFunction> available_functions;
+extern std::map<EncodedPhenotypeType, std::vector<double>> function_type_dictionary;
+extern std::map<std::string, double> function_name_to_index;
 void init_available_functions(); 
+
+
+// utils
+
+bool isEncodedPhenotypeTypeAParameterType(EncodedPhenotypeType);
+bool gfunctionAcceptsNumericParameter(const GTree::GFunction&);
 
 #endif

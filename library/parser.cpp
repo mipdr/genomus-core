@@ -99,21 +99,29 @@ std::vector<TokenNode> buildTokenTree(std::string entry) {
         }
     }
 
+    // Resolve token aliases
+    for (size_t i = 0; i < nodes.size(); ++i) {
+        if (name_aliases.find(nodes[i].token) != name_aliases.end()) {
+            nodes[i].token = name_aliases.find(nodes[i].token) -> second;
+        }
+    }
+
     return nodes;
 }
 
 dec_gen_t tokenTreeToGTree(const std::vector<TokenNode>& token_nodes, size_t index = 0) {
     auto token = token_nodes[index].token;
-    auto f_it = std::find_if(available_functions.begin(), available_functions.end(), [&token](GTree::GFunction& f) { 
-        return f.getName() == token; 
-    });
-    if (f_it == available_functions.end()) throw std::runtime_error(ErrorCodes::BAD_PARSER_ENTRY_BAD_FUNCTION_NAME + ": " + token);
+
+    auto it = function_name_to_index.find(token);
+    if (it == function_name_to_index.end()) throw std::runtime_error(ErrorCodes::BAD_PARSER_ENTRY_BAD_FUNCTION_NAME + ": " + token);
+
+    auto&& gfunction = available_functions[it -> second];
 
     if (token_nodes[index].children.size()) {
         auto first_child_token = token_nodes[token_nodes[index].children[0]].token; 
         if (isTokenNumeric(first_child_token)) {
             // Missing check for no siblings and no children
-            return (*f_it)(std::stof(first_child_token));
+            return gfunction(std::stof(first_child_token));
         }
     }
 
@@ -123,7 +131,7 @@ dec_gen_t tokenTreeToGTree(const std::vector<TokenNode>& token_nodes, size_t ind
         children.push_back(tokenTreeToGTree(token_nodes, child_index));
     });
 
-    return (*f_it)(children);
+    return gfunction(children);
 }
 
 dec_gen_t parseString(std::string entry) {

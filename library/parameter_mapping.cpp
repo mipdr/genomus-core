@@ -15,8 +15,8 @@ static const double PI = M_PI;
 ParameterMapper::ParameterMapper() {
     this -> _name = "DefaultMapper";
     this -> _type = parameter_mapper;
-    this -> _encode = [](float x){ return x; };
-    this -> _decode = [](float y){ return y; };
+    this -> _encode = [](double x){ return x; };
+    this -> _decode = [](double y){ return y; };
 }
 
 ParameterMapper::ParameterMapper(ParameterMapperInitializer params) {
@@ -26,11 +26,11 @@ ParameterMapper::ParameterMapper(ParameterMapperInitializer params) {
     this -> _decode = params.decoder;
 }
 
-float ParameterMapper::operator>>(const float p) {
+double ParameterMapper::operator>>(const double p) {
     return this -> _encode(p);
 }
 
-float ParameterMapper::operator<<(const float p) {
+double ParameterMapper::operator<<(const double p) {
     return this -> _decode(p);
 }
 
@@ -39,44 +39,44 @@ FeatureType ParameterMapper::getType() { return this -> _type; }
 
 ParameterMapper ParamF({
     .name = "ParamF",
-    .encoder = [](float a){ return a; },
-    .decoder = [](float a){ return a; }
+    .encoder = [](double a){ return a; },
+    .decoder = [](double a){ return a; }
 });
 
 ParameterMapper DurationF({
     .name = "DurationF",
-    .encoder = [](float p){ return pow(10 * p - 6, 2); },
-    .decoder = [](float s){ return (log(s) + 6 * log(2)) / (10 * log(2)); }
+    .encoder = [](double p){ return pow(10 * p - 6, 2); },
+    .decoder = [](double s){ return (log(s) + 6 * log(2)) / (10 * log(2)); }
 });
 
 ParameterMapper NoteValueF({
     .name = "NoteValueF",
-    .encoder = [](float v){ return (log(v) + 8 * log(2)) / 10 * log(2); },
-    .decoder = [](float p){ return pow(10 * p - 8, 2); }
+    .encoder = [](double v){ return (log(v) + 8 * log(2)) / 10 * log(2); },
+    .decoder = [](double p){ return pow(10 * p - 8, 2); }
 });
 
 ParameterMapper MidiPitchF({
     .name = "MidiPitchF",
-    .encoder = [](float m){ return (m - 12) / 100; },
-    .decoder = [](float p){ return 100 * p + 12; }
+    .encoder = [](double m){ return (m - 12) / 100; },
+    .decoder = [](double p){ return 100 * p + 12; }
 });
 
 ParameterMapper FrequencyF({
     .name = "FrequencyF",
-    .encoder = [](float h){ return pow(h / 20000, 1/4); },
-    .decoder = [](float p){ return 20000 * pow(p, 4); }
+    .encoder = [](double h){ return pow(h / 20000, 1/4); },
+    .decoder = [](double p){ return 20000 * pow(p, 4); }
 });
 
 ParameterMapper ArticulationF({
     .name = "ArticulationF",
-    .encoder = [](float a){ return pow(a / 3, 1 / E); },
-    .decoder = [](float p){ return exp(3 * p); }
+    .encoder = [](double a){ return pow(a / 3, 1 / E); },
+    .decoder = [](double p){ return exp(3 * p); }
 });
 
 ParameterMapper IntensityF({
     .name = "IntensityF",
-    .encoder = [](float i){ return i / 127; },
-    .decoder = [](float p){ return 127 * p; }
+    .encoder = [](double i){ return i / 127; },
+    .decoder = [](double p){ return 127 * p; }
 });
 
 ParameterMapper GoldenintegerF({
@@ -88,8 +88,8 @@ ParameterMapper GoldenintegerF({
 ParameterMapper QuantizedF({
     .name = "QuantizedF",
     .encoder = [](int z){ return round((asin(pow(2 * z - 1, 17.0 / 11)) / PI + 0.5) * 72 - 36); },
-    .decoder = [](float p){ 
-        static const std::map<float, int> LookUpTable({
+    .decoder = [](double p){ 
+        static const std::map<double, int> LookUpTable({
             { 0, -36 },
             { 0.0005, -35 },
             { 0.001, -34 },
@@ -166,8 +166,8 @@ ParameterMapper QuantizedF({
         });
 
         auto it = LookUpTable.begin();
-        float min_distance = abs(it -> first - p);
-        float current_distance;
+        double min_distance = abs(it -> first - p);
+        double current_distance;
         it++;
         for (; it != LookUpTable.end(); it++ ) {
             current_distance = abs(it -> first - p);
