@@ -5,8 +5,8 @@
 
 static const unsigned int MAX_RANDOM_VECTOR_LENGTH = 2000;
 
-std::vector<float> randomVector(int n) {
-    std::vector<float> v;
+std::vector<double> randomVector(int n) {
+    std::vector<double> v;
     auto generator = new std::random_device;
 
     if (n > MAX_RANDOM_VECTOR_LENGTH) {

@@ -8,8 +8,8 @@
 
 struct ParameterMapperInitializer{
     std::string name;
-    std::function<float(float)> encoder;
-    std::function<float(float)> decoder;
+    std::function<double(double)> encoder;
+    std::function<double(double)> decoder;
 };
 
 class ParameterMapper : public GenomusFeature {
@@ -17,8 +17,8 @@ class ParameterMapper : public GenomusFeature {
         std::string _name;
         FeatureType _type;
     public:
-        std::function<float(float)> _encode = 0;
-        std::function<float(float)> _decode = 0;
+        std::function<double(double)> _encode = 0;
+        std::function<double(double)> _decode = 0;
         /*
             Default constructor is only implemented for stl container requirements.
             It instantiates a default mapper made out of identity functions.
@@ -33,8 +33,8 @@ class ParameterMapper : public GenomusFeature {
              - Genomus encoding operator <<
              - Genomus decoding operator >>
         */
-        float operator>>(const float p);
-        float operator<<(const float p);
+        double operator>>(const double p);
+        double operator<<(const double p);
 
         // Accessors
         std::string getName();

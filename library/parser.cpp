@@ -112,17 +112,22 @@ std::vector<TokenNode> buildTokenTree(std::string entry) {
 dec_gen_t tokenTreeToGTree(const std::vector<TokenNode>& token_nodes, size_t index = 0) {
     auto token = token_nodes[index].token;
 
-    auto function_pointer_list = values(available_functions);
-    auto fp_it = std::find_if(function_pointer_list.begin(), function_pointer_list.end(), [&token](auto f) { 
-        return f -> getName() == token; 
-    });
-    if (fp_it == function_pointer_list.end()) throw std::runtime_error(ErrorCodes::BAD_PARSER_ENTRY_BAD_FUNCTION_NAME + ": " + token);
+    // We iterate over the available functions to find an existing function for this token
+    double function_index = invalid_function_index;
+    for (auto && [encoded_index, function]: available_functions) {
+        if (function.getName() == token) {
+            function_index = encoded_index;
+            break;
+        }
+    }
+
+    if (function_index == invalid_function_index) throw std::runtime_error(ErrorCodes::BAD_PARSER_ENTRY_BAD_FUNCTION_NAME + ": " + token);
 
     if (token_nodes[index].children.size()) {
         auto first_child_token = token_nodes[token_nodes[index].children[0]].token; 
         if (isTokenNumeric(first_child_token)) {
             // Missing check for no siblings and no children
-            return (**fp_it)(std::stof(first_child_token));
+            return available_functions[function_index](std::stof(first_child_token));
         }
     }
 
@@ -132,7 +137,7 @@ dec_gen_t tokenTreeToGTree(const std::vector<TokenNode>& token_nodes, size_t ind
         children.push_back(tokenTreeToGTree(token_nodes, child_index));
     });
 
-    return (**fp_it)(children);
+    return available_functions[function_index](children);
 }
 
 dec_gen_t parseString(std::string entry) {

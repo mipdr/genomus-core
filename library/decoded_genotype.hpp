@@ -30,9 +30,9 @@ class GTree {
             std::string toString() const;
             operator size_t() const;
             operator std::string() const;
-            float getLeafValue();
+            double getLeafValue();
             size_t getIndex();
-            std::vector<float> toNormalizedVector();
+            std::vector<double> toNormalizedVector();
             static void clean();
     };
     
@@ -85,7 +85,7 @@ class GTree {
             enc_phen_t evaluate(const std::vector<enc_phen_t>&) const;
             GTreeIndex operator()(std::initializer_list<GTreeIndex>);
             GTreeIndex operator()(const std::vector<GTreeIndex>);
-            GTreeIndex operator()(float);
+            GTreeIndex operator()(double);
             std::string toString();
     };
     
@@ -93,7 +93,7 @@ class GTree {
         GFunction& _function;
         std::vector<GTreeIndex> _children;
 
-        float _leaf_value; // Temporary, I just don't know where to put leaf values on trees
+        double _leaf_value; // Temporary, I just don't know where to put leaf values on trees
     public:
         static std::vector<GTree> tree_nodes;
         static std::map<EncodedPhenotypeType, std::vector<GTree::GTreeIndex>> available_subexpressions;
@@ -101,11 +101,11 @@ class GTree {
         static void registerLastInsertedNodeAsSubexpression();
         static std::string printStaticData();
         static void clean();
-        GTree(GFunction&, std::vector<GTreeIndex>, float leaf_value = 0);
+        GTree(GFunction&, std::vector<GTreeIndex>, double leaf_value = 0);
 
         enc_phen_t evaluate();
         std::string toString();
-        std::vector<float> toNormalizedVector();
+        std::vector<double> toNormalizedVector();
 };
 
 using dec_gen_t = GTree::GTreeIndex;
@@ -135,14 +135,16 @@ extern GTree::GFunction GENOTYPE_FUNCTIONS;
 
 extern std::map<std::string, std::string> name_aliases;
 
-extern std::map<float, GTree::GFunction> available_functions;
-extern std::map<EncodedPhenotypeType, std::vector<float>> function_dictionary;
+static const double invalid_function_index = -1;
+extern std::map<double, GTree::GFunction> available_functions;
+extern std::map<EncodedPhenotypeType, std::vector<double>> function_type_dictionary;
+extern std::map<std::string, double> function_name_to_index;
 void init_available_functions(); 
 
 
 // utils
 
 bool isEncodedPhenotypeTypeAParameterType(EncodedPhenotypeType);
-bool gfunctionAcceptsFloatParameter(const GTree::GFunction&);
+bool gfunctionAcceptsdoubleParameter(const GTree::GFunction&);
 
 #endif

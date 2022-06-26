@@ -55,7 +55,7 @@ class EncodedPhenotype {
             EncodedPhenotypeType child_type;
             std::vector<EncodedPhenotype> children;
             std::function<std::string(std::vector<std::string>)> to_string;
-            float leaf_value;
+            double leaf_value;
         };
     
     private:
@@ -63,17 +63,17 @@ class EncodedPhenotype {
         EncodedPhenotypeType _child_type;
         std::vector<EncodedPhenotype> _children;
         std::function<std::string(std::vector<std::string>)> _to_string;
-        float _leaf_value;
+        double _leaf_value;
     public:
         EncodedPhenotype(EncodedPhenotypeInitializer);
         EncodedPhenotypeType getType();
         EncodedPhenotypeType getChildType();
         std::string toString();
         const std::vector<EncodedPhenotype>& getChildren();
-        float getLeafValue();
+        double getLeafValue();
 };
 
-EncodedPhenotype Parameter(float value);
+EncodedPhenotype Parameter(double value);
 EncodedPhenotype Parameter(std::vector<EncodedPhenotype> parameters);
 EncodedPhenotype Event(std::vector<EncodedPhenotype> parameters);
 EncodedPhenotype Voice(std::vector<EncodedPhenotype> parameters);

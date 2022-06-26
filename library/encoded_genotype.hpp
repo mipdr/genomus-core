@@ -3,8 +3,8 @@
 
 #include <vector>
 
-std::vector<float> randomVector(int n);
+std::vector<double> randomVector(int n);
 
-using enc_gen_t = std::vector<float>;
+using enc_gen_t = std::vector<double>;
 
 #endif

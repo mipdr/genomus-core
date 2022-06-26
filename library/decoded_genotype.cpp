@@ -27,7 +27,7 @@ bool isEncodedPhenotypeTypeAParameterType(EncodedPhenotypeType eptt) {
     return includes(parameterTypes, eptt);
 }
 
-bool gfunctionAcceptsFloatParameter(const GTree::GFunction& gf) {
+bool gfunctionAcceptsdoubleParameter(const GTree::GFunction& gf) {
     return gf.getIsAutoreference() || isEncodedPhenotypeTypeAParameterType(gf.getOutputType());
 }
 
@@ -40,7 +40,7 @@ std::string GTree::GTreeIndex::toString() const {
 }
 GTree::GTreeIndex::operator size_t() const { return this -> _index; }
 GTree::GTreeIndex::operator std::string() const { return this -> toString(); }
-float GTree::GTreeIndex::getLeafValue() {
+double GTree::GTreeIndex::getLeafValue() {
     return tree_nodes[this -> _index]._leaf_value;
 }
 size_t GTree::GTreeIndex::getIndex() { return this -> _index; }
@@ -194,11 +194,11 @@ GTree::GTreeIndex GTree::GFunction::operator()(const std::vector<GTree::GTreeInd
     return tree_nodes.size() - 1;
 }
 
-GTree::GTreeIndex GTree::GFunction::operator()(float x) {
-    if (!gfunctionAcceptsFloatParameter(*this)) {
+GTree::GTreeIndex GTree::GFunction::operator()(double x) {
+    if (!gfunctionAcceptsdoubleParameter(*this)) {
         // Only parameter. GFunctions like n, f or i are allowed to receive
-        // a float as a parameter.
-        throw std::runtime_error(ErrorCodes::BAD_GFUNCTION_PARAMETERS + ": " + this -> _name + " does not accept a float parameter.");
+        // a double as a parameter.
+        throw std::runtime_error(ErrorCodes::BAD_GFUNCTION_PARAMETERS + ": " + this -> _name + " does not accept a double parameter.");
     }
     
     if (this -> _is_autoreference) {
@@ -243,13 +243,13 @@ void GTree::clean() {
     available_subexpressions.clear();
 }
 
-GTree::GTree(GTree::GFunction& function, std::vector<GTree::GTreeIndex> children, float leaf_value): _function(function) {
+GTree::GTree(GTree::GFunction& function, std::vector<GTree::GTreeIndex> children, double leaf_value): _function(function) {
     this -> _children = children;
     this -> _leaf_value = leaf_value;
 }
 
 enc_phen_t GTree::evaluate() {
-    if (gfunctionAcceptsFloatParameter(this -> _function)) {
+    if (gfunctionAcceptsdoubleParameter(this -> _function)) {
         return this -> _function.evaluate({
             EncodedPhenotype({
                 .type = leafF,
@@ -271,7 +271,7 @@ enc_phen_t GTree::evaluate() {
 }
 
 std::string GTree::toString() {
-    if (gfunctionAcceptsFloatParameter(this -> _function)) {
+    if (gfunctionAcceptsdoubleParameter(this -> _function)) {
         return this -> _function.buildExplicitForm({Parameter(this -> _leaf_value).toString()});
     }
 
@@ -283,6 +283,6 @@ std::string GTree::toString() {
     return this -> _function.buildExplicitForm(string_children);
 }
 
-std::vector<float> toNormalizedVector() {
+std::vector<double> toNormalizedVector() {
     return {1, 0};
 }

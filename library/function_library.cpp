@@ -8,7 +8,7 @@
 #include <stdexcept>
 
 std::function<enc_phen_t(std::vector<enc_phen_t>)> 
-    buildParameterComputeFunction(EncodedPhenotypeType parameterType, std::string name, std::function<float(float)> parameter_encoder) {
+    buildParameterComputeFunction(EncodedPhenotypeType parameterType, std::string name, std::function<double(double)> parameter_encoder) {
         if (!isEncodedPhenotypeTypeAParameterType(parameterType)) {
             throw std::runtime_error(ErrorCodes::INVALID_CALL);
         }
@@ -16,7 +16,7 @@ std::function<enc_phen_t(std::vector<enc_phen_t>)>
         // TO DO: mapper is not correctly initialized
         
         return [=](std::vector<enc_phen_t> params) -> enc_phen_t {
-            const float encoded_parameter_value = parameter_encoder(params[0].getLeafValue());
+            const double encoded_parameter_value = parameter_encoder(params[0].getLeafValue());
             return EncodedPhenotype({
                 .type = parameterType,
                 .child_type = leafF,
@@ -78,7 +78,7 @@ n({
     .index = 5,
     .param_types = { leafF },
     .output_type = noteValueF,
-    .compute = buildParameterComputeFunction(noteValueF, "n", [](float v){ return (log(v) + 8 * log(2)) / 10 * log(2); }),
+    .compute = buildParameterComputeFunction(noteValueF, "n", [](double v){ return (log(v) + 8 * log(2)) / 10 * log(2); }),
 }),
 
 d({
@@ -86,7 +86,7 @@ d({
     .index = 6,
     .param_types = { leafF },
     .output_type = durationF,
-    .compute = buildParameterComputeFunction(durationF, "d", [](float p){ return pow(10 * p - 6, 2); }),
+    .compute = buildParameterComputeFunction(durationF, "d", [](double p){ return pow(10 * p - 6, 2); }),
 }),
 
 m({
@@ -94,7 +94,7 @@ m({
     .index = 7,
     .param_types = { leafF },
     .output_type = midiPitchF,
-    .compute = buildParameterComputeFunction(midiPitchF, "m", [](float m){ return (m - 12) / 100; }),
+    .compute = buildParameterComputeFunction(midiPitchF, "m", [](double m){ return (m - 12) / 100; }),
 }),
 
 a({
@@ -102,7 +102,7 @@ a({
     .index = 9,
     .param_types = { leafF },
     .output_type = articulationF,
-    .compute = buildParameterComputeFunction(articulationF, "a", [](float a){ return pow(a / 3, 1 / E); }),
+    .compute = buildParameterComputeFunction(articulationF, "a", [](double a){ return pow(a / 3, 1 / E); }),
 }),
 
 i({
@@ -110,7 +110,7 @@ i({
     .index = 10,
     .param_types = { leafF },
     .output_type = intensityF,
-    .compute = buildParameterComputeFunction(intensityF, "i", [](float i){ return i / 127; }),
+    .compute = buildParameterComputeFunction(intensityF, "i", [](double i){ return i / 127; }),
 }),
 
 vConcatE({
@@ -159,10 +159,11 @@ vAutoRef({
 
 // e = e_piano.alias("e");
 
-std::map<float, GTree::GFunction> available_functions;
-std::map<EncodedPhenotypeType, std::vector<float>> function_dictionary;
+std::map<double, GTree::GFunction> available_functions;
+std::map<EncodedPhenotypeType, std::vector<double>> function_type_dictionary;
+std::map<std::string, double> function_name_to_index;
 
-float encodeIndex(size_t index) {
+double encodeIndex(size_t index) {
     auto aux = index * PHI;
     return roundTo6Decimals(aux - (int)aux);
 }
@@ -178,11 +179,11 @@ std::string print_available_functions() {
     return ss.str();
 }
 
-std::string print_function_dictionary() {
+std::string print_function_type_dictionary() {
     std::stringstream ss;
 
     ss << "FUNCTION DICTIONARY:" << '\n';
-    for (auto entry: function_dictionary) {
+    for (auto entry: function_type_dictionary) {
         ss << '\t' << EncodedPhenotypeTypeToString(entry.first) << ": " << join(entry.second) << '\n';
     }
 
@@ -190,7 +191,7 @@ std::string print_function_dictionary() {
 }
 
 void init_available_functions() {
-    float encoded_index;
+    double encoded_index;
     bool isAlias;
     for (auto gf: { GENOTYPE_FUNCTIONS }) {
         isAlias = name_aliases.find(gf.getName()) != name_aliases.end();
@@ -201,11 +202,12 @@ void init_available_functions() {
                 throw std::runtime_error(ErrorCodes::ALREADY_EXISTING_FUNCTION_INDEX + ": " + gf.getName());
             }
             available_functions[encodeIndex(gf.getIndex())] = gf;
-            function_dictionary[gf.getOutputType()].push_back(encoded_index);
+            function_type_dictionary[gf.getOutputType()].push_back(encoded_index);
+            function_name_to_index[gf.getName()] = encoded_index;
         }
 
     }
 
     // std::cout << print_available_functions() << std::endl;
-    // std::cout << print_function_dictionary() << std::endl;
+    // std::cout << print_function_type_dictionary() << std::endl;
 }

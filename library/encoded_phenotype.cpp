@@ -81,9 +81,9 @@ std::string EncodedPhenotype::toString() {
 
 const std::vector<EncodedPhenotype>& EncodedPhenotype::getChildren() { return this -> _children; }
 
-float EncodedPhenotype::getLeafValue() { return this -> _leaf_value; }
+double EncodedPhenotype::getLeafValue() { return this -> _leaf_value; }
 
-EncodedPhenotype Parameter(float value) {
+EncodedPhenotype Parameter(double value) {
     return EncodedPhenotype({
         .type = paramF, // ept_parameter,
         .child_type = leafF, // ept_leaf,
@@ -97,7 +97,7 @@ EncodedPhenotype Parameter(std::vector<EncodedPhenotype> parameters) {
     if (parameters.size() != 1) { throw std::runtime_error(ErrorCodes::BAD_ENC_PHEN_CONSTRUCTION_BAD_LEAF_VALUE); }
     if (parameters[0].getType() != leafF) { throw std::runtime_error(ErrorCodes::BAD_ENC_PHEN_CONSTRUCTION_BAD_CHILD_TYPE); }
 
-    const float value = parameters[0].getLeafValue();
+    const double value = parameters[0].getLeafValue();
     return EncodedPhenotype({
         .type = paramF,
         .child_type = leafF,
