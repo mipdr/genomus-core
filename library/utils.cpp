@@ -1,4 +1,6 @@
 #include "utils.hpp"
+#include <iostream>
+#include <ostream>
 #include <sstream>
 
 std::string join(std::vector<std::string> arg, std::string separator) {
@@ -54,4 +56,39 @@ uint32_t mulberry_32(uint32_t x) {
 
 double roundTo6Decimals(double f) {
     return round(f * 1000000) * 1.0 / 1000000.0;
+}
+
+std::map<double, size_t> _normalizedToInteger;
+
+double integerToNormalized(size_t x) {
+    const double encoded = roundTo6Decimals(PHI * x - (int)(PHI * x));
+    _normalizedToInteger[encoded] = x;
+    return encoded;
+}
+
+size_t normalizedToInteger(double x) {
+    static const size_t max_encodable_integer = 100;
+    static size_t max_explored_integer = 0;
+    if (_normalizedToInteger.find(x) != _normalizedToInteger.end()) {
+        return _normalizedToInteger[x];
+    }
+
+    // search for result in interval [0, max_encodable_integer]
+    size_t result;
+    for (size_t i = max_explored_integer; i < max_encodable_integer; i++) {
+        if (integerToNormalized(i) == roundTo6Decimals(x)) {
+            max_explored_integer = i;
+            return i;
+        }
+    }
+
+    // roundup to nearest integer if an exact match is not found
+    const auto upper = _normalizedToInteger.upper_bound(x) -> first; 
+    const auto lower = _normalizedToInteger.lower_bound(x) -> first; 
+    const auto upper_dif = upper - x;
+    const auto lower_dif = x - lower;
+
+    const auto index = upper_dif < lower_dif ? upper : lower;
+
+    return _normalizedToInteger[index];
 }

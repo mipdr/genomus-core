@@ -3,7 +3,6 @@
 #include "errorCodes.hpp"
 #include "utils.hpp"
 
-#include <iostream>
 #include <ostream>
 #include <sstream>
 #include <stdexcept>
@@ -180,8 +179,6 @@ double encodeParameter(EncodedPhenotypeType parameterType, double value) {
             : 
             encoded_parameter_value;
 
-    std::cout << "Codificando valor " << EncodedPhenotypeTypeToString(parameterType) << ": " << value << " -> " << roundTo6Decimals(optionally_uniformed_value) << std::endl;
-    
     return roundTo6Decimals(optionally_uniformed_value);
 }
 

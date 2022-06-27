@@ -48,4 +48,7 @@ T findWithDefault(const std::map<K, T>& m, K k, T def_val) {
     return it -> second;
 }
 
+double integerToNormalized(size_t x);
+size_t normalizedToInteger(double x);
+
 #endif
