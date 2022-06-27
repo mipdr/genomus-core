@@ -113,7 +113,8 @@ dec_gen_t tokenTreeToGTree(const std::vector<TokenNode>& token_nodes, size_t ind
     auto token = token_nodes[index].token;
 
     auto it = function_name_to_index.find(token);
-    if (it == function_name_to_index.end()) throw std::runtime_error(ErrorCodes::BAD_PARSER_ENTRY_BAD_FUNCTION_NAME + ": " + token);
+    if (it == function_name_to_index.end()) 
+        throw std::runtime_error(ErrorCodes::BAD_PARSER_ENTRY_BAD_FUNCTION_NAME + ": " + token);
 
     auto&& gfunction = available_functions[it -> second];
 

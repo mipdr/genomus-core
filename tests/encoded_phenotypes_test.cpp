@@ -3,6 +3,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <bits/stdc++.h>
+#include <string>
 
 #include "genomus-core.hpp"
 #include "testing_utils.hpp"
@@ -14,6 +15,7 @@ static bool verbose = true;
 
 GTest EncodedPhenotypesTest = GTest("Encoded Phenotypes Test")
 
+    .before([]() { init_available_functions(); })
     .after([]() { GTree::clean(); })
 
     .testCase("Parameter declaration", [](ostream& os){
@@ -31,5 +33,14 @@ GTest EncodedPhenotypesTest = GTest("Encoded Phenotypes Test")
             return;
         }
         throw runtime_error("Expected bad Event initialization to throw an error.");
+    })
+
+    .testCase("Encoded phenotype to normalized vector", [](ostream& os) {
+        auto ept = parseString("s(v(e_piano(n(0.100000), m(0.200000), a(0.300000), i(0.400000))))").evaluate();
+
+        os << ept.toString() << "\n";
+        os << to_string(ept.toNormalizedVector()) << "\n";
+
+        printOutput();
     });
 

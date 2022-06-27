@@ -25,6 +25,24 @@
             // "preLaunchTask": "clean-build"
         },
         {
+            "name": "Interpreter",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/interpreter/interpreter",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "externalConsole": true,
+            "setupCommands": [
+                {
+                    "description": "Habilitar la impresión con sangría para gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": false
+                }
+            ],
+        },
+        {
             "name": "(Windows) Iniciar",
             "type": "cppvsdbg",
             "request": "launch",
