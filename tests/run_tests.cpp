@@ -24,7 +24,7 @@ int main() {
 
     } catch (runtime_error e) {
         cout << e.what() << endl;
-        return 1;
+        return 1; 
     }
 
     if (result == g_failure) {
