@@ -70,4 +70,6 @@ std::vector<T>& operator+=(std::vector<T>& a, const std::vector<T>& b) {
     return a;
 }
 
+std::string strip(std::string&);
+
 #endif

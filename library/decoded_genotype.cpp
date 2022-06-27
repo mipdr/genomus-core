@@ -25,6 +25,7 @@ bool isEncodedPhenotypeTypeAParameterType(EncodedPhenotypeType eptt) {
         intensityF,
         leafF,
         paramF,
+        quantizedF,
     });
     return includes(parameterTypes, eptt);
 }
@@ -34,7 +35,8 @@ bool gfunctionAcceptsNumericParameter(const GTree::GFunction& gf) {
 }
 
 double leafTypeToNormalizedValue(EncodedPhenotypeType eptt) {
-    if (!isEncodedPhenotypeTypeAParameterType(eptt)) throw std::runtime_error(ErrorCodes::PARAMETER_IS_NOT_A_LEAF);
+    if (!isEncodedPhenotypeTypeAParameterType(eptt)) 
+        throw std::runtime_error(ErrorCodes::PARAMETER_IS_NOT_A_LEAF);
 
     // Table filled according to specifications: 
     // https://github.com/lopezmontes/GenoMus/blob/master/specifications/GenoMus_specifications.md#encoding-decoding-genotypes
@@ -251,7 +253,7 @@ std::string GTree::GFunction::toString() {
     std::string ret = "--- GTree::GFunction object ---";
 
     ret += "\n\t_name: " + this -> getName();
-    ret += "\n\t_type: " + this -> getTypeString();
+    // ret += "\n\t_type: " + EncodedPhenotypeTypeToString(this);
     ret += "\n\t_param_types: ";
     for_each(this -> _param_types.begin(), this -> _param_types.end(), [&ret](EncodedPhenotypeType ft){ ret += EncodedPhenotypeTypeToString(ft) + ", "; });
     ret = ret.substr(0, ret.length() - 2) + ";";

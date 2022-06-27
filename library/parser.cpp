@@ -37,6 +37,8 @@ std::vector<std::string> getTokens(std::string entry) {
         }
     }
 
+    if (current_token.size()) tokens.push_back(current_token);
+
     return tokens;
 }
 
