@@ -54,8 +54,6 @@ GTest EncodedGenotypesTest = GTest("Encoded Genotypes Test")
         if (expectedNormalizedVector != tree.toNormalizedVector()) {
             throw runtime_error("Unexpected normalized vector value.");
         }
-
-        printOutput();
     })
 
     .testCase("Encoding integers", [](ostream& os) {

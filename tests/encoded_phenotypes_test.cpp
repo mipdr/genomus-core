@@ -40,7 +40,5 @@ GTest EncodedPhenotypesTest = GTest("Encoded Phenotypes Test")
 
         os << ept.toString() << "\n";
         os << to_string(ept.toNormalizedVector()) << "\n";
-
-        printOutput();
     });
 

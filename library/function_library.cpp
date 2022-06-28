@@ -48,8 +48,8 @@ static const std::map<EncodedPhenotypeType, ParameterMapper> mappers = {
         .decoder = [](double p){ return 100 * p; }
     }},
     { goldenintegerF, {
-        .encoder = [](int z){ return z * PHI - (int)(z * PHI); },
-        .decoder = [](int p){ throw std::runtime_error(ErrorCodes::INVALID_CALL); return 0; }
+        .encoder = integerToNormalized,
+        .decoder = normalizedToInteger,
     }},
     { quantizedF, {
         .encoder = [](int z){ return round((asin(pow(2 * z - 1, 17.0 / 11)) / PI + 0.5) * 72 - 36); },
@@ -246,7 +246,7 @@ e_piano({
 v({
     .name = "v",
     .index = 3,
-    .param_types = { eventF },
+    .param_types = { leafF },
     .output_type = voiceF,
     .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
         return Voice(params);
@@ -256,7 +256,7 @@ v({
 s({
     .name = "s",
     .index = 4,
-    .param_types = { voiceF },
+    .param_types = { leafF },
     .output_type = scoreF,
     .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
         return Score(params);
@@ -266,7 +266,7 @@ s({
 n({
     .name = "n",
     .index = 5,
-    .param_types = { noteValueF },
+    .param_types = { leafF },
     .output_type = noteValueF,
     .compute = buildParameterComputeFunction(noteValueF, "n"),
 }),
@@ -274,7 +274,7 @@ n({
 d({
     .name = "d",
     .index = 6,
-    .param_types = { durationF },
+    .param_types = { leafF },
     .output_type = durationF,
     .compute = buildParameterComputeFunction(durationF, "d"),
 }),
@@ -282,7 +282,7 @@ d({
 m({
     .name = "m",
     .index = 7,
-    .param_types = { midiPitchF },
+    .param_types = { leafF },
     .output_type = midiPitchF,
     .compute = buildParameterComputeFunction(midiPitchF, "m"),
 }),
@@ -290,7 +290,7 @@ m({
 a({
     .name = "a",
     .index = 9,
-    .param_types = { articulationF },
+    .param_types = { leafF },
     .output_type = articulationF,
     .compute = buildParameterComputeFunction(articulationF, "a"),
 }),
@@ -298,7 +298,7 @@ a({
 i({
     .name = "i",
     .index = 10,
-    .param_types = { intensityF },
+    .param_types = { leafF },
     .output_type = intensityF,
     .compute = buildParameterComputeFunction(intensityF, "i"),
 }),

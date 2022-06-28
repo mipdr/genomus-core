@@ -310,10 +310,12 @@ std::vector<double> GTree::toNormalizedVector() const {
     double encoded_index = function_name_to_index[unalias_name(this -> _function.getName())];
     result.push_back(encoded_index);
 
-    if (gfunctionAcceptsNumericParameter(this -> _function)) {
-        result.push_back(leafTypeToNormalizedValue(this -> _function.getParamTypes()[0]));
+    if (isEncodedPhenotypeTypeAParameterType(this -> _function.getOutputType())) {
+        result.push_back(leafTypeToNormalizedValue(this -> _function.getOutputType()));
         encoded_leaf = this -> evaluate().getLeafValue();
         result.push_back(encoded_leaf);
+    } else if (this -> _function.getIsAutoreference()) {
+
     } else {
         std::vector<double> evaluated_children;
         for_each(this -> _children.begin(), this -> _children.end(), 
