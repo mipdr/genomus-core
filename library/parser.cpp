@@ -32,10 +32,12 @@ std::vector<std::string> getTokens(std::string entry) {
             tokens.push_back(std::string({c}));
             current_token = "";
         } else {
-            if (c != ' ' && c != '{' && c != '}') 
+            if (std::string("{}\n\t\r ").find(c) == std::string::npos) 
                 current_token += c;
         }
     }
+
+    if (current_token.size()) tokens.push_back(current_token);
 
     return tokens;
 }
@@ -113,7 +115,8 @@ dec_gen_t tokenTreeToGTree(const std::vector<TokenNode>& token_nodes, size_t ind
     auto token = token_nodes[index].token;
 
     auto it = function_name_to_index.find(token);
-    if (it == function_name_to_index.end()) throw std::runtime_error(ErrorCodes::BAD_PARSER_ENTRY_BAD_FUNCTION_NAME + ": " + token);
+    if (it == function_name_to_index.end()) 
+        throw std::runtime_error(ErrorCodes::BAD_PARSER_ENTRY_BAD_FUNCTION_NAME + ": " + token);
 
     auto&& gfunction = available_functions[it -> second];
 

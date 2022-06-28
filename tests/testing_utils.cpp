@@ -88,7 +88,8 @@ GTest& GTest::after(function<void()> run) {
     return *this;
 }
 
-void GTest::run() {
+GTestErrorState GTest::run() {
+    GTestErrorState suite_success = g_success;
     cout << " + TEST: " << this -> _name << endl;
 
     this -> _before(cout); 
@@ -97,6 +98,8 @@ void GTest::run() {
         auto result = testCase.run();
         if (result.error_state == g_success) {
             this -> _n_success++;
+        } else {
+            suite_success = g_failure;
         }
         cout << result.text << endl;
         cout.flush();
@@ -107,4 +110,6 @@ void GTest::run() {
     this -> _after(cout);
 
     cout << " - " <<  this -> _n_success << "/" << this -> _test_cases.size() << " test cases were successful" << endl << endl;
+
+    return suite_success;
 }

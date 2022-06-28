@@ -36,7 +36,7 @@ class GTest {
         unsigned int _n_success;
     public:
         GTest(string title);
-        void run();
+        GTestErrorState run();
         GTest& testCase(string title, function<void(ostream&)>);
         GTest& testCase(string title, function<void()>);
         GTest& before(function<void(ostream&)>);
@@ -48,4 +48,5 @@ class GTest {
 extern GTest 
     EncodedPhenotypesTest,
     DecodedGenotypesTest,
-    ParserTest;
+    ParserTest,
+    EncodedGenotypesTest;

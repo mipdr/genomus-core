@@ -10,18 +10,6 @@
 #define ENCODED_PHENOTYPES_TYPE_CHECK
 
 enum EncodedPhenotypeType {
-    // // Base types
-    // ept_leaf,
-    // ept_parameter,
-    // ept_event,
-    // ept_voice,
-    // ept_score,
-
-    // // Types for functions with arbitrary parameters
-    // ept_parameters,
-    // ept_events,
-    // ept_voices,
-
     scoreF,
     voiceF,
     eventF,
@@ -44,6 +32,30 @@ enum EncodedPhenotypeType {
     lintensityF,
     lgoldenintegerF,
     lquantizedF,
+
+    harmonyF,
+};
+
+static const std::vector<EncodedPhenotypeType> listTypes = {
+    lnoteValueF,
+    ldurationF,
+    lmidiPitchF,
+    lfrequencyF,
+    larticulationF,
+    lintensityF,
+    lgoldenintegerF,
+    lquantizedF,
+};
+
+static const std::vector<EncodedPhenotypeType> parameterTypes = {
+    noteValueF,
+    durationF,
+    midiPitchF,
+    frequencyF,
+    articulationF,
+    intensityF,
+    goldenintegerF,
+    quantizedF,
 };
 
 std::string EncodedPhenotypeTypeToString(const EncodedPhenotypeType& ept);
@@ -71,6 +83,7 @@ class EncodedPhenotype {
         std::string toString();
         const std::vector<EncodedPhenotype>& getChildren();
         double getLeafValue();
+        std::vector<double> toNormalizedVector() const;
 };
 
 EncodedPhenotype Parameter(double value);

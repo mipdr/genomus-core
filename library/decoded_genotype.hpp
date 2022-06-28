@@ -3,10 +3,10 @@
 
 #include <functional>
 #include <vector>
+#include <map>
 
 #include "encoded_phenotype.hpp"
 #include "features.hpp"
-#include "parameter_mapping.hpp"
 
 /*
     GTree class is the ADT for decoded genotypes. Its instances will hold what is needed
@@ -33,6 +33,7 @@ class GTree {
             double getLeafValue();
             size_t getIndex();
             static void clean();
+            std::vector<double> toNormalizedVector() const;
     };
     
 
@@ -100,9 +101,11 @@ class GTree {
         static void registerLastInsertedNodeAsSubexpression();
         static std::string printStaticData();
         static void clean();
+
         GTree(GFunction&, std::vector<GTreeIndex>, double leaf_value = 0);
 
-        enc_phen_t evaluate();
+        enc_phen_t evaluate() const;
+        std::vector<double> toNormalizedVector() const;
         std::string toString();
 };
 

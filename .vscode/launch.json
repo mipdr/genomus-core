@@ -25,6 +25,26 @@
             // "preLaunchTask": "clean-build"
         },
         {
+            "name": "Debug Interpreter (gdb)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/interpreter/interpreter",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Habilitar la impresión con sangría para gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": false
+                }
+            ],
+            // "preLaunchTask": "clean-build"
+        },
+        {
             "name": "(Windows) Iniciar",
             "type": "cppvsdbg",
             "request": "launch",

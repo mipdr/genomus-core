@@ -83,10 +83,38 @@ const std::vector<EncodedPhenotype>& EncodedPhenotype::getChildren() { return th
 
 double EncodedPhenotype::getLeafValue() { return this -> _leaf_value; }
 
+bool shouldIncludeChildrenSize(EncodedPhenotypeType type) {
+    return includes({scoreF, voiceF}, type) || includes(listTypes, type);
+}
+
+std::vector<double> EncodedPhenotype::toNormalizedVector() const {
+    if (includes(parameterTypes, this -> _type)) {
+        return { this -> _leaf_value };
+    }
+
+    std::vector<double> result;
+    std::vector<double> evaluated_children;
+
+    static const auto 
+        encodeAndAddChildren = [](std::vector<double>& inner_result, const std::vector<EncodedPhenotype>& children) -> void {
+            for_each(children.begin(), children.end(), [&](const EncodedPhenotype& ept) {
+                inner_result += ept.toNormalizedVector();
+            });
+        };
+
+    if (shouldIncludeChildrenSize(this -> _type)) {
+        result = { integerToNormalized(this -> _children.size()) };
+    }
+    
+    encodeAndAddChildren(result, this -> _children);
+
+    return result;
+}
+
 EncodedPhenotype Parameter(double value) {
     return EncodedPhenotype({
         .type = paramF, // ept_parameter,
-        .child_type = leafF, // ept_leaf,
+        .child_type = leafF, // ept_leaf:
         .children = {},
         .to_string = [=](std::vector<std::string>) { return std::to_string(value); },
         .leaf_value = value
@@ -179,7 +207,7 @@ EncodedPhenotype Score(std::vector<EncodedPhenotype> parameters) {
         .type = scoreF,
         .child_type = voiceF,
         .children = parameters,
-        .to_string = [](std::vector<std::string> children_strings) { return "s(\n\t\t" + join(children_strings, ",\n\t\t") + "\n)"; },
+        .to_string = [](std::vector<std::string> children_strings) { return "s(" + join(children_strings) + ")"; },
         .leaf_value = -1.0
     });
 }
