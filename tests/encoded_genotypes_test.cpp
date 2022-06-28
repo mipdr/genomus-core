@@ -52,7 +52,7 @@ GTest EncodedGenotypesTest = GTest("Encoded Genotypes Test")
         os << "\n\n[" << humanReadableNormalizedVector(tree.toNormalizedVector()) << "]\n";
 
         if (expectedNormalizedVector != tree.toNormalizedVector()) {
-            throw runtime_error("Unexpected normalized vector value.");
+            throw runtime_error("Unexpected normalized vector value. Expected value: " + to_string(expectedNormalizedVector));
         }
     })
 
