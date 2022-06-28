@@ -32,7 +32,7 @@ std::vector<std::string> getTokens(std::string entry) {
             tokens.push_back(std::string({c}));
             current_token = "";
         } else {
-            if (c != ' ' && c != '{' && c != '}') 
+            if (std::string("{}\n\t\r ").find(c) == std::string::npos) 
                 current_token += c;
         }
     }

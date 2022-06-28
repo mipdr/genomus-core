@@ -6,6 +6,7 @@
 #include "../library/genomus-core.hpp"
 
 #define PROMPT "> "
+#define FOLLOW_UP_PROMPT "> ... "
 
 static const std::string WELCOME = 
     "GENOMUS-CORE INTERPRETER\n"
@@ -42,6 +43,14 @@ static const std::vector<Command> commands({
             });
             return join(v, "\n");
         }
+    },
+    {
+        .command = "\\q",
+        .description = "Quit",
+        .get_output = []() {
+            exit(0);
+            return "";
+        }
     }
 });
 
@@ -61,30 +70,51 @@ std::string getInfo(dec_gen_t&& tree) {
     return ss.str();
 }
 
+void handleCommand(std::string command) {
+    auto it = std::find_if(commands.begin(), commands.end(), [&](const Command& c) { return c.command == command; });
+    if (it == commands.end()) {
+        std::cout << "Unknown command: " << command << std::endl;
+    } else {
+        std::cout << it -> get_output() << std::endl;
+    }
+}
+
+void handleInput(std::string input) {
+    input = strip(input);
+
+    try {
+        if (input[0] == '\\') {
+            handleCommand(input);
+        } else {
+            std::cout << getInfo(parseString(input)) << std::endl;
+        }
+    } catch (std::runtime_error e) {
+        std::cout << "ERROR: " << e.what() << std::endl;
+    }
+}
+
 int main() {
     std::string input;
+    std::string line_input;
+    bool complete_input;
 
     init_available_functions();
 
     std::cout << WELCOME << PROMPT;
     while (true) {
-        getline(std::cin, input, ';');
-        input = strip(input);
-
-        try {
-            if (input[0] == '\\') {
-                auto it = std::find_if(commands.begin(), commands.end(), [&](const Command& c) { return c.command == input; });
-                if (it == commands.end()) {
-                    std::cout << "Unknown command: " << input << std::endl;
-                } else {
-                    std::cout << it -> get_output() << std::endl;
-                }
-            } else {
-                std::cout << getInfo(parseString(input)) << std::endl;
-            }
-        } catch (std::runtime_error e) {
-            std::cout << "ERROR: " << e.what() << std::endl;
+        input = "";
+        complete_input = false;
+        while (!complete_input) {
+            getline(std::cin, line_input, '\n');
+            input += line_input;
+            complete_input = input[input.size() - 1] == ';';
+            if (!complete_input)
+                std::cout << FOLLOW_UP_PROMPT;
         }
+
+        if (input != "")
+            handleInput(input.substr(0, input.size() - 1));
+
         std::cout << PROMPT;
     }
     return 0;
