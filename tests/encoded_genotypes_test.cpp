@@ -91,5 +91,23 @@ GTest EncodedGenotypesTest = GTest("Encoded Genotypes Test")
                 throw runtime_error("Expected integer decoding to work: " + to_string(integer) + " -> " + to_string(normalized));
             }
         }
+    })
+
+    .testCase("Vector aproximation", []() {
+        vector<double> v = {0, 1, 2, 3, 4, 5};
+
+        static const map<double, double> source_of_truth = {
+            {-5, 0},
+            {0.4, 0},
+            {1, 1},
+            {3.6, 4},
+            {10000, 5},
+        };
+
+        for (auto [value, normalized] : source_of_truth) {
+            if (getClosestValue(v, value) != normalized) {
+                throw runtime_error("Expected: getClosestValue(" + to_string(value) + ") -> " + to_string(normalized) + " but obtained " + to_string(getClosestValue(v, value)));
+            }
+        }
     });
 

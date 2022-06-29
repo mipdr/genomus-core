@@ -148,4 +148,6 @@ void init_available_functions();
 bool isEncodedPhenotypeTypeAParameterType(EncodedPhenotypeType);
 bool gfunctionAcceptsNumericParameter(const GTree::GFunction&);
 
+double leafTypeToNormalizedValue(EncodedPhenotypeType eptt);
+
 #endif

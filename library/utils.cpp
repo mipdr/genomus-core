@@ -82,13 +82,7 @@ size_t normalizedToInteger(double x) {
         }
     }
 
-    // roundup to nearest integer if an exact match is not found
-    const auto upper = _normalizedToInteger.upper_bound(x) -> first; 
-    const auto lower = _normalizedToInteger.lower_bound(x) -> first; 
-    const auto upper_dif = upper - x;
-    const auto lower_dif = x - lower;
-
-    const auto index = upper_dif < lower_dif ? upper : lower;
+    const auto index = getClosestKey(_normalizedToInteger, x);
 
     return _normalizedToInteger[index];
 }

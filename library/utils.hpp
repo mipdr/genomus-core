@@ -72,4 +72,40 @@ std::vector<T>& operator+=(std::vector<T>& a, const std::vector<T>& b) {
 
 std::string strip(std::string&);
 
+template<typename K, typename T>
+K getClosestKey(std::map<K, T> m, K k) {
+    const K upper = m.upper_bound(k) -> first; 
+    const K lower = m.lower_bound(k) -> first; 
+    const K upper_dif = upper - k;
+    const K lower_dif = k - lower;
+
+    return upper_dif < lower_dif ? upper : lower;
+}
+
+template<typename T>
+T getClosestValue(std::vector<T> v, T val) {
+    sort(v.begin(), v.end());
+
+    auto it = v.begin();
+    for (it = v.begin(); it != v.end(); ++it) {
+        if (val < *it) {
+            break;
+        }
+    }
+
+    if (it == v.begin()) {
+        return v[0];
+    }
+
+    if (it == v.end()) {
+        it--;
+        return *it;
+    }
+
+    auto previous = it;
+    previous--;
+
+    return ((val - *previous) > (*it - val)) ? *it : *previous;
+}
+
 #endif
