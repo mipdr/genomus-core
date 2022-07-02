@@ -115,19 +115,12 @@ class GTree {
 using dec_gen_t = GTree::GTreeIndex;
 
 #define GENOTYPE_FUNCTIONS \
-    p, \
-    e, \
-    v, \
-    s, \
-    n, \
-    d, \
-    m, \
-    a, \
-    i, \
-    q, \
-    z, \
+    p, e, v, s, \
+    n, d, m, a, i, q, z, \
+    ln, ld, lm, la, li, \
     vConcatE, \
     vConcatV, \
+    vMotif, \
     e_piano, \
     eAutoRef
     // f, \
@@ -153,9 +146,11 @@ void init_available_functions();
 // utils
 
 bool isEncodedPhenotypeTypeAParameterType(EncodedPhenotypeType);
+bool isEncodedPhenotypeTypeAListType(EncodedPhenotypeType);
 bool gfunctionAcceptsNumericParameter(const GTree::GFunction&);
 
-double leafTypeToNormalizedValue(EncodedPhenotypeType eptt);
+double leafTypeToNormalizedValue(EncodedPhenotypeType);
+EncodedPhenotypeType listToParameterType(EncodedPhenotypeType);
 
 std::string humanReadableNormalizedVector(std::vector<double> v);
 

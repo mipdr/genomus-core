@@ -2,9 +2,9 @@
 #include <ostream>
 #include <sstream>
 #include <stdexcept>
-#include <bits/stdc++.h>
 #include <string>
 
+#include "decoded_genotype.hpp"
 #include "genomus-core.hpp"
 #include "testing_utils.hpp"
 
@@ -40,5 +40,22 @@ GTest EncodedPhenotypesTest = GTest("Encoded Phenotypes Test")
 
         os << ept.toString() << "\n";
         os << to_string(ept.toNormalizedVector()) << "\n";
+    })
+
+    .testCase("List types", [](ostream& os) {
+        GTree::clean();
+        auto tree = vMotif({
+            ln({p(0.1), p(0.2)}),
+            lm({p(0.1), p(0.2)}),
+            la({p(0.1), p(0.2)}),
+            li({p(0.1), p(0.2)})
+        });
+
+        auto ev = tree.evaluate();
+        auto s = ev.toString();
+
+        os << s << endl;
+
+        printOutput();
     });
 

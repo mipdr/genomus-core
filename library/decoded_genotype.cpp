@@ -31,6 +31,21 @@ bool isEncodedPhenotypeTypeAParameterType(EncodedPhenotypeType eptt) {
     return includes(parameterTypes, eptt);
 }
 
+bool isEncodedPhenotypeTypeAListType(EncodedPhenotypeType eptt) {
+    static const std::vector<EncodedPhenotypeType> parameterTypes({
+        lnoteValueF,
+        ldurationF,
+        lmidiPitchF,
+        lfrequencyF,
+        larticulationF,
+        lintensityF,
+        listF,
+        lquantizedF,
+        lgoldenintegerF,
+    });
+    return includes(parameterTypes, eptt);
+}
+
 bool gfunctionAcceptsNumericParameter(const GTree::GFunction& gf) {
     return gf.getIsAutoreference() || isEncodedPhenotypeTypeAParameterType(gf.getOutputType());
 }
@@ -54,6 +69,25 @@ double leafTypeToNormalizedValue(EncodedPhenotypeType eptt) {
     };
 
     return findWithDefault(leafTypeEncoding, eptt, 0.5);
+}
+
+EncodedPhenotypeType listToParameterType(EncodedPhenotypeType listType) {
+    if (!isEncodedPhenotypeTypeAListType(listType)) 
+        throw std::runtime_error(ErrorCodes::PARAMETER_IS_NOT_A_LIST);
+
+    static const std::map<EncodedPhenotypeType, EncodedPhenotypeType> listToParam {
+        { listF, leafF },
+        { lnoteValueF, noteValueF },
+        { ldurationF, durationF },
+        { lmidiPitchF, midiPitchF },
+        { lfrequencyF, frequencyF },
+        { larticulationF, articulationF },
+        { lintensityF, intensityF },
+        { lgoldenintegerF, goldenintegerF },
+        { lquantizedF, quantizedF },
+    };
+
+    return findWithDefault(listToParam, listType, leafF);
 }
 
 // GTree::GTreeIndex method implementation

@@ -3,6 +3,7 @@
 #include "errorCodes.hpp"
 #include "utils.hpp"
 
+#include <algorithm>
 #include <ostream>
 #include <sstream>
 #include <stdexcept>
@@ -202,8 +203,6 @@ std::function<enc_phen_t(std::vector<enc_phen_t>)>
         if (!isEncodedPhenotypeTypeAParameterType(parameterType)) {
             throw std::runtime_error(ErrorCodes::INVALID_CALL);
         }
-
-        // TO DO: mapper is not correctly initialized
         
         return [=](std::vector<enc_phen_t> params) -> enc_phen_t {
             const double encoded_parameter_value = encodeParameter(parameterType, params[0].getLeafValue());
@@ -212,6 +211,41 @@ std::function<enc_phen_t(std::vector<enc_phen_t>)>
                 .child_type = leafF,
                 .children = params,
                 .to_string = [=](std::vector<std::string> children_strings) { return name + "(" + std::to_string(encoded_parameter_value) + ")"; },
+                .leaf_value = encoded_parameter_value,
+            });
+        };
+    };
+
+std::function<enc_phen_t(std::vector<enc_phen_t>)> 
+    buildListComputeFunction(EncodedPhenotypeType parameterType, std::string name) {
+        if (!isEncodedPhenotypeTypeAListType(parameterType)) {
+            throw std::runtime_error(ErrorCodes::PARAMETER_IS_NOT_A_LIST);
+        }
+
+        return [=](std::vector<enc_phen_t> params) -> enc_phen_t {
+            double encoded_parameter_value;
+
+            for (auto&& param: params) {
+                encoded_parameter_value = encodeParameter(parameterType, param.getLeafValue());
+
+                param = EncodedPhenotype({
+                    .type = listToParameterType(parameterType),
+                    .child_type = leafF,
+                    .children = { param },
+                    .to_string = [=](std::vector<std::string> children_strings) { return std::to_string(encoded_parameter_value); },
+                    .leaf_value = encoded_parameter_value,
+                });
+            }
+
+            return EncodedPhenotype({
+                .type = parameterType,
+                .child_type = listToParameterType(parameterType),
+                .children = params,
+                .to_string = [=](std::vector<std::string> children_strings) { 
+                    std::vector<std::string> evaluated_children;
+                    std::for_each(params.begin(), params.end(), [&](auto param) { evaluated_children.push_back(param.toString()); });
+                    return name + "(" + join(evaluated_children) + ")"; 
+                },
                 .leaf_value = encoded_parameter_value,
             });
         };
@@ -314,7 +348,7 @@ i({
 
 q({
     .name = "q",
-    .index = 11,
+    .index = 12,
     .param_types = { leafF },
     .output_type = quantizedF,
     .compute = buildParameterComputeFunction(quantizedF, "q"),
@@ -323,10 +357,64 @@ q({
 
 z({
     .name = "z",
-    .index = 12,
+    .index = 11,
     .param_types = { leafF },
     .output_type = goldenintegerF,
     .compute = buildParameterComputeFunction(goldenintegerF, "z"),
+    .default_function_for_type = true,
+}),
+
+ln({
+    .name = "ln",
+    .index = 15,
+    .param_types = { listF },
+    .output_type = lnoteValueF,
+    .compute = buildListComputeFunction(lnoteValueF, "ln"),
+    .default_function_for_type = true,
+}),
+
+ld({
+    .name = "ld",
+    .index = 16,
+    .param_types = { listF },
+    .output_type = ldurationF,
+    .compute = buildListComputeFunction(lnoteValueF, "ld"),
+    .default_function_for_type = true,
+}),
+
+lm({
+    .name = "lm",
+    .index = 17,
+    .param_types = { listF },
+    .output_type = lmidiPitchF,
+    .compute = buildListComputeFunction(lmidiPitchF, "lm"),
+    .default_function_for_type = true,
+}),
+
+lf({
+    .name = "lf",
+    .index = 18,
+    .param_types = { listF },
+    .output_type = lfrequencyF,
+    .compute = buildListComputeFunction(lfrequencyF, "lf"),
+    .default_function_for_type = true,
+}),
+
+la({
+    .name = "la",
+    .index = 19,
+    .param_types = { listF },
+    .output_type = larticulationF,
+    .compute = buildListComputeFunction(larticulationF, "la"),
+    .default_function_for_type = true,
+}),
+
+li({
+    .name = "li",
+    .index = 20,
+    .param_types = { listF },
+    .output_type = lintensityF,
+    .compute = buildListComputeFunction(lintensityF, "li"),
     .default_function_for_type = true,
 }),
 
@@ -350,6 +438,32 @@ vConcatV({
         events.insert(events.end(), params[0].getChildren().begin(), params[0].getChildren().end());
         events.insert(events.end(), params[1].getChildren().begin(), params[1].getChildren().end());
         
+        return Voice(events);
+    },
+}),
+
+vMotif({
+    .name = "vMotif",
+    .index = 199,
+    .param_types = { lnoteValueF, lmidiPitchF, larticulationF, lintensityF },
+    .output_type = voiceF,
+    .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
+        std::vector<enc_phen_t> events;
+        size_t min = -1;
+
+        for (auto& param: params) {
+            min = std::min(min, param.getChildren().size());
+        }
+
+        for (size_t i = 0; i < min; ++i) {
+            events.push_back(Event({
+                params[0].getChildren()[i],
+                params[1].getChildren()[i],
+                params[2].getChildren()[i],
+                params[3].getChildren()[i],
+            }));
+        }
+
         return Voice(events);
     },
 }),

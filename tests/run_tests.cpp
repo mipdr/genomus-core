@@ -8,10 +8,10 @@ using namespace std;
 
 int main() {
     std::vector<GTest> tests({
-        // EncodedPhenotypesTest,
+        EncodedPhenotypesTest,
         // DecodedGenotypesTest,
         // ParserTest,
-        EncodedGenotypesTest
+        // EncodedGenotypesTest
     });
 
     GTestErrorState result = g_success;

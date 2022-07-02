@@ -71,6 +71,12 @@ std::vector<T>& operator+=(std::vector<T>& a, const std::vector<T>& b) {
     return a;
 }
 
+template<typename T>
+std::vector<T>& operator+=(std::vector<T>& a, T b) {
+    a.push_back(b);
+    return a;
+}
+
 std::string strip(std::string&);
 
 template<typename K, typename T>

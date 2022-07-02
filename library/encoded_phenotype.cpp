@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <string>
 
+#include "decoded_genotype.hpp"
 #include "encoded_phenotype.hpp"
 #include "errorCodes.hpp"
 #include "species.hpp"
@@ -96,8 +97,11 @@ std::vector<double> EncodedPhenotype::toNormalizedVector() const {
     std::vector<double> evaluated_children;
 
     static const auto 
-        encodeAndAddChildren = [](std::vector<double>& inner_result, const std::vector<EncodedPhenotype>& children) -> void {
+        encodeAndAddChildren = [&](std::vector<double>& inner_result, const std::vector<EncodedPhenotype>& children) -> void {
             for_each(children.begin(), children.end(), [&](const EncodedPhenotype& ept) {
+                if (isEncodedPhenotypeTypeAListType(this -> _type)){
+                    inner_result += leafTypeToNormalizedValue(listToParameterType(this -> _type));
+                }
                 inner_result += ept.toNormalizedVector();
             });
         };
