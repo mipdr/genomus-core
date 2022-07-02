@@ -10,7 +10,7 @@
 
 #define ENCODED_PHENOTYPES_TYPE_CHECK
 
-std::string EncodedPhenotypeTypeToString(const EncodedPhenotypeType& ept) {
+std::string encodedPhenotypeTypeToString(const EncodedPhenotypeType& ept) {
     switch (ept) {
         case scoreF:
             return "scoreF";

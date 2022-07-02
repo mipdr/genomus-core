@@ -26,6 +26,7 @@ bool isEncodedPhenotypeTypeAParameterType(EncodedPhenotypeType eptt) {
         leafF,
         paramF,
         quantizedF,
+        goldenintegerF,
     });
     return includes(parameterTypes, eptt);
 }
@@ -106,7 +107,7 @@ std::string GTree::printStaticData() {
     ss << "\nSUBEXPRESSIONS";
 
     for (auto it = GTree::available_subexpressions.begin(); it != GTree::available_subexpressions.end(); it++) {
-        ss << "\n    " << EncodedPhenotypeTypeToString(it -> first) << ":";
+        ss << "\n    " << encodedPhenotypeTypeToString(it -> first) << ":";
         for (auto vit = it -> second.begin(); vit != it -> second.end(); vit++) {
             ss << " " << vit -> getIndex();
         }
@@ -137,6 +138,7 @@ GTree::GFunction::GFunction(){
     this -> _param_types = std::vector<EncodedPhenotypeType>();
     this -> _compute = [](std::vector<enc_phen_t> x) -> enc_phen_t { return Parameter(-1.0); };
     this -> _output_type = leafF;
+    this -> _default_function_for_type = false;
 }
 
 GTree::GFunction::GFunction(const GTree::GFunction& gf) {
@@ -147,6 +149,7 @@ GTree::GFunction::GFunction(const GTree::GFunction& gf) {
     this -> _compute = gf._compute;
     this -> _output_type = gf._output_type;
     this -> _is_autoreference = gf._is_autoreference;
+    this -> _default_function_for_type = gf._default_function_for_type;
 }
 
 GTree::GFunction::GFunction(const GTree::GFunction& gf, std::string name) {
@@ -157,6 +160,7 @@ GTree::GFunction::GFunction(const GTree::GFunction& gf, std::string name) {
     this -> _compute = gf._compute;
     this -> _output_type = gf._output_type;
     this -> _is_autoreference = gf._is_autoreference;
+    this -> _default_function_for_type = false;
 }
 
 GTree::GFunction::GFunction(GFunctionInitializer init) {
@@ -169,6 +173,8 @@ GTree::GFunction::GFunction(GFunctionInitializer init) {
 
     // autoReference functions contain "autoref" in their name
     this -> _is_autoreference  = this -> _name.find("AutoRef") != std::string::npos;
+
+    this -> _default_function_for_type = init.default_function_for_type;
 }
 
 GTree::GFunction GTree::GFunction::alias(std::string alias_name) {
@@ -198,6 +204,7 @@ void GTree::GFunction::_assert_parameter_format(const std::vector<enc_phen_t>& a
 
 EncodedPhenotypeType GTree::GFunction::getOutputType() const { return this -> _output_type; }
 bool GTree::GFunction::getIsAutoreference() const { return this -> _is_autoreference; }
+bool GTree::GFunction::getIsDefaultForType() const { return this -> _default_function_for_type; };
 
 enc_phen_t GTree::GFunction::evaluate(const std::vector<enc_phen_t>& arg) const { 
     // this -> _assert_parameter_format(arg);
@@ -255,10 +262,10 @@ std::string GTree::GFunction::toString() {
     ret += "\n\t_name: " + this -> getName();
     // ret += "\n\t_type: " + EncodedPhenotypeTypeToString(this);
     ret += "\n\t_param_types: ";
-    for_each(this -> _param_types.begin(), this -> _param_types.end(), [&ret](EncodedPhenotypeType ft){ ret += EncodedPhenotypeTypeToString(ft) + ", "; });
+    for_each(this -> _param_types.begin(), this -> _param_types.end(), [&ret](EncodedPhenotypeType ft){ ret += encodedPhenotypeTypeToString(ft) + ", "; });
     ret = ret.substr(0, ret.length() - 2) + ";";
 
-    ret += "\n\t_output_type: " + EncodedPhenotypeTypeToString(this -> _output_type) + ";";
+    ret += "\n\t_output_type: " + encodedPhenotypeTypeToString(this -> _output_type) + ";";
 
     return ret + "\n";
 }
@@ -343,4 +350,17 @@ std::string GTree::toString() {
     });
     
     return this -> _function.buildExplicitForm(string_children);
+}
+
+
+std::string humanReadableNormalizedVector(std::vector<double> v) {
+    std::stringstream ss;
+
+    for_each(v.begin(), v.end(), [&](double d) {
+        ss << d;
+        ss << (available_functions.find(d) == available_functions.end() ? "" : "(" + available_functions[d].getName() + ")");
+        ss << ", ";
+    });
+
+    return ss.str();
 }

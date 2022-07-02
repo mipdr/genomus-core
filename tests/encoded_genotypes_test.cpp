@@ -4,57 +4,43 @@
 #include <sstream>
 #include <stdexcept>
 
-#include "decoded_genotype.hpp"
 #include "genomus-core.hpp"
 #include "testing_utils.hpp"
-#include "utils.hpp"
 
 using namespace std;
 
 static unsigned int test_case_counter = 1;
 static bool verbose = true;
 
-string humanReadableNormalizedVector(vector<double>&& v) {
-    stringstream ss;
-
-    for_each(v.begin(), v.end(), [&](double d) {
-        ss << d;
-        ss << (available_functions.find(d) == available_functions.end() ? "" : "(" + available_functions[d].getName() + ")");
-        ss << ", ";
-    });
-
-    return ss.str();
-}
-
 GTest EncodedGenotypesTest = GTest("Encoded Genotypes Test")
 
-    .before([]() { init_available_functions(); })
+    .before([]() { init_genomus(); })
     .after([]() { GTree::clean(); })
 
-    .testCase("Decoded genotype to encoded genotype", [](ostream& os){
-        auto tree = vConcatV({vConcatE({e_piano({n(0.1), m(0.1), a(0.1), i(0.1)}), eAutoRef(0.1)}), vConcatE({eAutoRef(0.1), eAutoRef(0.1)})});
+    // .testCase("Decoded genotype to encoded genotype", [](ostream& os){
+    //     auto tree = vConcatV({vConcatE({e_piano({n(0.1), m(0.1), a(0.1), i(0.1)}), eAutoRef(0.1)}), vConcatE({eAutoRef(0.1), eAutoRef(0.1)})});
 
-        tree = e({n(0.1), m(0.2), a(0.3), i(0.4)});
+    //     tree = e({n(0.1), m(0.2), a(0.3), i(0.4)});
 
-        vector<double> expectedNormalizedVector = { 1.000000, 0.236068, 1.000000, 
-                                                    0.090170, 0.510000, 0.389195, 
-                                                    0.000000, 1.000000, 0.326238, 
-                                                    0.530000, 0.000931, 0.000000, 
-                                                    1.000000, 0.562306, 0.550000, 
-                                                    0.001637, 0.000000, 1.000000, 
-                                                    0.180340, 0.560000, 0.000963, 
-                                                    0.000000, 0.000000
-                                                };
+    //     vector<double> expectedNormalizedVector = { 1.000000, 0.236068, 1.000000, 
+    //                                                 0.090170, 0.510000, 0.389195, 
+    //                                                 0.000000, 1.000000, 0.326238, 
+    //                                                 0.530000, 0.000931, 0.000000, 
+    //                                                 1.000000, 0.562306, 0.550000, 
+    //                                                 0.001637, 0.000000, 1.000000, 
+    //                                                 0.180340, 0.560000, 0.000963, 
+    //                                                 0.000000, 0.000000
+    //                                             };
 
-        // printed output for debugging
-        os << "Genotype (readable): " << tree.toString() << '\n';
-        os << "Genotype (numbers): [" << join(tree.toNormalizedVector()) << "]\n";
-        os << "\n\n[" << humanReadableNormalizedVector(tree.toNormalizedVector()) << "]\n";
+    //     // printed output for debugging
+    //     os << "Genotype (readable): " << tree.toString() << '\n';
+    //     os << "Genotype (numbers): [" << join(tree.toNormalizedVector()) << "]\n";
+    //     os << "\n\n[" << humanReadableNormalizedVector(tree.toNormalizedVector()) << "]\n";
 
-        if (expectedNormalizedVector != tree.toNormalizedVector()) {
-            throw runtime_error("Unexpected normalized vector value. Expected value: " + to_string(expectedNormalizedVector));
-        }
-    })
+    //     if (expectedNormalizedVector != tree.toNormalizedVector()) {
+    //         throw runtime_error("Unexpected normalized vector value. Expected value: " + to_string(expectedNormalizedVector));
+    //     }
+    // })
 
     .testCase("Encoding integers", [](ostream& os) {
 
@@ -109,5 +95,30 @@ GTest EncodedGenotypesTest = GTest("Encoded Genotypes Test")
                 throw runtime_error("Expected: getClosestValue(" + to_string(value) + ") -> " + to_string(normalized) + " but obtained " + to_string(getClosestValue(v, value)));
             }
         }
+    })
+
+    // .testCase("Germinal vector to genotype", [](ostream& os){
+    //     auto tree =  s({v({e_piano({n(0.1), m(0.1), a(0.1), i(0.1)})})});
+    //     auto v = tree.toNormalizedVector();
+
+    //     std::vector<double> result;
+    //     normalizeVector(v, result);
+
+    //     os << "Normalized vector: ";
+    //     os << to_string(result) << endl;
+    //     os << "Original vector: " << to_string(v) << endl;
+    //     printOutput();
+    // })
+
+    .testCase("Normalize random vector", [](ostream& os){
+        std::vector<double> v = { 0.077045, 0.963211, 0.677912, 0.501708, 0.0379405, 0.347572 };// newGerminalVector();
+        std::vector<double> normalized;
+        normalizeVector(v, normalized);
+
+        os << "Original vector: " << humanReadableNormalizedVector(v) << endl << endl << endl;
+        os << "Normalized vector: " << humanReadableNormalizedVector(normalized) << endl;
+
+
+        printOutput();
     });
 

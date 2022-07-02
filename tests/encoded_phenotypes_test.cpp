@@ -15,7 +15,7 @@ static bool verbose = true;
 
 GTest EncodedPhenotypesTest = GTest("Encoded Phenotypes Test")
 
-    .before([]() { init_available_functions(); })
+    .before([]() { init_genomus(); })
     .after([]() { GTree::clean(); })
 
     .testCase("Parameter declaration", [](ostream& os){

@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <functional>
 #include <math.h>
+#include <stdexcept>
 #include <string>
 #include <vector>
 #include <map>
@@ -84,6 +85,10 @@ K getClosestKey(std::map<K, T> m, K k) {
 
 template<typename T>
 T getClosestValue(std::vector<T> v, T val) {
+    if (!v.size()) {
+        throw new std::runtime_error("Vector must have elements");
+    }
+    
     sort(v.begin(), v.end());
 
     auto it = v.begin();

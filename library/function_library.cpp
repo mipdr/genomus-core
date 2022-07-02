@@ -231,6 +231,7 @@ p({
     .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
         return Parameter(params[0].getLeafValue());
     },
+    .default_function_for_type = true,
 }),
 
 e_piano({
@@ -241,26 +242,29 @@ e_piano({
     .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
         return Event(params);
     },
+    .default_function_for_type = true,
 }),
 
 v({
     .name = "v",
     .index = 3,
-    .param_types = { leafF },
+    .param_types = { eventF },
     .output_type = voiceF,
     .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
         return Voice(params);
     },
+    .default_function_for_type = true,
 }),
 
 s({
     .name = "s",
     .index = 4,
-    .param_types = { leafF },
+    .param_types = { voiceF },
     .output_type = scoreF,
     .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
         return Score(params);
     },
+    .default_function_for_type = true,
 }),
 
 n({
@@ -269,6 +273,7 @@ n({
     .param_types = { leafF },
     .output_type = noteValueF,
     .compute = buildParameterComputeFunction(noteValueF, "n"),
+    .default_function_for_type = true,
 }),
 
 d({
@@ -277,6 +282,7 @@ d({
     .param_types = { leafF },
     .output_type = durationF,
     .compute = buildParameterComputeFunction(durationF, "d"),
+    .default_function_for_type = true,
 }),
 
 m({
@@ -285,6 +291,7 @@ m({
     .param_types = { leafF },
     .output_type = midiPitchF,
     .compute = buildParameterComputeFunction(midiPitchF, "m"),
+    .default_function_for_type = true,
 }),
 
 a({
@@ -293,6 +300,7 @@ a({
     .param_types = { leafF },
     .output_type = articulationF,
     .compute = buildParameterComputeFunction(articulationF, "a"),
+    .default_function_for_type = true,
 }),
 
 i({
@@ -301,6 +309,25 @@ i({
     .param_types = { leafF },
     .output_type = intensityF,
     .compute = buildParameterComputeFunction(intensityF, "i"),
+    .default_function_for_type = true,
+}),
+
+q({
+    .name = "q",
+    .index = 11,
+    .param_types = { leafF },
+    .output_type = quantizedF,
+    .compute = buildParameterComputeFunction(quantizedF, "q"),
+    .default_function_for_type = true,
+}),
+
+z({
+    .name = "z",
+    .index = 12,
+    .param_types = { leafF },
+    .output_type = goldenintegerF,
+    .compute = buildParameterComputeFunction(goldenintegerF, "z"),
+    .default_function_for_type = true,
 }),
 
 vConcatE({
@@ -330,7 +357,7 @@ vConcatV({
 eAutoRef({
     .name = "eAutoRef",
     .index = 27,
-    .param_types = { quantizedF },
+    .param_types = { goldenintegerF },
     .output_type = eventF,
     .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
         return GTree::evaluateAutoReference(eventF, (size_t) params[0].getLeafValue());
@@ -340,7 +367,7 @@ eAutoRef({
 vAutoRef({
     .name = "vAutoRef",
     .index = 28,
-    .param_types = { quantizedF },
+    .param_types = { goldenintegerF },
     .output_type = eventF,
     .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
         return GTree::evaluateAutoReference(eventF, (size_t) params[0].getLeafValue());
@@ -364,8 +391,10 @@ sAddV({
 e = e_piano.alias("e");
 
 std::map<double, GTree::GFunction> available_functions;
-std::map<EncodedPhenotypeType, std::vector<double>> function_type_dictionary;
+FunctionTypeDictionary function_type_dictionary;
+FunctionTypeDictionary default_function_type_dictionary;
 std::map<std::string, double> function_name_to_index;
+
 
 double encodeIndex(size_t index) {
     auto aux = index * PHI;
@@ -388,7 +417,7 @@ std::string print_function_type_dictionary() {
 
     ss << "FUNCTION DICTIONARY:" << '\n';
     for (auto entry: function_type_dictionary) {
-        ss << '\t' << EncodedPhenotypeTypeToString(entry.first) << ": " << join(entry.second) << '\n';
+        ss << '\t' << encodedPhenotypeTypeToString(entry.first) << ": " << join(entry.second) << '\n';
     }
 
     return ss.str();
@@ -415,7 +444,21 @@ void init_available_functions() {
             available_functions[encodeIndex(gf.getIndex())] = gf;
             function_type_dictionary[gf.getOutputType()].push_back(encoded_index);
             function_name_to_index[gf.getName()] = encoded_index;
-        }
 
+            if (gf.getIsDefaultForType()) {
+                default_function_type_dictionary[gf.getOutputType()].push_back(encoded_index);
+            }
+        }
+    }
+
+    // Check correctness of default dictionary
+    if (default_function_type_dictionary.size() != function_type_dictionary.size()) {
+        throw std::runtime_error("Missing default functions for some types.");
+    }
+
+    for (auto [type, v]: default_function_type_dictionary) {
+        if (v.size() > 1) {
+            std::runtime_error("Found more than one default function for type " + encodedPhenotypeTypeToString(type) + ": " + to_string(v));
+        }
     }
 }

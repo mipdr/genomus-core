@@ -8,9 +8,9 @@ using namespace std;
 
 int main() {
     std::vector<GTest> tests({
-        EncodedPhenotypesTest,
-        DecodedGenotypesTest,
-        ParserTest,
+        // EncodedPhenotypesTest,
+        // DecodedGenotypesTest,
+        // ParserTest,
         EncodedGenotypesTest
     });
 

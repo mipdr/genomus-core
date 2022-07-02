@@ -58,7 +58,7 @@ static const std::vector<EncodedPhenotypeType> parameterTypes = {
     quantizedF,
 };
 
-std::string EncodedPhenotypeTypeToString(const EncodedPhenotypeType& ept);
+std::string encodedPhenotypeTypeToString(const EncodedPhenotypeType& ept);
 
 class EncodedPhenotype {
     public:

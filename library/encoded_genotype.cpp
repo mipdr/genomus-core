@@ -4,29 +4,34 @@
 #include "errorCodes.hpp"
 #include "utils.hpp"
 
+#include <iostream>
+#include <ostream>
 #include <random>
 #include <stack>
 #include <stdexcept>
 
-static const unsigned int MAX_RANDOM_VECTOR_LENGTH = 2000;
+static const unsigned int MAX_RANDOM_VECTOR_LENGTH = 128;
+
+double randomNormalized() {
+    return ((double) rand() / (RAND_MAX));
+}
 
 std::vector<double> randomVector(int n) {
     std::vector<double> v;
     auto generator = new std::random_device;
 
     if (n > MAX_RANDOM_VECTOR_LENGTH) {
-        throw std::runtime_error("N is too large");
+        n = MAX_RANDOM_VECTOR_LENGTH;
     }
 
-    for (int i; i < n; ++i) {
-        v.push_back((*generator)());
+    for (size_t i = 0; i < n; ++i) {
+        v.push_back(randomNormalized());
     }
     return v;
 }
 
-std::vector<double> getGerminalVector() {
-    auto generator = new std::random_device;
-    size_t size = (*generator)() * MAX_RANDOM_VECTOR_LENGTH;
+std::vector<double> newGerminalVector() {
+    size_t size = std::rand() % MAX_RANDOM_VECTOR_LENGTH;
     return randomVector(size);
 }
 
@@ -39,48 +44,76 @@ enum RetroTranscriptionStates {
     end,
 };
 
-void normalizeVector(std::vector<double>& v, EncodedPhenotypeType output_type = scoreF, size_t read_index = 0) {
-    // State machine to solve non-deterministic generative gramatic
-    // for genotype retrotranscription.
+static const VectorNormalizationState default_vector_normalization_state = {
+    // .position = 0,
+    .output_type = scoreF,
+    .current_depth = 0,
+};
 
-    std::stack<double> open_function_indexes;
-    RetroTranscriptionStates machine_state = start;
-    size_t read_position = 0;
-
+void innerNormalizeVector(std::vector<double>& input, std::vector<double>& output, VectorNormalizationState state) {
     double current_function_index;
+    RetroTranscriptionStates machine_state = start;
+    static size_t position = 0;
+    static size_t read_position = position % input.size();
+
     std::vector<EncodedPhenotypeType> current_function_parameters;
-    size_t current_function_parameter_index = 0;
 
     bool ready = false;
-    static const size_t max_output_size = 1024;
+    bool current_function_has_children;
 
-    bool current_function_has_leaves;
+    static const auto advance = [&]() {
+        position++;
+        read_position = position % input.size();
+    };
 
-    while (!ready && read_position < max_output_size) {
+    bool limits_overpassed = state.current_depth > MAX_GENOTYPE_DEPTH || position > MAX_GENOTYPE_VECTOR_SIZE;
+    FunctionTypeDictionary& dictionary = limits_overpassed ? default_function_type_dictionary : function_type_dictionary;
+
+    while (!ready && position < MAX_GENOTYPE_VECTOR_SIZE) {
         switch (machine_state) {
             case start:
-                v[read_position] = 1;
+                output.push_back(1);
                 machine_state = function_index;
                 break;
             case function_index:
-                // current_function_index = getClosestKey(function_type_dictionary[output_type], v[read_position]);
-                v[read_position] = current_function_index;
-                open_function_indexes.push(current_function_index);
+                // Find closest type-conforming index
+                current_function_index = getClosestValue(dictionary[state.output_type], input[read_position]);
+                output.push_back(current_function_index);
+                advance();
+
                 current_function_parameters = available_functions[current_function_index].getParamTypes();
-                current_function_has_leaves = current_function_parameters.size() != 0;
-                machine_state = current_function_has_leaves ? leaf_indentifier : end;
+
+                if (isEncodedPhenotypeTypeAParameterType(state.output_type)) {
+                    // Go for leaf parameter
+                    output.push_back(leafTypeToNormalizedValue(state.output_type));
+                    advance();
+                    output.push_back(input[read_position]);
+                } else if (current_function_parameters.size()) {
+                    // Explore parameter types and compute parameters on output
+                    for (auto parameterType : current_function_parameters) {
+                        innerNormalizeVector(input, output, {
+                            .output_type = parameterType,
+                            .current_depth = state.current_depth + 1,
+                        });
+                    }
+                }
+
+                machine_state = end;
                 break;
             case leaf_indentifier:
-                v[read_position] = leafTypeToNormalizedValue(available_functions[v[read_position]].getParamTypes()[current_function_parameter_index]);
-                ++current_function_parameter_index;
+                // output[write_position] = leafTypeToNormalizedValue(available_functions[input[read_position]].getParamTypes()[current_function_parameter_index]);
+                // ++current_function_parameter_index;
+            case end:
+                output.push_back(0);
+                ready = true;
+                break;
             default:
                 throw std::runtime_error(ErrorCodes::INVALID_ENUM_VALUE);
         }
-        ++read_position;
+        advance();
     }
+}
 
-
-
-
-
+void normalizeVector(std::vector<double>& input, std::vector<double>& output) {
+    innerNormalizeVector(input, output, default_vector_normalization_state);
 }

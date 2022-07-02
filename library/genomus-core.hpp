@@ -10,4 +10,6 @@
 #include "parser.hpp"
 #include "utils.hpp"
 
+void init_genomus();
+
 #endif
