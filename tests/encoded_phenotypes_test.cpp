@@ -55,7 +55,5 @@ GTest EncodedPhenotypesTest = GTest("Encoded Phenotypes Test")
         auto s = ev.toString();
 
         os << s << endl;
-
-        printOutput();
     });
 

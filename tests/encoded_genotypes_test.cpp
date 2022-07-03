@@ -4,7 +4,9 @@
 #include <sstream>
 #include <stdexcept>
 
+#include "encoded_genotype.hpp"
 #include "genomus-core.hpp"
+#include "parser.hpp"
 #include "testing_utils.hpp"
 
 using namespace std;
@@ -97,27 +99,76 @@ GTest EncodedGenotypesTest = GTest("Encoded Genotypes Test")
         }
     })
 
-    // .testCase("Germinal vector to genotype", [](ostream& os){
-    //     auto tree =  s({v({e_piano({n(0.1), m(0.1), a(0.1), i(0.1)})})});
-    //     auto v = tree.toNormalizedVector();
+    .testCase("Germinal vector to genotype", [](ostream& os){
+        auto tree =  s({v({e_piano({n(0.1), m(0.1), a(0.1), i(0.1)})})});
+        auto v = tree.toNormalizedVector();
 
-    //     std::vector<double> result;
-    //     normalizeVector(v, result);
+        std::vector<double> result;
+        normalizeVector(v, result);
 
-    //     os << "Normalized vector: ";
-    //     os << to_string(result) << endl;
-    //     os << "Original vector: " << to_string(v) << endl;
-    //     printOutput();
-    // })
+        os << "Normalized vector: ";
+        os << to_string(result) << endl;
+        os << "Original vector: " << to_string(v) << endl;
+    })
 
     .testCase("Normalize random vector", [](ostream& os){
-        std::vector<double> v = { 0.077045, 0.963211, 0.677912, 0.501708, 0.0379405, 0.347572 };// newGerminalVector();
+        std::vector<double> v = newGerminalVector();
         std::vector<double> normalized;
+        std::vector<double> second_normalized;
+
         normalizeVector(v, normalized);
+        normalizeVector(normalized, second_normalized);
 
         os << "Original vector: " << humanReadableNormalizedVector(v) << endl << endl << endl;
-        os << "Normalized vector: " << humanReadableNormalizedVector(normalized) << endl;
+        // os << "Normalized vector: " << humanReadableNormalizedVector(normalized) << endl << endl << endl;
+        // os << "Two times normalized vector: " << humanReadableNormalizedVector(second_normalized) << endl << endl;
 
+
+        for (size_t i = 0; i < std::max(normalized.size(), second_normalized.size()); ++i) {
+            os << (i < normalized.size() ? to_string(normalized[i]) : "---") << "\t";
+            os << (i < second_normalized.size() ? to_string(second_normalized[i]) : "---") << "\n";
+        }
+
+        if (normalized != second_normalized) {
+            throw std::runtime_error("Normalization is not idempotent");
+        }
+    })
+
+    .testCase("Normalize vector with lists", [](ostream& os) {
+        // vMotif(ln(n(0.1), n(0.2)), lm(m(0.1), m(0.2)), la(a(0.1), a(0.2)), li(i(0.1), i(0.2)));
+        std::vector<double> output, v = {
+            1.000000, 0.472136, 1.000000, 0.988764, 1.000000, 0.270510, 
+            1.000000, 0.090170, 0.510000, 0.389195, 0.000000, 1.000000, 
+            0.090170, 0.510000, 0.720975, 0.000000, 0.000000, 1.000000, 
+            0.506578, 1.000000, 0.326238, 0.530000, 0.000921, 0.000000, 
+            1.000000, 0.326238, 0.530000, 0.000931, 0.000000, 0.000000, 
+            1.000000, 0.742646, 1.000000, 0.562306, 0.550000, 0.001279, 
+            0.000000, 1.000000, 0.562306, 0.550000, 0.001471, 0.000000, 
+            0.000000, 1.000000, 0.360680, 1.000000, 0.180340, 0.560000, 
+            0.000924, 0.000000, 1.000000, 0.180340, 0.560000, 0.000937, 
+            0.000000, 0.000000, 0.000000, 0.000000
+        };
+
+        normalizeVector(v, output);
+
+        os << "Original vector: " << humanReadableNormalizedVector(v) << endl << endl << endl;
+        os << "Normalized vector: " << humanReadableNormalizedVector(output) << endl;
+    })
+
+    .testCase("Germinal vector to expression", [](ostream& os) {
+        const auto tree = s({v({e_piano({n(1.5), m(120), a(30), i(4)})})});
+
+        auto v = tree.toNormalizedVector();
+        auto exp = toExpression(v);
+
+        auto tree2 = parseString(exp);
+        auto v2 = tree2.toNormalizedVector();
+
+        os << tree.toString() << endl;
+        os << to_string(v) << endl;
+        os << exp << endl;
+        os << tree2.toString() << endl;
+        os << to_string(v2) << endl;
 
         printOutput();
     });

@@ -9,9 +9,9 @@ using namespace std;
 int main() {
     std::vector<GTest> tests({
         EncodedPhenotypesTest,
-        // DecodedGenotypesTest,
-        // ParserTest,
-        // EncodedGenotypesTest
+        DecodedGenotypesTest,
+        ParserTest,
+        EncodedGenotypesTest
     });
 
     GTestErrorState result = g_success;

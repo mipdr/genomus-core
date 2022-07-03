@@ -99,10 +99,10 @@ std::string GTree::GTreeIndex::toString() const {
 }
 GTree::GTreeIndex::operator size_t() const { return this -> _index; }
 GTree::GTreeIndex::operator std::string() const { return this -> toString(); }
-double GTree::GTreeIndex::getLeafValue() {
+double GTree::GTreeIndex::getLeafValue() const {
     return tree_nodes[this -> _index]._leaf_value;
 }
-size_t GTree::GTreeIndex::getIndex() { return this -> _index; }
+size_t GTree::GTreeIndex::getIndex() const { return this -> _index; }
 
 void GTree::GTreeIndex::clean() {
     GTree::clean();
@@ -355,6 +355,17 @@ std::vector<double> GTree::toNormalizedVector() const {
         result.push_back(leafTypeToNormalizedValue(this -> _function.getOutputType()));
         encoded_leaf = this -> evaluate().getLeafValue();
         result.push_back(encoded_leaf);
+    } else if (isEncodedPhenotypeTypeAListType(this -> _function.getOutputType())) {
+        // result.push_back(integerToNormalized(this -> _children.size()));
+        const double leafTypeMarker = leafTypeToNormalizedValue(listToParameterType(this -> _function.getOutputType()));
+
+        for (auto&& child: this -> _children) {
+            result.push_back(leafTypeMarker);
+            result.push_back(encodeParameter(
+                listToParameterType(this -> _function.getOutputType()), 
+                child.getLeafValue())
+            );
+        }
     } else if (this -> _function.getIsAutoreference()) {
 
     } else {

@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <sstream>
 
 static const double E = exp(1.0);
 static const double PHI = (1 + sqrt(5)) / 2;
@@ -24,7 +25,15 @@ std::string join(std::vector<T> v, std::string separator = ", ") {
 
 template<typename T>
 std::string to_string(std::vector<T> v) {
-    return "[" + join(v) + "]";
+    std::stringstream ss;
+
+    ss << "[ ";
+    for (size_t i = 0; i < v.size(); ++i) {
+        if (i % 4 == 0 && i != 0) ss << "\n\t";
+        ss << std::to_string(v[i]) << ", ";
+    }
+
+    return ss.str().substr(0, ss.str().size() - 2) + " ]";
 }
 
 template<typename T, typename K>

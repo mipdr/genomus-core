@@ -19,6 +19,7 @@ static const ParameterMapper defaultMapper = {
     .encoder = [](double a){ return a; },
     .decoder = [](double a){ return a; }
 };
+
 static const std::map<EncodedPhenotypeType, ParameterMapper> mappers = {
     { durationF, {
         .encoder = [](double s){ return (log10(s) + 6 * log10(2)) / (10 * log10(2)); },
@@ -26,7 +27,7 @@ static const std::map<EncodedPhenotypeType, ParameterMapper> mappers = {
     }},
     { noteValueF, {
         .encoder = [](double v){ return v < 0.003907 ? 0 : (log10(v) + 8 * log10(2)) / (10 * log10(2)); },
-        .decoder = [](double p){ return pow(10 * p - 8, 2); }
+        .decoder = [](double p){ return p < 0.006695 ? 0 : pow(2, 10 * p - 8); }
     }},
     { midiPitchF, {
         .encoder = [](double m){ return m / 127; },
@@ -42,7 +43,11 @@ static const std::map<EncodedPhenotypeType, ParameterMapper> mappers = {
                 return 0.63662 * atan(1.20416 * sqrt(a * 0.01));
             return 0.998; 
         },
-        .decoder = [](double p){ return exp(3 * p); }
+        .decoder = [](double p){ 
+            if (p < 0.998) 
+                return round((pow(tan(p * PI * 0.5), 2) / 1.45 * 100));
+            return 10000.0;
+        }
     }},
     { intensityF, {
         .encoder = [](double i){ return i / 100; },
@@ -259,7 +264,7 @@ GTree::GFunction
 
 p({
     .name = "p",
-    .index = 1,
+    .index = 100,
     .param_types = { leafF },
     .output_type = paramF,
     .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {

@@ -144,10 +144,14 @@ EncodedPhenotype Event(std::vector<EncodedPhenotype> parameters) {
         std::string error_message = "Error in typecheck for Event construction:\n";
         bool error = false;
 
-        // if (any_of(parameters.begin(), parameters.end(), [](EncodedPhenotype p) { return p.getType() != paramF; })) {
-        //     error = true;
-        //     error_message += " - Not all parameters are of type ept_parameter.\n";
-        // }
+        if (any_of(
+                parameters.begin(), 
+                parameters.end(), 
+                [](EncodedPhenotype p) { return !isEncodedPhenotypeTypeAParameterType(p.getType()); })
+        ) {
+            error = true;
+            error_message += " - Not all arguments are of parameter type.\n";
+        }
 
         if (parameters.size() != CURRENT_SPECIES.getParameterTypes().size()) {
             error = true;

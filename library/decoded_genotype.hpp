@@ -30,8 +30,8 @@ class GTree {
             std::string toString() const;
             operator size_t() const;
             operator std::string() const;
-            double getLeafValue();
-            size_t getIndex();
+            double getLeafValue() const;
+            size_t getIndex() const;
             static void clean();
             std::vector<double> toNormalizedVector() const;
     };
@@ -155,5 +155,8 @@ EncodedPhenotypeType listToParameterType(EncodedPhenotypeType);
 std::string humanReadableNormalizedVector(std::vector<double> v);
 
 extern std::map<EncodedPhenotypeType, dec_gen_t> default_genotypes;
+
+double encodeParameter(EncodedPhenotypeType parameterType, double value);
+double decodeParameter(EncodedPhenotypeType parameterType, double encoded_value);
 
 #endif
