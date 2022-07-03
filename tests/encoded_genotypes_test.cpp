@@ -19,30 +19,30 @@ GTest EncodedGenotypesTest = GTest("Encoded Genotypes Test")
     .before([]() { init_genomus(); })
     .after([]() { GTree::clean(); })
 
-    // .testCase("Decoded genotype to encoded genotype", [](ostream& os){
-    //     auto tree = vConcatV({vConcatE({e_piano({n(0.1), m(0.1), a(0.1), i(0.1)}), eAutoRef(0.1)}), vConcatE({eAutoRef(0.1), eAutoRef(0.1)})});
+    .testCase("Decoded genotype to encoded genotype", [](ostream& os){
+        auto tree = vConcatV({vConcatE({e_piano({n(0.1), m(0.1), a(0.1), i(0.1)}), eAutoRef(0.1)}), vConcatE({eAutoRef(0.1), eAutoRef(0.1)})});
 
-    //     tree = e({n(0.1), m(0.2), a(0.3), i(0.4)});
+        tree = e({n(0.1), m(0.2), a(0.3), i(0.4)});
 
-    //     vector<double> expectedNormalizedVector = { 1.000000, 0.236068, 1.000000, 
-    //                                                 0.090170, 0.510000, 0.389195, 
-    //                                                 0.000000, 1.000000, 0.326238, 
-    //                                                 0.530000, 0.000931, 0.000000, 
-    //                                                 1.000000, 0.562306, 0.550000, 
-    //                                                 0.001637, 0.000000, 1.000000, 
-    //                                                 0.180340, 0.560000, 0.000963, 
-    //                                                 0.000000, 0.000000
-    //                                             };
+        vector<double> expectedNormalizedVector = { 1.000000, 0.236068, 1.000000, 
+                                                    0.090170, 0.510000, 0.389195, 
+                                                    0.000000, 1.000000, 0.326238, 
+                                                    0.530000, 0.000931, 0.000000, 
+                                                    1.000000, 0.562306, 0.550000, 
+                                                    0.001637, 0.000000, 1.000000, 
+                                                    0.180340, 0.560000, 0.000963, 
+                                                    0.000000, 0.000000
+                                                };
 
-    //     // printed output for debugging
-    //     os << "Genotype (readable): " << tree.toString() << '\n';
-    //     os << "Genotype (numbers): [" << join(tree.toNormalizedVector()) << "]\n";
-    //     os << "\n\n[" << humanReadableNormalizedVector(tree.toNormalizedVector()) << "]\n";
+        // printed output for debugging
+        os << "Genotype (readable): " << tree.toString() << '\n';
+        os << "Genotype (numbers): [" << join(tree.toNormalizedVector()) << "]\n";
+        os << "\n\n[" << humanReadableNormalizedVector(tree.toNormalizedVector()) << "]\n";
 
-    //     if (expectedNormalizedVector != tree.toNormalizedVector()) {
-    //         throw runtime_error("Unexpected normalized vector value. Expected value: " + to_string(expectedNormalizedVector));
-    //     }
-    // })
+        if (expectedNormalizedVector != tree.toNormalizedVector()) {
+            throw runtime_error("Unexpected normalized vector value. Expected value: " + to_string(expectedNormalizedVector));
+        }
+    })
 
     .testCase("Encoding integers", [](ostream& os) {
 
@@ -112,21 +112,33 @@ GTest EncodedGenotypesTest = GTest("Encoded Genotypes Test")
     })
 
     .testCase("Normalize random vector", [](ostream& os){
-        std::vector<double> v = newGerminalVector();
+        const size_t iterations = 1;
+        std::vector<double> v;
         std::vector<double> normalized;
         std::vector<double> second_normalized;
 
-        normalizeVector(v, normalized);
-        normalizeVector(normalized, second_normalized);
+        bool isIdempotent = true;
 
-        os << "Original vector: " << humanReadableNormalizedVector(v) << endl << endl << endl;
-        // os << "Normalized vector: " << humanReadableNormalizedVector(normalized) << endl << endl << endl;
-        // os << "Two times normalized vector: " << humanReadableNormalizedVector(second_normalized) << endl << endl;
+        for (size_t i = 0; i < iterations; ++i) {
+            v = newGerminalVector();
+            normalized = {};
+            second_normalized = {};
+            normalizeVector(v, normalized);
+            normalizeVector(normalized, second_normalized);
+
+            // os << "Original vector: " << humanReadableNormalizedVector(v) << endl << endl << endl;s
+            // os << "Normalized vector: " << humanReadableNormalizedVector(normalized) << endl << endl << endl;
+            // os << "Two times normalized vector: " << humanReadableNormalizedVector(second_normalized) << endl << endl;
 
 
-        for (size_t i = 0; i < std::max(normalized.size(), second_normalized.size()); ++i) {
-            os << (i < normalized.size() ? to_string(normalized[i]) : "---") << "\t";
-            os << (i < second_normalized.size() ? to_string(second_normalized[i]) : "---") << "\n";
+            // for (size_t i = 0; i < std::max(normalized.size(), second_normalized.size()); ++i) {
+            //     os << (i < normalized.size() ? to_string(normalized[i]) : "---") << "\t";
+            //     os << (i < second_normalized.size() ? to_string(second_normalized[i]) : "---") << "\n";
+            // }
+
+            if (normalized != second_normalized) {
+                isIdempotent = false;
+            }
         }
 
         if (normalized != second_normalized) {
@@ -169,7 +181,5 @@ GTest EncodedGenotypesTest = GTest("Encoded Genotypes Test")
         os << exp << endl;
         os << tree2.toString() << endl;
         os << to_string(v2) << endl;
-
-        printOutput();
     });
 

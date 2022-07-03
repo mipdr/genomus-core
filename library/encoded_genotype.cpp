@@ -32,7 +32,7 @@ std::vector<double> randomVector(int n) {
 }
 
 std::vector<double> newGerminalVector() {
-    size_t size = std::rand() % MAX_RANDOM_VECTOR_LENGTH;
+    size_t size = (std::rand() % MAX_RANDOM_VECTOR_LENGTH) + 1;
     return randomVector(size);
 }
 
@@ -75,7 +75,7 @@ void innerNormalizeVector(const std::vector<double>& input, std::vector<double>&
     bool limits_overpassed = state.current_depth > MAX_GENOTYPE_DEPTH || position > MAX_GENOTYPE_VECTOR_SIZE;
     FunctionTypeDictionary& dictionary = limits_overpassed ? default_function_type_dictionary : function_type_dictionary;
 
-    while (!ready && position < MAX_GENOTYPE_VECTOR_SIZE) {
+    while (!ready) {
         switch (machine_state) {
             case start:
                 output.push_back(1);

@@ -82,6 +82,10 @@ void handleCommand(std::string command) {
 void handleInput(std::string input) {
     input = strip(input);
 
+    if (input == "") {
+        return;
+    }
+
     try {
         if (input[0] == '\\') {
             handleCommand(input);

@@ -5,9 +5,9 @@
 #include "decoded_genotype.hpp"
 #include "encoded_phenotype.hpp"
 
-#define GERMINAL_VECTOR_MAX_LENGTH 64
-#define MAX_GENOTYPE_VECTOR_SIZE 128
-#define MAX_GENOTYPE_DEPTH 10
+#define GERMINAL_VECTOR_MAX_LENGTH 128
+#define MAX_GENOTYPE_VECTOR_SIZE 256
+#define MAX_GENOTYPE_DEPTH 32
 #define MAX_LIST_SIZE 16
 
 // Generate a random vector of size n
