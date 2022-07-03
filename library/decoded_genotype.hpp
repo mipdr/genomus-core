@@ -30,8 +30,8 @@ class GTree {
             std::string toString() const;
             operator size_t() const;
             operator std::string() const;
-            double getLeafValue();
-            size_t getIndex();
+            double getLeafValue() const;
+            size_t getIndex() const;
             static void clean();
             std::vector<double> toNormalizedVector() const;
     };
@@ -51,6 +51,7 @@ class GTree {
             std::vector<EncodedPhenotypeType> param_types;
             EncodedPhenotypeType output_type;
             std::function<enc_phen_t(std::vector<enc_phen_t>)> compute;
+            bool default_function_for_type;
         };
 
         private:
@@ -64,6 +65,7 @@ class GTree {
             EncodedPhenotypeType _output_type;
             std::function<enc_phen_t(std::vector<enc_phen_t>)> _compute;
             bool _is_autoreference;
+            bool _default_function_for_type;
 
             void _assert_parameter_format(const std::vector<enc_phen_t>&) const;
         public:
@@ -82,6 +84,7 @@ class GTree {
 
             EncodedPhenotypeType getOutputType() const;
             bool getIsAutoreference() const;
+            bool getIsDefaultForType() const;
             enc_phen_t evaluate(const std::vector<enc_phen_t>&) const;
             GTreeIndex operator()(std::initializer_list<GTreeIndex>);
             GTreeIndex operator()(const std::vector<GTreeIndex>);
@@ -112,22 +115,15 @@ class GTree {
 using dec_gen_t = GTree::GTreeIndex;
 
 #define GENOTYPE_FUNCTIONS \
-    p, \
-    e, \
-    v, \
-    s, \
-    n, \
-    d, \
-    m, \
-    a, \
-    i, \
-    e_piano, \
+    p, e, v, s, \
+    n, d, m, a, i, q, z, \
+    ln, ld, lm, la, li, \
     vConcatE, \
     vConcatV, \
+    vMotif, \
+    e_piano, \
     eAutoRef
     // f, \
-    // z, \
-    // q, \
 
 // GFunction instances declaration
 extern GTree::GFunction GENOTYPE_FUNCTIONS;
@@ -138,7 +134,11 @@ extern std::map<std::string, std::string> name_aliases;
 
 static const double invalid_function_index = -1;
 extern std::map<double, GTree::GFunction> available_functions;
-extern std::map<EncodedPhenotypeType, std::vector<double>> function_type_dictionary;
+
+using FunctionTypeDictionary = std::map<EncodedPhenotypeType, std::vector<double>>;
+extern FunctionTypeDictionary function_type_dictionary;
+extern FunctionTypeDictionary default_function_type_dictionary;
+
 extern std::map<std::string, double> function_name_to_index;
 void init_available_functions(); 
 
@@ -146,6 +146,17 @@ void init_available_functions();
 // utils
 
 bool isEncodedPhenotypeTypeAParameterType(EncodedPhenotypeType);
+bool isEncodedPhenotypeTypeAListType(EncodedPhenotypeType);
 bool gfunctionAcceptsNumericParameter(const GTree::GFunction&);
+
+double leafTypeToNormalizedValue(EncodedPhenotypeType);
+EncodedPhenotypeType listToParameterType(EncodedPhenotypeType);
+
+std::string humanReadableNormalizedVector(std::vector<double> v);
+
+extern std::map<EncodedPhenotypeType, dec_gen_t> default_genotypes;
+
+double encodeParameter(EncodedPhenotypeType parameterType, double value);
+double decodeParameter(EncodedPhenotypeType parameterType, double encoded_value);
 
 #endif

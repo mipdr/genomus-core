@@ -66,4 +66,13 @@ GTest DecodedGenotypesTest = GTest("Decoded GenotypesTest")
         os << GTree::printStaticData() << endl;
 
         tree.clean();
+    })
+
+    .testCase("Lists", [](ostream& os) {
+        auto tree = vMotif({
+            ln({p(0.1), p(0.2)}),
+            lm({p(0.1), p(0.2)}),
+            la({p(0.1), p(0.2)}),
+            li({p(0.1), p(0.2)})
+        });
     });

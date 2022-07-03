@@ -3,6 +3,7 @@
 #include "errorCodes.hpp"
 #include "utils.hpp"
 
+#include <algorithm>
 #include <ostream>
 #include <sstream>
 #include <stdexcept>
@@ -18,6 +19,7 @@ static const ParameterMapper defaultMapper = {
     .encoder = [](double a){ return a; },
     .decoder = [](double a){ return a; }
 };
+
 static const std::map<EncodedPhenotypeType, ParameterMapper> mappers = {
     { durationF, {
         .encoder = [](double s){ return (log10(s) + 6 * log10(2)) / (10 * log10(2)); },
@@ -25,7 +27,7 @@ static const std::map<EncodedPhenotypeType, ParameterMapper> mappers = {
     }},
     { noteValueF, {
         .encoder = [](double v){ return v < 0.003907 ? 0 : (log10(v) + 8 * log10(2)) / (10 * log10(2)); },
-        .decoder = [](double p){ return pow(10 * p - 8, 2); }
+        .decoder = [](double p){ return p < 0.006695 ? 0 : pow(2, 10 * p - 8); }
     }},
     { midiPitchF, {
         .encoder = [](double m){ return m / 127; },
@@ -41,7 +43,11 @@ static const std::map<EncodedPhenotypeType, ParameterMapper> mappers = {
                 return 0.63662 * atan(1.20416 * sqrt(a * 0.01));
             return 0.998; 
         },
-        .decoder = [](double p){ return exp(3 * p); }
+        .decoder = [](double p){ 
+            if (p < 0.998) 
+                return round((pow(tan(p * PI * 0.5), 2) / 1.45 * 100));
+            return 10000.0;
+        }
     }},
     { intensityF, {
         .encoder = [](double i){ return i / 100; },
@@ -202,8 +208,6 @@ std::function<enc_phen_t(std::vector<enc_phen_t>)>
         if (!isEncodedPhenotypeTypeAParameterType(parameterType)) {
             throw std::runtime_error(ErrorCodes::INVALID_CALL);
         }
-
-        // TO DO: mapper is not correctly initialized
         
         return [=](std::vector<enc_phen_t> params) -> enc_phen_t {
             const double encoded_parameter_value = encodeParameter(parameterType, params[0].getLeafValue());
@@ -217,6 +221,41 @@ std::function<enc_phen_t(std::vector<enc_phen_t>)>
         };
     };
 
+std::function<enc_phen_t(std::vector<enc_phen_t>)> 
+    buildListComputeFunction(EncodedPhenotypeType parameterType, std::string name) {
+        if (!isEncodedPhenotypeTypeAListType(parameterType)) {
+            throw std::runtime_error(ErrorCodes::PARAMETER_IS_NOT_A_LIST);
+        }
+
+        return [=](std::vector<enc_phen_t> params) -> enc_phen_t {
+            double encoded_parameter_value;
+
+            for (auto&& param: params) {
+                encoded_parameter_value = encodeParameter(parameterType, param.getLeafValue());
+
+                param = EncodedPhenotype({
+                    .type = listToParameterType(parameterType),
+                    .child_type = leafF,
+                    .children = { param },
+                    .to_string = [=](std::vector<std::string> children_strings) { return std::to_string(encoded_parameter_value); },
+                    .leaf_value = encoded_parameter_value,
+                });
+            }
+
+            return EncodedPhenotype({
+                .type = parameterType,
+                .child_type = listToParameterType(parameterType),
+                .children = params,
+                .to_string = [=](std::vector<std::string> children_strings) { 
+                    std::vector<std::string> evaluated_children;
+                    std::for_each(params.begin(), params.end(), [&](auto param) { evaluated_children.push_back(param.toString()); });
+                    return name + "(" + join(evaluated_children) + ")"; 
+                },
+                .leaf_value = encoded_parameter_value,
+            });
+        };
+    };
+
 std::map<std::string, std::string> name_aliases;
 
 // GTree::GFunction instances
@@ -225,12 +264,13 @@ GTree::GFunction
 
 p({
     .name = "p",
-    .index = 1,
+    .index = 100,
     .param_types = { leafF },
     .output_type = paramF,
     .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
         return Parameter(params[0].getLeafValue());
     },
+    .default_function_for_type = true,
 }),
 
 e_piano({
@@ -241,26 +281,29 @@ e_piano({
     .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
         return Event(params);
     },
+    .default_function_for_type = true,
 }),
 
 v({
     .name = "v",
     .index = 3,
-    .param_types = { leafF },
+    .param_types = { eventF },
     .output_type = voiceF,
     .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
         return Voice(params);
     },
+    .default_function_for_type = true,
 }),
 
 s({
     .name = "s",
     .index = 4,
-    .param_types = { leafF },
+    .param_types = { voiceF },
     .output_type = scoreF,
     .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
         return Score(params);
     },
+    .default_function_for_type = true,
 }),
 
 n({
@@ -269,6 +312,7 @@ n({
     .param_types = { leafF },
     .output_type = noteValueF,
     .compute = buildParameterComputeFunction(noteValueF, "n"),
+    .default_function_for_type = true,
 }),
 
 d({
@@ -277,6 +321,7 @@ d({
     .param_types = { leafF },
     .output_type = durationF,
     .compute = buildParameterComputeFunction(durationF, "d"),
+    .default_function_for_type = true,
 }),
 
 m({
@@ -285,6 +330,7 @@ m({
     .param_types = { leafF },
     .output_type = midiPitchF,
     .compute = buildParameterComputeFunction(midiPitchF, "m"),
+    .default_function_for_type = true,
 }),
 
 a({
@@ -293,6 +339,7 @@ a({
     .param_types = { leafF },
     .output_type = articulationF,
     .compute = buildParameterComputeFunction(articulationF, "a"),
+    .default_function_for_type = true,
 }),
 
 i({
@@ -301,6 +348,79 @@ i({
     .param_types = { leafF },
     .output_type = intensityF,
     .compute = buildParameterComputeFunction(intensityF, "i"),
+    .default_function_for_type = true,
+}),
+
+q({
+    .name = "q",
+    .index = 12,
+    .param_types = { leafF },
+    .output_type = quantizedF,
+    .compute = buildParameterComputeFunction(quantizedF, "q"),
+    .default_function_for_type = true,
+}),
+
+z({
+    .name = "z",
+    .index = 11,
+    .param_types = { leafF },
+    .output_type = goldenintegerF,
+    .compute = buildParameterComputeFunction(goldenintegerF, "z"),
+    .default_function_for_type = true,
+}),
+
+ln({
+    .name = "ln",
+    .index = 15,
+    .param_types = { listF },
+    .output_type = lnoteValueF,
+    .compute = buildListComputeFunction(lnoteValueF, "ln"),
+    .default_function_for_type = true,
+}),
+
+ld({
+    .name = "ld",
+    .index = 16,
+    .param_types = { listF },
+    .output_type = ldurationF,
+    .compute = buildListComputeFunction(lnoteValueF, "ld"),
+    .default_function_for_type = true,
+}),
+
+lm({
+    .name = "lm",
+    .index = 17,
+    .param_types = { listF },
+    .output_type = lmidiPitchF,
+    .compute = buildListComputeFunction(lmidiPitchF, "lm"),
+    .default_function_for_type = true,
+}),
+
+lf({
+    .name = "lf",
+    .index = 18,
+    .param_types = { listF },
+    .output_type = lfrequencyF,
+    .compute = buildListComputeFunction(lfrequencyF, "lf"),
+    .default_function_for_type = true,
+}),
+
+la({
+    .name = "la",
+    .index = 19,
+    .param_types = { listF },
+    .output_type = larticulationF,
+    .compute = buildListComputeFunction(larticulationF, "la"),
+    .default_function_for_type = true,
+}),
+
+li({
+    .name = "li",
+    .index = 20,
+    .param_types = { listF },
+    .output_type = lintensityF,
+    .compute = buildListComputeFunction(lintensityF, "li"),
+    .default_function_for_type = true,
 }),
 
 vConcatE({
@@ -327,10 +447,36 @@ vConcatV({
     },
 }),
 
+vMotif({
+    .name = "vMotif",
+    .index = 199,
+    .param_types = { lnoteValueF, lmidiPitchF, larticulationF, lintensityF },
+    .output_type = voiceF,
+    .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
+        std::vector<enc_phen_t> events;
+        size_t min = -1;
+
+        for (auto& param: params) {
+            min = std::min(min, param.getChildren().size());
+        }
+
+        for (size_t i = 0; i < min; ++i) {
+            events.push_back(Event({
+                params[0].getChildren()[i],
+                params[1].getChildren()[i],
+                params[2].getChildren()[i],
+                params[3].getChildren()[i],
+            }));
+        }
+
+        return Voice(events);
+    },
+}),
+
 eAutoRef({
     .name = "eAutoRef",
     .index = 27,
-    .param_types = { quantizedF },
+    .param_types = { goldenintegerF },
     .output_type = eventF,
     .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
         return GTree::evaluateAutoReference(eventF, (size_t) params[0].getLeafValue());
@@ -340,7 +486,7 @@ eAutoRef({
 vAutoRef({
     .name = "vAutoRef",
     .index = 28,
-    .param_types = { quantizedF },
+    .param_types = { goldenintegerF },
     .output_type = eventF,
     .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
         return GTree::evaluateAutoReference(eventF, (size_t) params[0].getLeafValue());
@@ -364,8 +510,10 @@ sAddV({
 e = e_piano.alias("e");
 
 std::map<double, GTree::GFunction> available_functions;
-std::map<EncodedPhenotypeType, std::vector<double>> function_type_dictionary;
+FunctionTypeDictionary function_type_dictionary;
+FunctionTypeDictionary default_function_type_dictionary;
 std::map<std::string, double> function_name_to_index;
+
 
 double encodeIndex(size_t index) {
     auto aux = index * PHI;
@@ -388,7 +536,7 @@ std::string print_function_type_dictionary() {
 
     ss << "FUNCTION DICTIONARY:" << '\n';
     for (auto entry: function_type_dictionary) {
-        ss << '\t' << EncodedPhenotypeTypeToString(entry.first) << ": " << join(entry.second) << '\n';
+        ss << '\t' << encodedPhenotypeTypeToString(entry.first) << ": " << join(entry.second) << '\n';
     }
 
     return ss.str();
@@ -415,7 +563,21 @@ void init_available_functions() {
             available_functions[encodeIndex(gf.getIndex())] = gf;
             function_type_dictionary[gf.getOutputType()].push_back(encoded_index);
             function_name_to_index[gf.getName()] = encoded_index;
-        }
 
+            if (gf.getIsDefaultForType()) {
+                default_function_type_dictionary[gf.getOutputType()].push_back(encoded_index);
+            }
+        }
+    }
+
+    // Check correctness of default dictionary
+    if (default_function_type_dictionary.size() != function_type_dictionary.size()) {
+        throw std::runtime_error("Missing default functions for some types.");
+    }
+
+    for (auto [type, v]: default_function_type_dictionary) {
+        if (v.size() > 1) {
+            std::runtime_error("Found more than one default function for type " + encodedPhenotypeTypeToString(type) + ": " + to_string(v));
+        }
     }
 }

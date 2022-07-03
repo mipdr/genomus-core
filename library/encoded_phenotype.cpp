@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <string>
 
+#include "decoded_genotype.hpp"
 #include "encoded_phenotype.hpp"
 #include "errorCodes.hpp"
 #include "species.hpp"
@@ -10,7 +11,7 @@
 
 #define ENCODED_PHENOTYPES_TYPE_CHECK
 
-std::string EncodedPhenotypeTypeToString(const EncodedPhenotypeType& ept) {
+std::string encodedPhenotypeTypeToString(const EncodedPhenotypeType& ept) {
     switch (ept) {
         case scoreF:
             return "scoreF";
@@ -96,8 +97,11 @@ std::vector<double> EncodedPhenotype::toNormalizedVector() const {
     std::vector<double> evaluated_children;
 
     static const auto 
-        encodeAndAddChildren = [](std::vector<double>& inner_result, const std::vector<EncodedPhenotype>& children) -> void {
+        encodeAndAddChildren = [&](std::vector<double>& inner_result, const std::vector<EncodedPhenotype>& children) -> void {
             for_each(children.begin(), children.end(), [&](const EncodedPhenotype& ept) {
+                if (isEncodedPhenotypeTypeAListType(this -> _type)){
+                    inner_result += leafTypeToNormalizedValue(listToParameterType(this -> _type));
+                }
                 inner_result += ept.toNormalizedVector();
             });
         };
@@ -140,10 +144,14 @@ EncodedPhenotype Event(std::vector<EncodedPhenotype> parameters) {
         std::string error_message = "Error in typecheck for Event construction:\n";
         bool error = false;
 
-        // if (any_of(parameters.begin(), parameters.end(), [](EncodedPhenotype p) { return p.getType() != paramF; })) {
-        //     error = true;
-        //     error_message += " - Not all parameters are of type ept_parameter.\n";
-        // }
+        if (any_of(
+                parameters.begin(), 
+                parameters.end(), 
+                [](EncodedPhenotype p) { return !isEncodedPhenotypeTypeAParameterType(p.getType()); })
+        ) {
+            error = true;
+            error_message += " - Not all arguments are of parameter type.\n";
+        }
 
         if (parameters.size() != CURRENT_SPECIES.getParameterTypes().size()) {
             error = true;

@@ -138,6 +138,10 @@ dec_gen_t tokenTreeToGTree(const std::vector<TokenNode>& token_nodes, size_t ind
 }
 
 dec_gen_t parseString(std::string entry) {
+    if (entry == "") {
+        return s({v({e_piano({n(0.1), m(0.1), a(0.1), i(0.1)})})});
+    }
+
     if (!wellFormedParenthesis(entry)) 
         throw std::runtime_error(ErrorCodes::BAD_PARSER_ENTRY_BAD_PARENTHESIS);
 

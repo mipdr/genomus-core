@@ -4,9 +4,11 @@
 #include <algorithm>
 #include <functional>
 #include <math.h>
+#include <stdexcept>
 #include <string>
 #include <vector>
 #include <map>
+#include <sstream>
 
 static const double E = exp(1.0);
 static const double PHI = (1 + sqrt(5)) / 2;
@@ -23,7 +25,15 @@ std::string join(std::vector<T> v, std::string separator = ", ") {
 
 template<typename T>
 std::string to_string(std::vector<T> v) {
-    return "[" + join(v) + "]";
+    std::stringstream ss;
+
+    ss << "[ ";
+    for (size_t i = 0; i < v.size(); ++i) {
+        if (i % 4 == 0 && i != 0) ss << "\n\t";
+        ss << std::to_string(v[i]) << ", ";
+    }
+
+    return ss.str().substr(0, ss.str().size() - 2) + " ]";
 }
 
 template<typename T, typename K>
@@ -70,6 +80,52 @@ std::vector<T>& operator+=(std::vector<T>& a, const std::vector<T>& b) {
     return a;
 }
 
+template<typename T>
+std::vector<T>& operator+=(std::vector<T>& a, T b) {
+    a.push_back(b);
+    return a;
+}
+
 std::string strip(std::string&);
+
+template<typename K, typename T>
+K getClosestKey(std::map<K, T> m, K k) {
+    const K upper = m.upper_bound(k) -> first; 
+    const K lower = m.lower_bound(k) -> first; 
+    const K upper_dif = upper - k;
+    const K lower_dif = k - lower;
+
+    return upper_dif < lower_dif ? upper : lower;
+}
+
+template<typename T>
+T getClosestValue(std::vector<T> v, T val) {
+    if (!v.size()) {
+        throw new std::runtime_error("Vector must have elements");
+    }
+    
+    sort(v.begin(), v.end());
+
+    auto it = v.begin();
+    for (it = v.begin(); it != v.end(); ++it) {
+        if (val < *it) {
+            break;
+        }
+    }
+
+    if (it == v.begin()) {
+        return v[0];
+    }
+
+    if (it == v.end()) {
+        it--;
+        return *it;
+    }
+
+    auto previous = it;
+    previous--;
+
+    return ((val - *previous) > (*it - val)) ? *it : *previous;
+}
 
 #endif

@@ -26,6 +26,22 @@ bool isEncodedPhenotypeTypeAParameterType(EncodedPhenotypeType eptt) {
         leafF,
         paramF,
         quantizedF,
+        goldenintegerF,
+    });
+    return includes(parameterTypes, eptt);
+}
+
+bool isEncodedPhenotypeTypeAListType(EncodedPhenotypeType eptt) {
+    static const std::vector<EncodedPhenotypeType> parameterTypes({
+        lnoteValueF,
+        ldurationF,
+        lmidiPitchF,
+        lfrequencyF,
+        larticulationF,
+        lintensityF,
+        listF,
+        lquantizedF,
+        lgoldenintegerF,
     });
     return includes(parameterTypes, eptt);
 }
@@ -55,6 +71,25 @@ double leafTypeToNormalizedValue(EncodedPhenotypeType eptt) {
     return findWithDefault(leafTypeEncoding, eptt, 0.5);
 }
 
+EncodedPhenotypeType listToParameterType(EncodedPhenotypeType listType) {
+    if (!isEncodedPhenotypeTypeAListType(listType)) 
+        throw std::runtime_error(ErrorCodes::PARAMETER_IS_NOT_A_LIST);
+
+    static const std::map<EncodedPhenotypeType, EncodedPhenotypeType> listToParam {
+        { listF, leafF },
+        { lnoteValueF, noteValueF },
+        { ldurationF, durationF },
+        { lmidiPitchF, midiPitchF },
+        { lfrequencyF, frequencyF },
+        { larticulationF, articulationF },
+        { lintensityF, intensityF },
+        { lgoldenintegerF, goldenintegerF },
+        { lquantizedF, quantizedF },
+    };
+
+    return findWithDefault(listToParam, listType, leafF);
+}
+
 // GTree::GTreeIndex method implementation
 
 GTree::GTreeIndex::GTreeIndex(size_t i) { this -> _index = i; }
@@ -64,10 +99,10 @@ std::string GTree::GTreeIndex::toString() const {
 }
 GTree::GTreeIndex::operator size_t() const { return this -> _index; }
 GTree::GTreeIndex::operator std::string() const { return this -> toString(); }
-double GTree::GTreeIndex::getLeafValue() {
+double GTree::GTreeIndex::getLeafValue() const {
     return tree_nodes[this -> _index]._leaf_value;
 }
-size_t GTree::GTreeIndex::getIndex() { return this -> _index; }
+size_t GTree::GTreeIndex::getIndex() const { return this -> _index; }
 
 void GTree::GTreeIndex::clean() {
     GTree::clean();
@@ -106,7 +141,7 @@ std::string GTree::printStaticData() {
     ss << "\nSUBEXPRESSIONS";
 
     for (auto it = GTree::available_subexpressions.begin(); it != GTree::available_subexpressions.end(); it++) {
-        ss << "\n    " << EncodedPhenotypeTypeToString(it -> first) << ":";
+        ss << "\n    " << encodedPhenotypeTypeToString(it -> first) << ":";
         for (auto vit = it -> second.begin(); vit != it -> second.end(); vit++) {
             ss << " " << vit -> getIndex();
         }
@@ -137,6 +172,7 @@ GTree::GFunction::GFunction(){
     this -> _param_types = std::vector<EncodedPhenotypeType>();
     this -> _compute = [](std::vector<enc_phen_t> x) -> enc_phen_t { return Parameter(-1.0); };
     this -> _output_type = leafF;
+    this -> _default_function_for_type = false;
 }
 
 GTree::GFunction::GFunction(const GTree::GFunction& gf) {
@@ -147,6 +183,7 @@ GTree::GFunction::GFunction(const GTree::GFunction& gf) {
     this -> _compute = gf._compute;
     this -> _output_type = gf._output_type;
     this -> _is_autoreference = gf._is_autoreference;
+    this -> _default_function_for_type = gf._default_function_for_type;
 }
 
 GTree::GFunction::GFunction(const GTree::GFunction& gf, std::string name) {
@@ -157,6 +194,7 @@ GTree::GFunction::GFunction(const GTree::GFunction& gf, std::string name) {
     this -> _compute = gf._compute;
     this -> _output_type = gf._output_type;
     this -> _is_autoreference = gf._is_autoreference;
+    this -> _default_function_for_type = false;
 }
 
 GTree::GFunction::GFunction(GFunctionInitializer init) {
@@ -169,6 +207,8 @@ GTree::GFunction::GFunction(GFunctionInitializer init) {
 
     // autoReference functions contain "autoref" in their name
     this -> _is_autoreference  = this -> _name.find("AutoRef") != std::string::npos;
+
+    this -> _default_function_for_type = init.default_function_for_type;
 }
 
 GTree::GFunction GTree::GFunction::alias(std::string alias_name) {
@@ -198,6 +238,7 @@ void GTree::GFunction::_assert_parameter_format(const std::vector<enc_phen_t>& a
 
 EncodedPhenotypeType GTree::GFunction::getOutputType() const { return this -> _output_type; }
 bool GTree::GFunction::getIsAutoreference() const { return this -> _is_autoreference; }
+bool GTree::GFunction::getIsDefaultForType() const { return this -> _default_function_for_type; };
 
 enc_phen_t GTree::GFunction::evaluate(const std::vector<enc_phen_t>& arg) const { 
     // this -> _assert_parameter_format(arg);
@@ -255,10 +296,10 @@ std::string GTree::GFunction::toString() {
     ret += "\n\t_name: " + this -> getName();
     // ret += "\n\t_type: " + EncodedPhenotypeTypeToString(this);
     ret += "\n\t_param_types: ";
-    for_each(this -> _param_types.begin(), this -> _param_types.end(), [&ret](EncodedPhenotypeType ft){ ret += EncodedPhenotypeTypeToString(ft) + ", "; });
+    for_each(this -> _param_types.begin(), this -> _param_types.end(), [&ret](EncodedPhenotypeType ft){ ret += encodedPhenotypeTypeToString(ft) + ", "; });
     ret = ret.substr(0, ret.length() - 2) + ";";
 
-    ret += "\n\t_output_type: " + EncodedPhenotypeTypeToString(this -> _output_type) + ";";
+    ret += "\n\t_output_type: " + encodedPhenotypeTypeToString(this -> _output_type) + ";";
 
     return ret + "\n";
 }
@@ -314,6 +355,17 @@ std::vector<double> GTree::toNormalizedVector() const {
         result.push_back(leafTypeToNormalizedValue(this -> _function.getOutputType()));
         encoded_leaf = this -> evaluate().getLeafValue();
         result.push_back(encoded_leaf);
+    } else if (isEncodedPhenotypeTypeAListType(this -> _function.getOutputType())) {
+        // result.push_back(integerToNormalized(this -> _children.size()));
+        const double leafTypeMarker = leafTypeToNormalizedValue(listToParameterType(this -> _function.getOutputType()));
+
+        for (auto&& child: this -> _children) {
+            result.push_back(leafTypeMarker);
+            result.push_back(encodeParameter(
+                listToParameterType(this -> _function.getOutputType()), 
+                child.getLeafValue())
+            );
+        }
     } else if (this -> _function.getIsAutoreference()) {
 
     } else {
@@ -343,4 +395,17 @@ std::string GTree::toString() {
     });
     
     return this -> _function.buildExplicitForm(string_children);
+}
+
+
+std::string humanReadableNormalizedVector(std::vector<double> v) {
+    std::stringstream ss;
+
+    for_each(v.begin(), v.end(), [&](double d) {
+        ss << d;
+        ss << (available_functions.find(d) == available_functions.end() ? "" : "(" + available_functions[d].getName() + ")");
+        ss << ", ";
+    });
+
+    return ss.str();
 }

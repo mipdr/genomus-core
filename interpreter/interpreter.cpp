@@ -57,13 +57,13 @@ static const std::vector<Command> commands({
 std::string getInfo(dec_gen_t&& tree) {
     std::stringstream ss;
 
-    ss << "{\n\t";
-    ss << "Encoded Genotype: " << to_string(tree.toNormalizedVector()) << "\n\n\t";
-    ss << "Decoded Genotype: " << tree.toString() << "\n\n\t";
+    ss << "{\n    ";
+    ss << "Encoded Genotype:\n\t" << to_string(tree.toNormalizedVector()) << "\n\n    ";
+    ss << "Decoded Genotype: " << tree.toString() << "\n\n    ";
 
     auto encoded_phenotype = tree.evaluate();
 
-    ss << "Encoded Phenotype (human readable): " << encoded_phenotype.toString() << "\n\n\t";
+    ss << "Encoded Phenotype (human readable): " << encoded_phenotype.toString() << "\n\n    ";
     ss << "Encoded Phenotype (normalized vector): " << to_string(encoded_phenotype.toNormalizedVector()) << "\n"; 
     ss << "}\n";   
 
@@ -81,6 +81,10 @@ void handleCommand(std::string command) {
 
 void handleInput(std::string input) {
     input = strip(input);
+
+    if (input == "") {
+        return;
+    }
 
     try {
         if (input[0] == '\\') {
