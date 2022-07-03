@@ -50,8 +50,6 @@ bool includes(std::vector<T> v, T elem) {
 
 std::string prettyPrint(std::string s);
 
-uint32_t mulberry_32(uint32_t);
-
 double roundTo6Decimals(double f);
 
 template<typename K, typename T>
@@ -127,5 +125,26 @@ T getClosestValue(std::vector<T> v, T val) {
 
     return ((val - *previous) > (*it - val)) ? *it : *previous;
 }
+
+////////////////
+//            //
+//    RNG!    //
+//            //
+////////////////
+
+class RandomGenerator {
+    private:
+        std::function<size_t(size_t)> _next;
+        size_t _seed;
+        size_t _max;
+    public:
+        RandomGenerator();
+        // RandomGenerator(size_t, std::function<size_t(size_t)>);
+        void seed(size_t);
+        size_t next();
+        double nextDouble();
+};
+
+uint32_t mulberry_32(uint32_t);
 
 #endif

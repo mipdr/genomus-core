@@ -7,6 +7,7 @@
 
 #include "encoded_phenotype.hpp"
 #include "features.hpp"
+#include "utils.hpp"
 
 /*
     GTree class is the ADT for decoded genotypes. Its instances will hold what is needed
@@ -100,6 +101,7 @@ class GTree {
     public:
         static std::vector<GTree> tree_nodes;
         static std::map<EncodedPhenotypeType, std::vector<GTree::GTreeIndex>> available_subexpressions;
+        static RandomGenerator RNG;
         static EncodedPhenotype evaluateAutoReference(EncodedPhenotypeType, size_t index);
         static void registerLastInsertedNodeAsSubexpression();
         static std::string printStaticData();
@@ -122,7 +124,8 @@ using dec_gen_t = GTree::GTreeIndex;
     vConcatV, \
     vMotif, \
     e_piano, \
-    eAutoRef
+    eAutoRef, \
+    nRnd
     // f, \
 
 // GFunction instances declaration

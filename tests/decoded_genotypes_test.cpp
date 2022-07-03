@@ -3,6 +3,7 @@
 #include <ostream>
 #include <stdexcept>
 
+#include "decoded_genotype.hpp"
 #include "genomus-core.hpp"
 #include "testing_utils.hpp"
 
@@ -75,4 +76,8 @@ GTest DecodedGenotypesTest = GTest("Decoded GenotypesTest")
             la({p(0.1), p(0.2)}),
             li({p(0.1), p(0.2)})
         });
-    });
+    })
+
+    .testCase("Random functions", [](ostream& os) {
+        // auto tree = nRnd();
+    }); 

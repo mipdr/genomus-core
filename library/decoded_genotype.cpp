@@ -161,6 +161,7 @@ std::string unalias_name(std::string name) {
 // GTree::GFunction method implementation
 
 std::vector<GTree> GTree::tree_nodes;
+RandomGenerator GTree::RNG;
 std::map<EncodedPhenotypeType, std::vector<GTree::GTreeIndex>> GTree::available_subexpressions;
 
 std::string GTree::GFunction::getName() { return this -> _name; };

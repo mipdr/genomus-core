@@ -1,4 +1,5 @@
 #include "utils.hpp"
+#include <cstdint>
 #include <iostream>
 #include <ostream>
 #include <sstream>
@@ -45,15 +46,6 @@ std::string prettyPrint(std::string s) {
     return result.str();
 }
 
-uint32_t mulberry_32(uint32_t x) {
-    // Code mostly copied from tommyettinger's gist:
-    // https://gist.github.com/tommyettinger/46a874533244883189143505d203312c
-    uint32_t z = (x += 0x6D2B79F5UL);
-    z = (z ^ (z >> 15)) * (z | 1UL);
-    z ^= z + (z ^ (z >> 7)) * (z | 61UL);
-    return z ^ (z >> 14);
-}
-
 double roundTo6Decimals(double f) {
     return round(f * 1000000) * 1.0 / 1000000.0;
 }
@@ -95,4 +87,50 @@ std::string strip(std::string& str){
     while (std::isspace(*end_it))
         ++end_it;
     return std::string(start_it, end_it.base());
+}
+
+
+
+////////////////
+//            //
+//    RNG!    //
+//            //
+////////////////
+
+// Beware! Fun stuff here
+
+uint32_t mulberry_32_next(uint32_t x) {
+    // Code mostly copied from tommyettinger's gist:
+    // https://gist.github.com/tommyettinger/46a874533244883189143505d203312c
+    uint32_t z = (x += 0x6D2B79F5UL);
+    z = (z ^ (z >> 15)) * (z | 1UL);
+    z ^= z + (z ^ (z >> 7)) * (z | 61UL);
+    return (z ^ (z >> 14)) * 1.0 / 4294967296.0;
+}
+uint64_t mulberry_32_max = 4294967296;
+
+RandomGenerator::RandomGenerator() {
+    this -> _seed = time(NULL);
+    this -> _next = mulberry_32_next;
+    this -> _max = mulberry_32_max;
+}
+
+// RandomGenerator::RandomGenerator(size_t seed, std::function<size_t(size_t)> next) {
+//     this -> _seed = seed;
+//     this -> _next = next;
+//     this -> _max = mulberry_32_max
+// }
+
+void RandomGenerator::seed(size_t s) {
+    this -> _seed = s;
+}
+
+size_t RandomGenerator::next() {
+    size_t next = this -> _next(this -> _seed);
+    this -> _seed = next;
+    return next;
+}
+
+double RandomGenerator::nextDouble() {
+    return ((double)this -> next()) / ((double)this -> _max);
 }

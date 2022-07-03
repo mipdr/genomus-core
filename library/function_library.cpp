@@ -256,6 +256,20 @@ std::function<enc_phen_t(std::vector<enc_phen_t>)>
         };
     };
 
+std::function<enc_phen_t(std::vector<enc_phen_t>)>
+    buildRandomComputeFunction(EncodedPhenotypeType parameterType, std::string name) {
+        return [=](std::vector<enc_phen_t> params) -> enc_phen_t {
+            const double random_number = GTree::RNG.nextDouble();
+            return enc_phen_t({
+                .type = parameterType,
+                .child_type = leafF,
+                .children = {},
+                .to_string = [=](std::vector<std::string> children_strings) { return name + "(" + std::to_string(random_number) + ")"; },
+                .leaf_value = random_number,
+            });
+        };
+    }
+
 std::map<std::string, std::string> name_aliases;
 
 // GTree::GFunction instances
@@ -505,6 +519,14 @@ sAddV({
         voices.push_back(new_voice);
         return Score(voices);
     },
+}),
+
+nRnd({
+    .name = "nRnd",
+    .index = 310,
+    .param_types = {},
+    .output_type = noteValueF,
+    .compute = buildRandomComputeFunction(noteValueF, "nRnd"),
 }),
 
 e = e_piano.alias("e");
