@@ -112,11 +112,11 @@ std::vector<double> GTree::GTreeIndex::toNormalizedVector() {
     return tree_nodes[this -> _index].toNormalizedVector();
 }
 
-EncodedPhenotype GTree::evaluateAutoReference(EncodedPhenotypeType eptt, size_t index) {
+EncodedPhenotype GTree::evaluateAutoreference(EncodedPhenotypeType eptt, size_t index) {
     std::vector<GTree::GTreeIndex> available_subexpressions_for_type = GTree::available_subexpressions[eptt];
 
     if (available_subexpressions_for_type.size() == 0) {
-        throw std::runtime_error(ErrorCodes::BAD_AUTOREFERENCE);
+        throw std::runtime_error(ErrorCodes::BAD_Autoreference);
     }
 
     const size_t mod_index = index % available_subexpressions_for_type.size();
@@ -174,7 +174,7 @@ GTree::GFunction::GFunction(){
     this -> _compute = [](std::vector<enc_phen_t> x) -> enc_phen_t { return Parameter(-1.0); };
     this -> _output_type = leafF;
     this -> _default_function_for_type = false;
-    this -> _is_autoreference = false;
+    this -> _is_Autoreference = false;
     this -> _is_random = false;
 }
 
@@ -185,9 +185,9 @@ GTree::GFunction::GFunction(const GTree::GFunction& gf) {
     this -> _param_types = gf._param_types;
     this -> _compute = gf._compute;
     this -> _output_type = gf._output_type;
-    this -> _is_autoreference = gf._is_autoreference;
+    this -> _is_Autoreference = gf._is_Autoreference;
     this -> _default_function_for_type = gf._default_function_for_type;
-    this -> _is_autoreference = gf._is_autoreference;
+    this -> _is_Autoreference = gf._is_Autoreference;
     this -> _is_random = gf._is_random;
 }
 
@@ -198,7 +198,7 @@ GTree::GFunction::GFunction(const GTree::GFunction& gf, std::string name) {
     this -> _param_types = gf._param_types;
     this -> _compute = gf._compute;
     this -> _output_type = gf._output_type;
-    this -> _is_autoreference = gf._is_autoreference;
+    this -> _is_Autoreference = gf._is_Autoreference;
     this -> _default_function_for_type = false;
     this -> _is_random = gf._is_random;
 }
@@ -210,7 +210,7 @@ GTree::GFunction::GFunction(GFunctionInitializer init) {
     this -> _param_types = init.param_types;
     this -> _compute = init.compute;
     this -> _output_type = init.output_type;
-    this -> _is_autoreference  = init.is_autoreference;
+    this -> _is_Autoreference  = init.is_Autoreference;
     this -> _default_function_for_type = init.default_function_for_type;
 
     this -> _is_random = init.is_random;
@@ -236,13 +236,13 @@ GTree::GFunction GTree::GFunction::alias(std::string alias_name) {
 void GTree::GFunction::_assert_parameter_format(const std::vector<enc_phen_t>& arg) const {
     std::vector<EncodedPhenotypeType> arg_types;
     for_each(arg.begin(), arg.end(), [&](enc_phen_t argument) { arg_types.push_back(argument.getType()); });
-    if (!this -> _is_autoreference && (this -> _param_types != arg_types)) {
+    if (!this -> _is_Autoreference && (this -> _param_types != arg_types)) {
         throw std::runtime_error(ErrorCodes::BAD_GFUNCTION_PARAMETERS + ": " + this -> _name);
     }
 }
 
 EncodedPhenotypeType GTree::GFunction::getOutputType() const { return this -> _output_type; }
-bool GTree::GFunction::getIsAutoreference() const { return this -> _is_autoreference; }
+bool GTree::GFunction::getIsAutoreference() const { return this -> _is_Autoreference; }
 bool GTree::GFunction::getIsDefaultForType() const { return this -> _default_function_for_type; };
 bool GTree::GFunction::getIsRandom() const { return this -> _is_random; };
 
@@ -277,11 +277,11 @@ GTree::GTreeIndex GTree::GFunction::operator()(const std::vector<GTree::GTreeInd
 
 GTree::GTreeIndex GTree::GFunction::operator()(double x) {
     if (!gfunctionAcceptsNumericParameter(*this)) {
-        // Only parameter functions and autoreferences are allowed to receive a numeric parameter
+        // Only parameter functions and Autoreferences are allowed to receive a numeric parameter
         throw std::runtime_error(ErrorCodes::BAD_GFUNCTION_PARAMETERS + ": " + this -> _name + " does not accept a double parameter.");
     }
     
-    if (this -> _is_autoreference) {
+    if (this -> _is_Autoreference) {
         if (x > tree_nodes.size() - 1) {
             throw std::runtime_error(ErrorCodes::BAD_AUTOREFERENCE_INDEX);
         }
@@ -334,7 +334,7 @@ enc_phen_t GTree::evaluate() {
             EncodedPhenotype({
                 .type = leafF,
                 .child_type = leafF,
-                .children = {},
+                .children = std::vector<EncodedPhenotype>(),
                 .to_string = [&](std::vector<std::string>) { return std::to_string(this -> _leaf_value); },
                 .leaf_value = this -> _leaf_value,
             })

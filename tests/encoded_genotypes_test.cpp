@@ -3,7 +3,9 @@
 #include <ostream>
 #include <sstream>
 #include <stdexcept>
+#include <string>
 
+#include "decoded_genotype.hpp"
 #include "encoded_genotype.hpp"
 #include "genomus-core.hpp"
 #include "parser.hpp"
@@ -20,7 +22,7 @@ GTest EncodedGenotypesTest = GTest("Encoded Genotypes Test")
     .after([]() { GTree::clean(); })
 
     .testCase("Decoded genotype to encoded genotype", [](ostream& os){
-        auto tree = vConcatV({vConcatE({e_piano({n(0.1), m(0.1), a(0.1), i(0.1)}), eAutoRef(0.1)}), vConcatE({eAutoRef(0.1), eAutoRef(0.1)})});
+        auto tree = vConcatV({vConcatE({e_piano({n(0.1), m(0.1), a(0.1), i(0.1)}), eAutoref(0.1)}), vConcatE({eAutoref(0.1), eAutoref(0.1)})});
 
         tree = e({n(0.1), m(0.2), a(0.3), i(0.4)});
 
@@ -168,18 +170,24 @@ GTest EncodedGenotypesTest = GTest("Encoded Genotypes Test")
     })
 
     .testCase("Germinal vector to expression", [](ostream& os) {
-        auto tree = s({v({e_piano({n(1.5), m(120), a(30), i(4)})})});
+        std::vector<double> germinal, normalized;
+        std::string expression;
+        dec_gen_t tree = 0;
 
-        auto v = tree.toNormalizedVector();
-        auto exp = toExpression(v);
+        for (size_t i = 0; i < 1; ++i){
+            germinal = normalized = {};
+            expression = "";
+            GTree::clean(); 
 
-        auto tree2 = parseString(exp);
-        auto v2 = tree2.toNormalizedVector();
+            germinal = newGerminalVector();
+            normalizeVector(germinal, normalized);
+            expression = toExpression(normalized);
 
-        os << tree.toString() << endl;
-        os << to_string(v) << endl;
-        os << exp << endl;
-        os << tree2.toString() << endl;
-        os << to_string(v2) << endl;
+            os << "###########\n\n" << to_string(normalized) << "\n\n";
+            os << expression << endl << endl;
+            tree = parseString(expression);
+            os  << tree.toString() << endl;
+            os << "\n\n" << tree.evaluate().toString() << endl << endl;
+        }
     });
 

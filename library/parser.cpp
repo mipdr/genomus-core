@@ -74,7 +74,8 @@ bool isTokenNumeric(std::string token) {
 }
 
 std::vector<TokenNode> buildTokenTree(std::string entry) {
-    if (!wellFormedParenthesis(entry)) throw std::runtime_error(ErrorCodes::BAD_PARSER_ENTRY_BAD_PARENTHESIS);
+    if (!wellFormedParenthesis(entry)) 
+        throw std::runtime_error(ErrorCodes::BAD_PARSER_ENTRY_BAD_PARENTHESIS);
     auto tokens = getTokens(entry);
 
     size_t current_parent = 0;
@@ -120,13 +121,25 @@ dec_gen_t tokenTreeToGTree(const std::vector<TokenNode>& token_nodes, size_t ind
 
     auto&& gfunction = available_functions[it -> second];
 
-    if (token_nodes[index].children.size()) {
+    if (token_nodes[index].children.size() == 1) {
         auto first_child_token = token_nodes[token_nodes[index].children[0]].token; 
         if (isTokenNumeric(first_child_token)) {
             // Missing check for no siblings and no children
             return gfunction(std::stof(first_child_token));
         }
     }
+    //  else if (token_nodes[index].children.size() > 1) {
+    //     std::vector<std::string> children_tokens;
+    //     std::vector<dec_gen_t> leaf_children;
+
+    //     std::for_each(token_nodes[index].children.begin(), token_nodes[index].children.end(), [&](size_t child_index) {
+    //         children_tokens.push_back(token_nodes[child_index].token);
+    //     });
+
+    //     if (std::all_of(children_tokens.begin(), children_tokens.end(), [](std::string token){ return isTokenNumeric(token); })) {
+
+    //     }
+    // }
 
     std::vector<dec_gen_t> children({});
 

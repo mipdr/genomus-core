@@ -53,7 +53,7 @@ class GTree {
             EncodedPhenotypeType output_type;
             std::function<enc_phen_t(std::vector<enc_phen_t>)> compute;
             bool default_function_for_type;
-            bool is_autoreference;
+            bool is_Autoreference;
             bool is_random;
         };
 
@@ -67,7 +67,7 @@ class GTree {
             std::vector<EncodedPhenotypeType> _param_types;
             EncodedPhenotypeType _output_type;
             std::function<enc_phen_t(std::vector<enc_phen_t>)> _compute;
-            bool _is_autoreference;
+            bool _is_Autoreference;
             bool _is_random;
             bool _default_function_for_type;
 
@@ -107,7 +107,7 @@ class GTree {
         static std::vector<GTree> tree_nodes;
         static std::map<EncodedPhenotypeType, std::vector<GTree::GTreeIndex>> available_subexpressions;
         static RandomGenerator RNG;
-        static EncodedPhenotype evaluateAutoReference(EncodedPhenotypeType, size_t index);
+        static EncodedPhenotype evaluateAutoreference(EncodedPhenotypeType, size_t index);
         static void registerLastInsertedNodeAsSubexpression();
         static std::string printStaticData();
         static void clean();
@@ -122,16 +122,13 @@ class GTree {
 using dec_gen_t = GTree::GTreeIndex;
 
 #define GENOTYPE_FUNCTIONS \
-    p, e, v, s, \
-    n, d, m, a, i, q, z, \
+    s, s2V, sAddS, sAddV, \
+    v, vMotif, vMotifLoop, vPerpetuumMobile, vPerpetuumMobileLoop, vConcatE, vConcatV, \
+    e, e_piano, \
+    p, n, d, f, m, a, i, q, z, \
     ln, ld, lm, la, li, \
-    vConcatE, \
-    vConcatV, \
-    vMotif, \
-    e_piano, \
-    eAutoRef, \
-    nRnd
-    // f, \
+    nRnd, dRnd, mRnd, fRnd, aRnd, iRnd, zRnd, qRnd, \
+    eAutoref, vAutoref \
 
 // GFunction instances declaration
 extern GTree::GFunction GENOTYPE_FUNCTIONS;
@@ -142,6 +139,7 @@ extern std::map<std::string, std::string> name_aliases;
 
 static const double invalid_function_index = -1;
 extern std::map<double, GTree::GFunction> available_functions;
+extern std::vector<std::string> exclude_functions;
 
 using FunctionTypeDictionary = std::map<EncodedPhenotypeType, std::vector<double>>;
 extern FunctionTypeDictionary function_type_dictionary;

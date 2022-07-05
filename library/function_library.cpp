@@ -359,6 +359,16 @@ lf(buildListFunction("lf", lfrequencyF, 18)),
 la(buildListFunction("la", larticulationF, 19)),
 li(buildListFunction("li", lintensityF, 20)),
 
+s2V({
+    .name = "s2V",
+    .index = 104,
+    .param_types = { voiceF, voiceF },
+    .output_type = scoreF,
+    .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
+        return Score(params);
+    },
+}),
+
 vConcatE({
     .name = "vConcatE",
     .index = 42,
@@ -409,33 +419,111 @@ vMotif({
     },
 }),
 
-eAutoRef({
-    .name = "eAutoRef",
+vMotifLoop({
+    .name = "vMotifLoop",
+    .index = 200,
+    .param_types = { lnoteValueF, lmidiPitchF, larticulationF, lintensityF },
+    .output_type = voiceF,
+    .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
+        std::vector<enc_phen_t> events;
+        size_t max = 0;
+
+        for (auto& param: params) {
+            max = std::max(max, param.getChildren().size());
+        }
+
+        for (size_t i = 0; i < max; ++i) {
+            events.push_back(Event({
+                params[0].getChildren()[i % params[0].getChildren().size()],
+                params[1].getChildren()[i % params[1].getChildren().size()],
+                params[2].getChildren()[i % params[2].getChildren().size()],
+                params[3].getChildren()[i % params[3].getChildren().size()],
+            }));
+        }
+
+        return Voice(events);
+    },
+}),
+
+vPerpetuumMobile({
+    .name = "vPerpetuumMobile",
+    .index = 201,
+    .param_types = { noteValueF, lmidiPitchF, larticulationF, lintensityF },
+    .output_type = voiceF,
+    .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
+        std::vector<enc_phen_t> events;
+        size_t min = -1;
+
+        for (auto& param: params) {
+            min = std::min(min, param.getChildren().size());
+        }
+
+        for (size_t i = 0; i < min; ++i) {
+            events.push_back(Event({
+                params[0],
+                params[1].getChildren()[i],
+                params[2].getChildren()[i],
+                params[3].getChildren()[i],
+            }));
+        }
+
+        return Voice(events);
+    },
+}),
+
+vPerpetuumMobileLoop({
+    .name = "vPerpetuumMobile",
+    .index = 202,
+    .param_types = { noteValueF, lmidiPitchF, larticulationF, lintensityF },
+    .output_type = voiceF,
+    .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
+        std::vector<enc_phen_t> events;
+        size_t max = 0;
+
+        for (auto& param: params) {
+            max = std::max(max, param.getChildren().size());
+        }
+
+        for (size_t i = 0; i < max; ++i) {
+            events.push_back(Event({
+                params[0],
+                params[1].getChildren()[i % params[1].getChildren().size()],
+                params[2].getChildren()[i % params[2].getChildren().size()],
+                params[3].getChildren()[i % params[3].getChildren().size()],
+            }));
+        }
+
+        return Voice(events);
+    },
+}),
+
+eAutoref({
+    .name = "eAutoref",
     .index = 27,
     .param_types = { goldenintegerF },
     .output_type = eventF,
     .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
-        return GTree::evaluateAutoReference(eventF, (size_t) params[0].getLeafValue());
+        return GTree::evaluateAutoreference(eventF, (size_t) params[0].getLeafValue());
     },
-    .is_autoreference = true,
+    .is_Autoreference = true,
 }),
 
-vAutoRef({
-    .name = "vAutoRef",
+vAutoref({
+    .name = "vAutoref",
     .index = 28,
     .param_types = { goldenintegerF },
     .output_type = eventF,
     .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
-        return GTree::evaluateAutoReference(eventF, (size_t) params[0].getLeafValue());
+        return GTree::evaluateAutoreference(eventF, (size_t) params[0].getLeafValue());
     },
-    .is_autoreference = true,
+    .is_Autoreference = true,
 }),
 
 sAddV({
     .name = "sAddV",
     .index = 109,
     .param_types = { scoreF, voiceF },
-    .output_type = eventF,
+    .output_type = scoreF,
     .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
         auto& score = params[0], new_voice = params[1];
 
@@ -444,6 +532,16 @@ sAddV({
         return Score(voices);
     },
 }),
+
+sAddS({
+    .name = "sAddS",
+    .index = 110,
+    .param_types = { scoreF, scoreF },
+    .output_type = scoreF,
+    .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
+        return Score(params[0].getChildren() + params[1].getChildren());
+    },
+}), 
 
 nRnd(buildRandomFunction("nRnd", noteValueF, 310)),
 dRnd(buildRandomFunction("dRnd", durationF, 311)),
@@ -459,6 +557,7 @@ qRnd(buildRandomFunction("qRnd", quantizedF, 317)),
 e = e_piano.alias("e");
 
 std::map<double, GTree::GFunction> available_functions;
+std::vector<std::string> exclude_functions = { "vConcatV", "vAutoref", "eAutoref" };
 FunctionTypeDictionary function_type_dictionary;
 FunctionTypeDictionary default_function_type_dictionary;
 std::map<std::string, double> function_name_to_index;
@@ -500,11 +599,12 @@ void init_available_functions() {
     is_initialized = true;
 
     double encoded_index;
-    bool isAlias;
+    bool is_alias, is_excluded;
     for (auto gf: { GENOTYPE_FUNCTIONS }) {
-        isAlias = name_aliases.find(gf.getName()) != name_aliases.end();
+        is_alias = name_aliases.find(gf.getName()) != name_aliases.end();
+        is_excluded = find(exclude_functions.begin(), exclude_functions.end(), gf.getName()) != exclude_functions.end();
 
-        if (!isAlias) {
+        if (!is_alias && !is_excluded) {
             encoded_index = encodeIndex(gf.getIndex());
             if (available_functions.find(encoded_index) != available_functions.end()) {
                 throw std::runtime_error(ErrorCodes::ALREADY_EXISTING_FUNCTION_INDEX + ": " + gf.getName());
