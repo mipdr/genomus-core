@@ -203,38 +203,48 @@ double decodeParameter(EncodedPhenotypeType parameterType, double encoded_value)
 
 // Utils
 
-std::function<enc_phen_t(std::vector<enc_phen_t>)> 
-    buildParameterComputeFunction(EncodedPhenotypeType parameterType, std::string name) {
-        if (!isEncodedPhenotypeTypeAParameterType(parameterType)) {
-            throw std::runtime_error(ErrorCodes::INVALID_CALL);
-        }
-        
-        return [=](std::vector<enc_phen_t> params) -> enc_phen_t {
-            const double encoded_parameter_value = encodeParameter(parameterType, params[0].getLeafValue());
+GTree::GFunction::GFunctionInitializer buildParameterFunction(std::string name, EncodedPhenotypeType output_type, size_t index) {
+    if (!isEncodedPhenotypeTypeAParameterType(output_type)) {
+        throw std::runtime_error(ErrorCodes::INVALID_CALL);
+    }
+    
+    return {
+        .name = name,
+        .index = index,
+        .param_types = { leafF },
+        .output_type = output_type,
+        .compute = [=](std::vector<enc_phen_t> params) -> enc_phen_t {
+            const double encoded_parameter_value = encodeParameter(output_type, params[0].getLeafValue());
             return EncodedPhenotype({
-                .type = parameterType,
+                .type = output_type,
                 .child_type = leafF,
                 .children = params,
                 .to_string = [=](std::vector<std::string> children_strings) { return name + "(" + std::to_string(encoded_parameter_value) + ")"; },
                 .leaf_value = encoded_parameter_value,
             });
-        };
+        },
+        .default_function_for_type = true,
     };
+}
 
-std::function<enc_phen_t(std::vector<enc_phen_t>)> 
-    buildListComputeFunction(EncodedPhenotypeType parameterType, std::string name) {
-        if (!isEncodedPhenotypeTypeAListType(parameterType)) {
-            throw std::runtime_error(ErrorCodes::PARAMETER_IS_NOT_A_LIST);
-        }
-
-        return [=](std::vector<enc_phen_t> params) -> enc_phen_t {
+GTree::GFunction::GFunctionInitializer buildListFunction(std::string name, EncodedPhenotypeType output_type, size_t index) {
+    if (!isEncodedPhenotypeTypeAListType(output_type)) {
+        throw std::runtime_error(ErrorCodes::INVALID_CALL);
+    }
+    
+    return {
+        .name = name,
+        .index = index,
+        .param_types = { listF },
+        .output_type = output_type,
+        .compute = [=](std::vector<enc_phen_t> params) -> enc_phen_t {
             double encoded_parameter_value;
 
             for (auto&& param: params) {
-                encoded_parameter_value = encodeParameter(parameterType, param.getLeafValue());
+                encoded_parameter_value = encodeParameter(output_type, param.getLeafValue());
 
                 param = EncodedPhenotype({
-                    .type = listToParameterType(parameterType),
+                    .type = listToParameterType(output_type),
                     .child_type = leafF,
                     .children = { param },
                     .to_string = [=](std::vector<std::string> children_strings) { return std::to_string(encoded_parameter_value); },
@@ -243,8 +253,8 @@ std::function<enc_phen_t(std::vector<enc_phen_t>)>
             }
 
             return EncodedPhenotype({
-                .type = parameterType,
-                .child_type = listToParameterType(parameterType),
+                .type = output_type,
+                .child_type = listToParameterType(output_type),
                 .children = params,
                 .to_string = [=](std::vector<std::string> children_strings) { 
                     std::vector<std::string> evaluated_children;
@@ -253,17 +263,23 @@ std::function<enc_phen_t(std::vector<enc_phen_t>)>
                 },
                 .leaf_value = encoded_parameter_value,
             });
-        };
+        },
+        .default_function_for_type = true,
     };
+}
 
-std::function<enc_phen_t(std::vector<enc_phen_t>)>
-    buildRandomComputeFunction(EncodedPhenotypeType parameterType, std::string name) {
-        return [=](std::vector<enc_phen_t> params) -> enc_phen_t {
+
+GTree::GFunction::GFunctionInitializer buildRandomFunction(std::string name, EncodedPhenotypeType output_type, size_t index) {
+    return {
+        .name = name,
+        .index = index,
+        .param_types = {},
+        .output_type = output_type,
+        .compute = [=](std::vector<enc_phen_t> params) -> enc_phen_t {
             if (params.size() == 0) {
                 const double random_number = GTree::RNG.nextDouble();
-                
                 return enc_phen_t({
-                    .type = parameterType,
+                    .type = output_type,
                     .child_type = leafF,
                     .children = {},
                     .to_string = [=](std::vector<std::string> children_strings) { return name + "(" + std::to_string(random_number) + ")"; },
@@ -272,8 +288,10 @@ std::function<enc_phen_t(std::vector<enc_phen_t>)>
             } else {
                 return params[0];
             }
-        };
-    }
+        },
+        .is_random = true,
+    };
+}
 
 std::map<std::string, std::string> name_aliases;
 
@@ -325,122 +343,21 @@ s({
     .default_function_for_type = true,
 }),
 
-n({
-    .name = "n",
-    .index = 5,
-    .param_types = { leafF },
-    .output_type = noteValueF,
-    .compute = buildParameterComputeFunction(noteValueF, "n"),
-    .default_function_for_type = true,
-}),
+n(buildParameterFunction("n", noteValueF, 5)),
+d(buildParameterFunction("d", durationF, 6)),
+m(buildParameterFunction("m", midiPitchF, 7)),
+f(buildParameterFunction("f", frequencyF, 8)),
+a(buildParameterFunction("a", articulationF, 9)),
+i(buildParameterFunction("i", intensityF, 10)),
+z(buildParameterFunction("z", goldenintegerF, 11)),
+q(buildParameterFunction("q", quantizedF, 12)),
 
-d({
-    .name = "d",
-    .index = 6,
-    .param_types = { leafF },
-    .output_type = durationF,
-    .compute = buildParameterComputeFunction(durationF, "d"),
-    .default_function_for_type = true,
-}),
-
-m({
-    .name = "m",
-    .index = 7,
-    .param_types = { leafF },
-    .output_type = midiPitchF,
-    .compute = buildParameterComputeFunction(midiPitchF, "m"),
-    .default_function_for_type = true,
-}),
-
-a({
-    .name = "a",
-    .index = 9,
-    .param_types = { leafF },
-    .output_type = articulationF,
-    .compute = buildParameterComputeFunction(articulationF, "a"),
-    .default_function_for_type = true,
-}),
-
-i({
-    .name = "i",
-    .index = 10,
-    .param_types = { leafF },
-    .output_type = intensityF,
-    .compute = buildParameterComputeFunction(intensityF, "i"),
-    .default_function_for_type = true,
-}),
-
-q({
-    .name = "q",
-    .index = 12,
-    .param_types = { leafF },
-    .output_type = quantizedF,
-    .compute = buildParameterComputeFunction(quantizedF, "q"),
-    .default_function_for_type = true,
-}),
-
-z({
-    .name = "z",
-    .index = 11,
-    .param_types = { leafF },
-    .output_type = goldenintegerF,
-    .compute = buildParameterComputeFunction(goldenintegerF, "z"),
-    .default_function_for_type = true,
-}),
-
-ln({
-    .name = "ln",
-    .index = 15,
-    .param_types = { listF },
-    .output_type = lnoteValueF,
-    .compute = buildListComputeFunction(lnoteValueF, "ln"),
-    .default_function_for_type = true,
-}),
-
-ld({
-    .name = "ld",
-    .index = 16,
-    .param_types = { listF },
-    .output_type = ldurationF,
-    .compute = buildListComputeFunction(lnoteValueF, "ld"),
-    .default_function_for_type = true,
-}),
-
-lm({
-    .name = "lm",
-    .index = 17,
-    .param_types = { listF },
-    .output_type = lmidiPitchF,
-    .compute = buildListComputeFunction(lmidiPitchF, "lm"),
-    .default_function_for_type = true,
-}),
-
-lf({
-    .name = "lf",
-    .index = 18,
-    .param_types = { listF },
-    .output_type = lfrequencyF,
-    .compute = buildListComputeFunction(lfrequencyF, "lf"),
-    .default_function_for_type = true,
-}),
-
-la({
-    .name = "la",
-    .index = 19,
-    .param_types = { listF },
-    .output_type = larticulationF,
-    .compute = buildListComputeFunction(larticulationF, "la"),
-    .default_function_for_type = true,
-}),
-
-li({
-    .name = "li",
-    .index = 20,
-    .param_types = { listF },
-    .output_type = lintensityF,
-    .compute = buildListComputeFunction(lintensityF, "li"),
-    .default_function_for_type = true,
-}),
+ln(buildListFunction("ln", lnoteValueF, 15)),
+ld(buildListFunction("ld", ldurationF, 16)),
+lm(buildListFunction("lm", lmidiPitchF, 17)),
+lf(buildListFunction("lf", lfrequencyF, 18)),
+la(buildListFunction("la", larticulationF, 19)),
+li(buildListFunction("li", lintensityF, 20)),
 
 vConcatE({
     .name = "vConcatE",
@@ -528,14 +445,16 @@ sAddV({
     },
 }),
 
-nRnd({
-    .name = "nRnd",
-    .index = 310,
-    .param_types = {},
-    .output_type = noteValueF,
-    .compute = buildRandomComputeFunction(noteValueF, "nRnd"),
-    .is_random = true,
-}),
+nRnd(buildRandomFunction("nRnd", noteValueF, 310)),
+dRnd(buildRandomFunction("dRnd", durationF, 311)),
+mRnd(buildRandomFunction("mRnd", midiPitchF, 312)),
+fRnd(buildRandomFunction("fRnd", frequencyF, 313)),
+aRnd(buildRandomFunction("aRnd", articulationF, 314)),
+iRnd(buildRandomFunction("iRnd", intensityF, 315)),
+zRnd(buildRandomFunction("zRnd", goldenintegerF, 316)),
+qRnd(buildRandomFunction("qRnd", quantizedF, 317)),
+
+
 
 e = e_piano.alias("e");
 
