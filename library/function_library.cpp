@@ -503,7 +503,8 @@ eAutoref({
     .param_types = { goldenintegerF },
     .output_type = eventF,
     .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
-        return GTree::evaluateAutoreference(eventF, (size_t) params[0].getLeafValue());
+        // Autoreferences must be evaluated by the GTree object, not by the GFunction
+        throw std::runtime_error(ErrorCodes::INVALID_CALL);
     },
     .is_Autoreference = true,
 }),
@@ -512,9 +513,9 @@ vAutoref({
     .name = "vAutoref",
     .index = 28,
     .param_types = { goldenintegerF },
-    .output_type = eventF,
+    .output_type = voiceF,
     .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
-        return GTree::evaluateAutoreference(eventF, (size_t) params[0].getLeafValue());
+        throw std::runtime_error(ErrorCodes::INVALID_CALL);
     },
     .is_Autoreference = true,
 }),
@@ -557,9 +558,10 @@ qRnd(buildRandomFunction("qRnd", quantizedF, 317)),
 e = e_piano.alias("e");
 
 std::map<double, GTree::GFunction> available_functions;
-std::vector<std::string> exclude_functions = { "vConcatV", "vAutoref", "eAutoref" };
+std::vector<std::string> exclude_functions = { };
 FunctionTypeDictionary function_type_dictionary;
 FunctionTypeDictionary default_function_type_dictionary;
+std::map<EncodedPhenotypeType, double> autoreference_type_dictionary;
 std::map<std::string, double> function_name_to_index;
 
 
@@ -612,6 +614,13 @@ void init_available_functions() {
             available_functions[encodeIndex(gf.getIndex())] = gf;
             function_type_dictionary[gf.getOutputType()].push_back(encoded_index);
             function_name_to_index[gf.getName()] = encoded_index;
+
+            if (gf.getIsAutoreference()) {
+                if (autoreference_type_dictionary[gf.getOutputType()] != 0) {
+                    throw std::runtime_error("There can only be one autoreference function per type.");
+                }
+                autoreference_type_dictionary[gf.getOutputType()] = encoded_index;
+            }
 
             if (gf.getIsDefaultForType()) {
                 default_function_type_dictionary[gf.getOutputType()].push_back(encoded_index);

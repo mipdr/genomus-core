@@ -44,7 +44,7 @@ void values(std::map<T, K> m, std::vector<K>& v) {
 }
 
 template<typename T>
-bool includes(std::vector<T> v, T elem) {
+bool includes(const std::vector<T>& v, T elem) {
     return std::any_of(v.begin(), v.end(), [&](T t) { return t == elem; });
 }
 
@@ -97,9 +97,13 @@ K getClosestKey(std::map<K, T> m, K k) {
 }
 
 template<typename T>
-T getClosestValue(std::vector<T> v, T val) {
+T getClosestValue(std::vector<T> v, T val, bool ignore_actual_closest = false) {
     if (!v.size()) {
         throw new std::runtime_error("Vector must have elements");
+    }
+
+    if (ignore_actual_closest && v.size() < 2) {
+        throw new std::runtime_error("Vector must have two elements to ignore closest");
     }
     
     sort(v.begin(), v.end());
@@ -112,16 +116,22 @@ T getClosestValue(std::vector<T> v, T val) {
     }
 
     if (it == v.begin()) {
+        if (ignore_actual_closest) return v[1];
         return v[0];
     }
 
     if (it == v.end()) {
         it--;
+        if (ignore_actual_closest) it--;
         return *it;
     }
 
     auto previous = it;
     previous--;
+
+    if (ignore_actual_closest) {
+        return ((val - *previous) < (*it - val)) ? *it : *previous;
+    }
 
     return ((val - *previous) > (*it - val)) ? *it : *previous;
 }

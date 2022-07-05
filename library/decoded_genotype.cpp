@@ -112,14 +112,26 @@ std::vector<double> GTree::GTreeIndex::toNormalizedVector() {
     return tree_nodes[this -> _index].toNormalizedVector();
 }
 
-EncodedPhenotype GTree::evaluateAutoreference(EncodedPhenotypeType eptt, size_t index) {
+EncodedPhenotype GTree::evaluateAutoreference(EncodedPhenotypeType eptt, size_t index, size_t depth_first_index) {
     std::vector<GTree::GTreeIndex> available_subexpressions_for_type = GTree::available_subexpressions[eptt];
 
-    if (available_subexpressions_for_type.size() == 0) {
-        throw std::runtime_error(ErrorCodes::BAD_Autoreference);
+    if (available_subexpressions_for_type.size() == 0 || depth_first_index == 0) {
+        throw std::runtime_error(ErrorCodes::BAD_AUTOREFERENCE);
     }
 
-    const size_t mod_index = index % available_subexpressions_for_type.size();
+    // i is the position of the autoreference in the available subexpressions ofr type
+    size_t i;
+    for (i = 0; i < available_subexpressions_for_type.size(); ++i) {
+        if (available_subexpressions_for_type[i] >= depth_first_index) {
+            break;
+        }
+    }
+
+    if (i == 0) {
+        throw std::runtime_error(ErrorCodes::BAD_AUTOREFERENCE);
+    }
+
+    size_t mod_index = index % i;
     return available_subexpressions_for_type[mod_index].evaluate();
 }
 
@@ -255,7 +267,8 @@ GTree::GTreeIndex GTree::GFunction::operator()(std::initializer_list<GTree::GTre
     GTree::tree_nodes.push_back(GTree(
         *this,
         children,
-        0
+        0,
+        tree_nodes.size()
     ));
 
     GTree::registerLastInsertedNodeAsSubexpression();
@@ -267,7 +280,8 @@ GTree::GTreeIndex GTree::GFunction::operator()(const std::vector<GTree::GTreeInd
     GTree::tree_nodes.push_back(GTree(
         *this,
         children,
-        0
+        0,
+        tree_nodes.size()
     ));
 
     GTree::registerLastInsertedNodeAsSubexpression();
@@ -287,7 +301,7 @@ GTree::GTreeIndex GTree::GFunction::operator()(double x) {
         }
     }
 
-    GTree p_tree = GTree(*this, {}, x);
+    GTree p_tree = GTree(*this, {}, x, tree_nodes.size());
     
     GTree::tree_nodes.push_back((p_tree));
 
@@ -323,13 +337,18 @@ void GTree::clean() {
     available_subexpressions.clear();
 }
 
-GTree::GTree(GTree::GFunction& function, std::vector<GTree::GTreeIndex> children, double leaf_value): _function(function) {
+GTree::GTree(GTree::GFunction& function, std::vector<GTree::GTreeIndex> children, double leaf_value, size_t depth_first_index): _function(function) {
     this -> _children = children;
     this -> _leaf_value = leaf_value;
+    this -> _depth_first_index = depth_first_index;
 }
 
 enc_phen_t GTree::evaluate() {
     if (gfunctionAcceptsNumericParameter(this -> _function)) {
+
+        if (this -> _function.getIsAutoreference()) {
+            return GTree::evaluateAutoreference(this -> _function.getOutputType(), (size_t) this -> _leaf_value, this -> _depth_first_index);
+        }
         return this -> _function.evaluate({
             EncodedPhenotype({
                 .type = leafF,
@@ -361,6 +380,7 @@ enc_phen_t GTree::evaluate() {
             evaluated_children.push_back(child.evaluate()); 
         }
     );
+
     return this -> _function.evaluate(evaluated_children);
 }
 

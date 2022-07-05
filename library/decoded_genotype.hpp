@@ -103,16 +103,17 @@ class GTree {
 
         double _leaf_value;
         bool _isRandomEvaluated;
+        size_t _depth_first_index;
     public:
         static std::vector<GTree> tree_nodes;
         static std::map<EncodedPhenotypeType, std::vector<GTree::GTreeIndex>> available_subexpressions;
         static RandomGenerator RNG;
-        static EncodedPhenotype evaluateAutoreference(EncodedPhenotypeType, size_t index);
+        static EncodedPhenotype evaluateAutoreference(EncodedPhenotypeType, size_t index, size_t depth_first_index);
         static void registerLastInsertedNodeAsSubexpression();
         static std::string printStaticData();
         static void clean();
 
-        GTree(GFunction&, std::vector<GTreeIndex>, double leaf_value = 0);
+        GTree(GFunction&, std::vector<GTreeIndex>, double leaf_value = 0, size_t depth_first_index = 0);
 
         enc_phen_t evaluate();
         std::vector<double> toNormalizedVector();
@@ -144,6 +145,7 @@ extern std::vector<std::string> exclude_functions;
 using FunctionTypeDictionary = std::map<EncodedPhenotypeType, std::vector<double>>;
 extern FunctionTypeDictionary function_type_dictionary;
 extern FunctionTypeDictionary default_function_type_dictionary;
+extern std::map<EncodedPhenotypeType, double> autoreference_type_dictionary;
 
 extern std::map<std::string, double> function_name_to_index;
 void init_available_functions(); 

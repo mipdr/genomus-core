@@ -7,6 +7,7 @@
 GTest ParserTest = GTest("Parser test")
 
     .before([]() { init_genomus(); })
+    .beforeEach([]() { GTree::clean(); })
     .after([]() { GTree::clean(); })
 
     .testCase("Check parser tokens", [](ostream& os) {

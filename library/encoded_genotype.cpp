@@ -19,7 +19,6 @@ double randomNormalized() {
 
 std::vector<double> randomVector(int n) {
     std::vector<double> v;
-    auto generator = new std::random_device;
 
     if (n > MAX_RANDOM_VECTOR_LENGTH) {
         n = MAX_RANDOM_VECTOR_LENGTH;
@@ -51,13 +50,26 @@ static const VectorNormalizationState default_vector_normalization_state = {
     .current_depth = 0,
 };
 
+double getClosestFunctionIndex(FunctionTypeDictionary& dictionary, EncodedPhenotypeType type, double value, bool include_autoreferences) {
+    // Can return an autoreference function only if there are available subexpressions available.
+    double current_function_index = getClosestValue(dictionary[type], value);
+
+    if (autoreference_type_dictionary[type] == current_function_index && !include_autoreferences) {
+        current_function_index = getClosestValue(dictionary[type], value, true);
+    }
+
+    return current_function_index;
+}
+
 void innerNormalizeVector(const std::vector<double>& input, std::vector<double>& output, VectorNormalizationState state) {
     double current_function_index;
     RetroTranscriptionStates machine_state = start;
     static size_t position = 0;
+    static std::vector<EncodedPhenotypeType> autoreferenciable_types = {};
 
     if (state.current_depth == 0) {
         position = 0;
+        autoreferenciable_types = {};
     }
     
     static size_t read_position = position % input.size();
@@ -87,7 +99,7 @@ void innerNormalizeVector(const std::vector<double>& input, std::vector<double>&
                 break;
             case function_index:
                 // Find closest type-conforming index
-                current_function_index = getClosestValue(dictionary[state.output_type], input[read_position]);
+                current_function_index = getClosestFunctionIndex(dictionary, state.output_type, input[read_position], includes(autoreferenciable_types, state.output_type));
                 output.push_back(current_function_index);
                 advance();
 
@@ -124,12 +136,11 @@ void innerNormalizeVector(const std::vector<double>& input, std::vector<double>&
 
                 machine_state = end;
                 break;
-            case leaf_indentifier:
-                // output[write_position] = leafTypeToNormalizedValue(available_functions[input[read_position]].getParamTypes()[current_function_parameter_index]);
-                // ++current_function_parameter_index;
             case end:
                 output.push_back(0);
                 ready = true;
+
+                autoreferenciable_types.push_back(state.output_type);
                 advance();
                 break;
             default:
@@ -181,7 +192,7 @@ std::string innerToExpression(const std::vector<double>& input, VectorNormalizat
                 break;
             case function_index:
                 // Find closest type-conforming index
-                current_function_index = getClosestValue(dictionary[state.output_type], input[read_position]);
+                current_function_index = getClosestFunctionIndex(dictionary, state.output_type, input[read_position], true);
                 result += available_functions[current_function_index].getName() + "(";
                 advance();
 

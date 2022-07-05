@@ -11,6 +11,7 @@ using namespace std;
 
 GTest DecodedGenotypesTest = GTest("Decoded GenotypesTest")
 
+    .beforeEach([]() { GTree::clean(); })
     .after([]() { GTree::clean(); })
 
     .testCase("Functional tree build", [](ostream& os) {
