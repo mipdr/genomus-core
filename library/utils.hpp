@@ -44,13 +44,11 @@ void values(std::map<T, K> m, std::vector<K>& v) {
 }
 
 template<typename T>
-bool includes(std::vector<T> v, T elem) {
+bool includes(const std::vector<T>& v, T elem) {
     return std::any_of(v.begin(), v.end(), [&](T t) { return t == elem; });
 }
 
 std::string prettyPrint(std::string s);
-
-uint32_t mulberry_32(uint32_t);
 
 double roundTo6Decimals(double f);
 
@@ -99,9 +97,13 @@ K getClosestKey(std::map<K, T> m, K k) {
 }
 
 template<typename T>
-T getClosestValue(std::vector<T> v, T val) {
+T getClosestValue(std::vector<T> v, T val, bool ignore_actual_closest = false) {
     if (!v.size()) {
         throw new std::runtime_error("Vector must have elements");
+    }
+
+    if (ignore_actual_closest && v.size() < 2) {
+        throw new std::runtime_error("Vector must have two elements to ignore closest");
     }
     
     sort(v.begin(), v.end());
@@ -114,18 +116,45 @@ T getClosestValue(std::vector<T> v, T val) {
     }
 
     if (it == v.begin()) {
+        if (ignore_actual_closest) return v[1];
         return v[0];
     }
 
     if (it == v.end()) {
         it--;
+        if (ignore_actual_closest) it--;
         return *it;
     }
 
     auto previous = it;
     previous--;
 
+    if (ignore_actual_closest) {
+        return ((val - *previous) < (*it - val)) ? *it : *previous;
+    }
+
     return ((val - *previous) > (*it - val)) ? *it : *previous;
 }
+
+////////////////
+//            //
+//    RNG!    //
+//            //
+////////////////
+
+class RandomGenerator {
+    private:
+        std::function<size_t(size_t)> _next;
+        size_t _seed;
+        size_t _max;
+    public:
+        RandomGenerator();
+        // RandomGenerator(size_t, std::function<size_t(size_t)>);
+        void seed(size_t);
+        size_t next();
+        double nextDouble();
+};
+
+uint32_t mulberry_32(uint32_t);
 
 #endif

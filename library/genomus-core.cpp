@@ -4,6 +4,6 @@
 #include "decoded_genotype.hpp"
 
 void init_genomus() {
-    std::srand(std::time(NULL));
+    std::srand(std::time(0));
     init_available_functions();
 }

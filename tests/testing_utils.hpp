@@ -32,6 +32,7 @@ class GTest {
         string _name;
         vector<GTestCase> _test_cases;
         function<void(ostream&)> _before;
+        function<void(ostream&)> _before_each;
         function<void(ostream&)> _after;
         unsigned int _n_success;
     public:
@@ -43,6 +44,7 @@ class GTest {
         GTest& before(function<void()>);
         GTest& after(function<void(ostream&)>);
         GTest& after(function<void()>);
+        GTest& beforeEach(function<void()>);
 };
 
 extern GTest 

@@ -7,6 +7,7 @@
 
 #include "encoded_phenotype.hpp"
 #include "features.hpp"
+#include "utils.hpp"
 
 /*
     GTree class is the ADT for decoded genotypes. Its instances will hold what is needed
@@ -33,7 +34,7 @@ class GTree {
             double getLeafValue() const;
             size_t getIndex() const;
             static void clean();
-            std::vector<double> toNormalizedVector() const;
+            std::vector<double> toNormalizedVector();
     };
     
 
@@ -52,6 +53,8 @@ class GTree {
             EncodedPhenotypeType output_type;
             std::function<enc_phen_t(std::vector<enc_phen_t>)> compute;
             bool default_function_for_type;
+            bool is_Autoreference;
+            bool is_random;
         };
 
         private:
@@ -64,7 +67,8 @@ class GTree {
             std::vector<EncodedPhenotypeType> _param_types;
             EncodedPhenotypeType _output_type;
             std::function<enc_phen_t(std::vector<enc_phen_t>)> _compute;
-            bool _is_autoreference;
+            bool _is_Autoreference;
+            bool _is_random;
             bool _default_function_for_type;
 
             void _assert_parameter_format(const std::vector<enc_phen_t>&) const;
@@ -85,6 +89,7 @@ class GTree {
             EncodedPhenotypeType getOutputType() const;
             bool getIsAutoreference() const;
             bool getIsDefaultForType() const;
+            bool getIsRandom() const;
             enc_phen_t evaluate(const std::vector<enc_phen_t>&) const;
             GTreeIndex operator()(std::initializer_list<GTreeIndex>);
             GTreeIndex operator()(const std::vector<GTreeIndex>);
@@ -96,34 +101,35 @@ class GTree {
         GFunction& _function;
         std::vector<GTreeIndex> _children;
 
-        double _leaf_value; // Temporary, I just don't know where to put leaf values on trees
+        double _leaf_value;
+        bool _isRandomEvaluated;
+        size_t _depth_first_index;
     public:
         static std::vector<GTree> tree_nodes;
         static std::map<EncodedPhenotypeType, std::vector<GTree::GTreeIndex>> available_subexpressions;
-        static EncodedPhenotype evaluateAutoReference(EncodedPhenotypeType, size_t index);
+        static RandomGenerator RNG;
+        static EncodedPhenotype evaluateAutoreference(EncodedPhenotypeType, size_t index, size_t depth_first_index);
         static void registerLastInsertedNodeAsSubexpression();
         static std::string printStaticData();
         static void clean();
 
-        GTree(GFunction&, std::vector<GTreeIndex>, double leaf_value = 0);
+        GTree(GFunction&, std::vector<GTreeIndex>, double leaf_value = 0, size_t depth_first_index = 0);
 
-        enc_phen_t evaluate() const;
-        std::vector<double> toNormalizedVector() const;
+        enc_phen_t evaluate();
+        std::vector<double> toNormalizedVector();
         std::string toString();
 };
 
 using dec_gen_t = GTree::GTreeIndex;
 
 #define GENOTYPE_FUNCTIONS \
-    p, e, v, s, \
-    n, d, m, a, i, q, z, \
+    s, s2V, sAddS, sAddV, \
+    v, vMotif, vMotifLoop, vPerpetuumMobile, vPerpetuumMobileLoop, vConcatE, vConcatV, \
+    e, e_piano, \
+    p, n, d, f, m, a, i, q, z, \
     ln, ld, lm, la, li, \
-    vConcatE, \
-    vConcatV, \
-    vMotif, \
-    e_piano, \
-    eAutoRef
-    // f, \
+    nRnd, dRnd, mRnd, fRnd, aRnd, iRnd, zRnd, qRnd, \
+    eAutoref, vAutoref \
 
 // GFunction instances declaration
 extern GTree::GFunction GENOTYPE_FUNCTIONS;
@@ -134,10 +140,12 @@ extern std::map<std::string, std::string> name_aliases;
 
 static const double invalid_function_index = -1;
 extern std::map<double, GTree::GFunction> available_functions;
+extern std::vector<std::string> exclude_functions;
 
 using FunctionTypeDictionary = std::map<EncodedPhenotypeType, std::vector<double>>;
 extern FunctionTypeDictionary function_type_dictionary;
 extern FunctionTypeDictionary default_function_type_dictionary;
+extern std::map<EncodedPhenotypeType, double> autoreference_type_dictionary;
 
 extern std::map<std::string, double> function_name_to_index;
 void init_available_functions(); 
