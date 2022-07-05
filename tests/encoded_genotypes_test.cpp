@@ -168,7 +168,7 @@ GTest EncodedGenotypesTest = GTest("Encoded Genotypes Test")
     })
 
     .testCase("Germinal vector to expression", [](ostream& os) {
-        const auto tree = s({v({e_piano({n(1.5), m(120), a(30), i(4)})})});
+        auto tree = s({v({e_piano({n(1.5), m(120), a(30), i(4)})})});
 
         auto v = tree.toNormalizedVector();
         auto exp = toExpression(v);

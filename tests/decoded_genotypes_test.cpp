@@ -79,5 +79,9 @@ GTest DecodedGenotypesTest = GTest("Decoded GenotypesTest")
     })
 
     .testCase("Random functions", [](ostream& os) {
-        // auto tree = nRnd();
+        auto tree = vConcatV({vConcatE({e_piano({nRnd({}), m(0.1), a(0.1), i(0.1)}), eAutoRef(0.1)}), vConcatE({eAutoRef(0.1), eAutoRef(0.1)})});
+
+        if (tree.evaluate().toString() != tree.evaluate().toString()) {
+            throw runtime_error("Expected reevaluation of random function to be equal.");
+        }
     }); 

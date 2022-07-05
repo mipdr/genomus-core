@@ -259,14 +259,19 @@ std::function<enc_phen_t(std::vector<enc_phen_t>)>
 std::function<enc_phen_t(std::vector<enc_phen_t>)>
     buildRandomComputeFunction(EncodedPhenotypeType parameterType, std::string name) {
         return [=](std::vector<enc_phen_t> params) -> enc_phen_t {
-            const double random_number = GTree::RNG.nextDouble();
-            return enc_phen_t({
-                .type = parameterType,
-                .child_type = leafF,
-                .children = {},
-                .to_string = [=](std::vector<std::string> children_strings) { return name + "(" + std::to_string(random_number) + ")"; },
-                .leaf_value = random_number,
-            });
+            if (params.size() == 0) {
+                const double random_number = GTree::RNG.nextDouble();
+                
+                return enc_phen_t({
+                    .type = parameterType,
+                    .child_type = leafF,
+                    .children = {},
+                    .to_string = [=](std::vector<std::string> children_strings) { return name + "(" + std::to_string(random_number) + ")"; },
+                    .leaf_value = random_number,
+                });
+            } else {
+                return params[0];
+            }
         };
     }
 
@@ -495,6 +500,7 @@ eAutoRef({
     .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
         return GTree::evaluateAutoReference(eventF, (size_t) params[0].getLeafValue());
     },
+    .is_autoreference = true,
 }),
 
 vAutoRef({
@@ -505,6 +511,7 @@ vAutoRef({
     .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
         return GTree::evaluateAutoReference(eventF, (size_t) params[0].getLeafValue());
     },
+    .is_autoreference = true,
 }),
 
 sAddV({
@@ -527,6 +534,7 @@ nRnd({
     .param_types = {},
     .output_type = noteValueF,
     .compute = buildRandomComputeFunction(noteValueF, "nRnd"),
+    .is_random = true,
 }),
 
 e = e_piano.alias("e");

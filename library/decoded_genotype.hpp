@@ -34,7 +34,7 @@ class GTree {
             double getLeafValue() const;
             size_t getIndex() const;
             static void clean();
-            std::vector<double> toNormalizedVector() const;
+            std::vector<double> toNormalizedVector();
     };
     
 
@@ -53,6 +53,8 @@ class GTree {
             EncodedPhenotypeType output_type;
             std::function<enc_phen_t(std::vector<enc_phen_t>)> compute;
             bool default_function_for_type;
+            bool is_autoreference;
+            bool is_random;
         };
 
         private:
@@ -66,6 +68,7 @@ class GTree {
             EncodedPhenotypeType _output_type;
             std::function<enc_phen_t(std::vector<enc_phen_t>)> _compute;
             bool _is_autoreference;
+            bool _is_random;
             bool _default_function_for_type;
 
             void _assert_parameter_format(const std::vector<enc_phen_t>&) const;
@@ -86,6 +89,7 @@ class GTree {
             EncodedPhenotypeType getOutputType() const;
             bool getIsAutoreference() const;
             bool getIsDefaultForType() const;
+            bool getIsRandom() const;
             enc_phen_t evaluate(const std::vector<enc_phen_t>&) const;
             GTreeIndex operator()(std::initializer_list<GTreeIndex>);
             GTreeIndex operator()(const std::vector<GTreeIndex>);
@@ -97,7 +101,8 @@ class GTree {
         GFunction& _function;
         std::vector<GTreeIndex> _children;
 
-        double _leaf_value; // Temporary, I just don't know where to put leaf values on trees
+        double _leaf_value;
+        bool _isRandomEvaluated;
     public:
         static std::vector<GTree> tree_nodes;
         static std::map<EncodedPhenotypeType, std::vector<GTree::GTreeIndex>> available_subexpressions;
@@ -109,8 +114,8 @@ class GTree {
 
         GTree(GFunction&, std::vector<GTreeIndex>, double leaf_value = 0);
 
-        enc_phen_t evaluate() const;
-        std::vector<double> toNormalizedVector() const;
+        enc_phen_t evaluate();
+        std::vector<double> toNormalizedVector();
         std::string toString();
 };
 
