@@ -14,14 +14,14 @@ int main() {
     std::vector<double> germinal, normalized;
     std::string expression;
     dec_gen_t tree = 0;
-    size_t iterations = 10;
     double average_resulting_phenotype_length = 0;
+    double total_ms = 10000;
 
     chrono::time_point<sclock> total_before, before;
     sec total_duration, duration;
 
     cout << "##########    GENOMUS-CORE BENCHMARK    ##########\n" << endl;
-    cout << iterations << " instances of germinal vector generation, normalization, parsing, evaluation and vector representation will be thrown with the following parameters:" << endl;
+    cout << "Instances of germinal vector generation, normalization, parsing, evaluation and vector representation will be thrown with the following parameters:" << endl;
 
     cout << " - GERMINAL_VECTOR_MAX_LENGTH = " << GERMINAL_VECTOR_MAX_LENGTH << endl;
     cout << " - MAX_GENOTYPE_VECTOR_SIZE = " << MAX_GENOTYPE_VECTOR_SIZE << endl;
@@ -30,7 +30,8 @@ int main() {
 
     total_before = sclock::now();
 
-    for (size_t i = 0; i < 10; ++i){
+    size_t i = 0;
+    while (true) {
         germinal = normalized = {};
         expression = "";
         GTree::clean(); 
@@ -42,13 +43,17 @@ int main() {
 
         average_resulting_phenotype_length += tree.evaluate().toNormalizedVector().size();
 
-        // cout << ((tree.toString().find("Autoref") != string::npos) ? "Contains autoreferences" : "Does not contain autoreferences") << endl;
+        i++;
+        duration = sclock::now() - total_before;
+        if (duration.count() > total_ms) {
+            break;
+        }
     }
 
     total_duration = sclock::now() - total_before;
 
-    cout << "Benchmark completed in " << total_duration.count() << "ms" << endl;
-    cout << "Average phenotype vector length: " << average_resulting_phenotype_length / iterations << endl;
+    cout << "Benchmark completed " << i << " iterations in " << total_duration.count() << "ms" << endl;
+    cout << "Average phenotype vector length: " << average_resulting_phenotype_length / i << endl;
 
     return 0;
 }
