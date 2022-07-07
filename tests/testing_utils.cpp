@@ -1,8 +1,11 @@
 #include "testing_utils.hpp"
 #include <functional>
 #include <iostream>
-#include <regex>
 #include <sstream>
+#include <chrono>
+
+using sclock = std::chrono::system_clock;
+using sec = std::chrono::duration<double, std::milli>;
 
 static int test_case_counter = 1;
 static bool verbose = false;
@@ -11,6 +14,8 @@ GTest::GTestCase::GTestCase(string name, function<void(ostream&)> run) {
     this -> _name = name;
     this -> _run_test_case = run;
 }
+
+void printOutput(){ throw runtime_error("Dummy print error"); }
 
 GTest::GTestCase::GTestCaseOutput GTest::GTestCase::run() {
     stringstream regular_out, verbose_out;
@@ -76,6 +81,11 @@ GTest& GTest::before(function<void()> run) {
     return *this;
 }
 
+GTest& GTest::beforeEach(function<void()> run) {
+    this -> _before_each = [=](ostream&) { run(); };
+    return *this;
+}
+
 GTest& GTest::after(function<void(ostream &)> run) {
     this -> _after = run;
     return *this;
@@ -86,23 +96,39 @@ GTest& GTest::after(function<void()> run) {
     return *this;
 }
 
-void GTest::run() {
+GTestErrorState GTest::run() {
+    GTestErrorState suite_success = g_success;
     cout << " + TEST: " << this -> _name << endl;
 
     this -> _before(cout); 
 
+    chrono::time_point<sclock> total_before, before;
+    sec total_duration, duration;
+    
+    total_before = sclock::now();
+
     for (auto testCase : this -> _test_cases) {
+        this -> _before_each(cout);
+
+        before = sclock::now();
         auto result = testCase.run();
         if (result.error_state == g_success) {
             this -> _n_success++;
+        } else {
+            suite_success = g_failure;
         }
-        cout << result.text << endl;
+        duration = sclock::now() - total_before;
+        cout << result.text << " after " << duration.count() << "ms" << endl;
         cout.flush();
     }
+
+    total_duration = sclock::now() - total_before;
 
     test_case_counter = 1;
 
     this -> _after(cout);
 
-    cout << " - " <<  this -> _n_success << "/" << this -> _test_cases.size() << " test cases were successful" << endl << endl;
+    cout << " - " <<  this -> _n_success << "/" << this -> _test_cases.size() << " test cases were successful after " << total_duration.count() << "ms" << endl << endl;
+
+    return suite_success;
 }

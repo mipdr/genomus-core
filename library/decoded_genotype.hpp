@@ -3,10 +3,11 @@
 
 #include <functional>
 #include <vector>
+#include <map>
 
 #include "encoded_phenotype.hpp"
 #include "features.hpp"
-#include "parameter_mapping.hpp"
+#include "utils.hpp"
 
 /*
     GTree class is the ADT for decoded genotypes. Its instances will hold what is needed
@@ -27,10 +28,13 @@ class GTree {
         public:
             GTreeIndex(size_t);
             enc_phen_t evaluate();
-            std::string toString();
+            std::string toString() const;
             operator size_t() const;
-            float getLeafValue();
+            operator std::string() const;
+            double getLeafValue() const;
+            size_t getIndex() const;
             static void clean();
+            std::vector<double> toNormalizedVector();
     };
     
 
@@ -44,10 +48,13 @@ class GTree {
         public:
         struct GFunctionInitializer {
             std::string name;
+            size_t index;
             std::vector<EncodedPhenotypeType> param_types;
             EncodedPhenotypeType output_type;
             std::function<enc_phen_t(std::vector<enc_phen_t>)> compute;
-            std::function<std::string(std::vector<std::string>)> build_explicit_form;
+            bool default_function_for_type;
+            bool is_Autoreference;
+            bool is_random;
         };
 
         private:
@@ -56,27 +63,37 @@ class GTree {
             FeatureType _type;
 
             // GFunction fields
+            size_t _index;
             std::vector<EncodedPhenotypeType> _param_types;
             EncodedPhenotypeType _output_type;
             std::function<enc_phen_t(std::vector<enc_phen_t>)> _compute;
-            std::function<std::string(std::vector<std::string>)> _build_explicit_form;
+            bool _is_Autoreference;
+            bool _is_random;
+            bool _default_function_for_type;
 
-            void _assert_parameter_format(const std::vector<enc_phen_t>&);
+            void _assert_parameter_format(const std::vector<enc_phen_t>&) const;
         public:
+            std::string getName();
+
             GFunction();
             GFunction(const GFunction&);
+            GFunction(const GFunction&, std::string name);
             GFunction(GFunctionInitializer);
 
-            std::vector<EncodedPhenotypeType> getParamTypes();
-            // function<string(vector<string>)>& getBuildExplicitForm();
+            GFunction alias(std::string alias_name);
+
+            std::vector<EncodedPhenotypeType> getParamTypes() const;
+            size_t getIndex() const;
             std::string buildExplicitForm(std::vector<std::string>);
 
-            EncodedPhenotypeType getOutputType();
-            enc_phen_t evaluate(const std::vector<enc_phen_t>&);
-            // enc_phen_t operator()(const std::vector<enc_phen_t>&);
+            EncodedPhenotypeType getOutputType() const;
+            bool getIsAutoreference() const;
+            bool getIsDefaultForType() const;
+            bool getIsRandom() const;
+            enc_phen_t evaluate(const std::vector<enc_phen_t>&) const;
             GTreeIndex operator()(std::initializer_list<GTreeIndex>);
             GTreeIndex operator()(const std::vector<GTreeIndex>);
-            GTreeIndex operator()(float);
+            GTreeIndex operator()(double);
             std::string toString();
     };
     
@@ -84,36 +101,70 @@ class GTree {
         GFunction& _function;
         std::vector<GTreeIndex> _children;
 
-        float _leaf_value; // Temporary, I just don't know where to put leaf values on trees
+        double _leaf_value;
+        bool _isRandomEvaluated;
+        size_t _depth_first_index;
     public:
         static std::vector<GTree> tree_nodes;
+        static std::map<EncodedPhenotypeType, std::vector<GTree::GTreeIndex>> available_subexpressions;
+        static RandomGenerator RNG;
+        static EncodedPhenotype evaluateAutoreference(EncodedPhenotypeType, size_t index, size_t depth_first_index);
+        static void registerLastInsertedNodeAsSubexpression();
+        static std::string printStaticData();
         static void clean();
-        GTree(GFunction&, std::vector<GTreeIndex>, float leaf_value = 0);
+
+        GTree(GFunction&, std::vector<GTreeIndex>, double leaf_value = 0, size_t depth_first_index = 0);
 
         enc_phen_t evaluate();
+        std::vector<double> toNormalizedVector();
         std::string toString();
 };
 
 using dec_gen_t = GTree::GTreeIndex;
 
+#define GENOTYPE_FUNCTIONS \
+    s, s2V, sAddS, sAddV, \
+    v, vMotif, vMotifLoop, vPerpetuumMobile, vPerpetuumMobileLoop, vConcatE, vConcatV, \
+    e, e_piano, \
+    p, n, d, f, m, a, i, q, z, \
+    ln, ld, lm, la, li, \
+    nRnd, dRnd, mRnd, fRnd, aRnd, iRnd, zRnd, qRnd, \
+    eAutoref, vAutoref \
+
 // GFunction instances declaration
-extern GTree::GFunction
-    p,
-    l,
-    e,
-    v,
-    s,
-    n,
-    d,
-    m,
-    // f,
-    a,
-    i,
-    // z,
-    // q,
-    e_piano,
-    vConcatE,
-    vConcatV
-    ; 
+extern GTree::GFunction GENOTYPE_FUNCTIONS;
+
+// Function access structures
+
+extern std::map<std::string, std::string> name_aliases;
+
+static const double invalid_function_index = -1;
+extern std::map<double, GTree::GFunction> available_functions;
+extern std::vector<std::string> exclude_functions;
+
+using FunctionTypeDictionary = std::map<EncodedPhenotypeType, std::vector<double>>;
+extern FunctionTypeDictionary function_type_dictionary;
+extern FunctionTypeDictionary default_function_type_dictionary;
+extern std::map<EncodedPhenotypeType, double> autoreference_type_dictionary;
+
+extern std::map<std::string, double> function_name_to_index;
+void init_available_functions(); 
+
+
+// utils
+
+bool isEncodedPhenotypeTypeAParameterType(EncodedPhenotypeType);
+bool isEncodedPhenotypeTypeAListType(EncodedPhenotypeType);
+bool gfunctionAcceptsNumericParameter(const GTree::GFunction&);
+
+double leafTypeToNormalizedValue(EncodedPhenotypeType);
+EncodedPhenotypeType listToParameterType(EncodedPhenotypeType);
+
+std::string humanReadableNormalizedVector(std::vector<double> v);
+
+extern std::map<EncodedPhenotypeType, dec_gen_t> default_genotypes;
+
+double encodeParameter(EncodedPhenotypeType parameterType, double value);
+double decodeParameter(EncodedPhenotypeType parameterType, double encoded_value);
 
 #endif

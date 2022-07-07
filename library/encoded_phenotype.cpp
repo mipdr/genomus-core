@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <string>
 
+#include "decoded_genotype.hpp"
 #include "encoded_phenotype.hpp"
 #include "errorCodes.hpp"
 #include "species.hpp"
@@ -10,7 +11,7 @@
 
 #define ENCODED_PHENOTYPES_TYPE_CHECK
 
-std::string EncodedPhenotypeTypeToString(const EncodedPhenotypeType& ept) {
+std::string encodedPhenotypeTypeToString(const EncodedPhenotypeType& ept) {
     switch (ept) {
         case scoreF:
             return "scoreF";
@@ -81,12 +82,43 @@ std::string EncodedPhenotype::toString() {
 
 const std::vector<EncodedPhenotype>& EncodedPhenotype::getChildren() { return this -> _children; }
 
-float EncodedPhenotype::getLeafValue() { return this -> _leaf_value; }
+double EncodedPhenotype::getLeafValue() { return this -> _leaf_value; }
 
-EncodedPhenotype Parameter(float value) {
+bool shouldIncludeChildrenSize(EncodedPhenotypeType type) {
+    return includes({scoreF, voiceF}, type) || includes(listTypes, type);
+}
+
+std::vector<double> EncodedPhenotype::toNormalizedVector() const {
+    if (includes(parameterTypes, this -> _type)) {
+        return { this -> _leaf_value };
+    }
+
+    std::vector<double> result;
+    std::vector<double> evaluated_children;
+
+    static const auto 
+        encodeAndAddChildren = [&](std::vector<double>& inner_result, const std::vector<EncodedPhenotype>& children) -> void {
+            for_each(children.begin(), children.end(), [&](const EncodedPhenotype& ept) {
+                if (isEncodedPhenotypeTypeAListType(this -> _type)){
+                    inner_result += leafTypeToNormalizedValue(listToParameterType(this -> _type));
+                }
+                inner_result += ept.toNormalizedVector();
+            });
+        };
+
+    if (shouldIncludeChildrenSize(this -> _type)) {
+        result = { integerToNormalized(this -> _children.size()) };
+    }
+    
+    encodeAndAddChildren(result, this -> _children);
+
+    return result;
+}
+
+EncodedPhenotype Parameter(double value) {
     return EncodedPhenotype({
         .type = paramF, // ept_parameter,
-        .child_type = leafF, // ept_leaf,
+        .child_type = leafF, // ept_leaf:
         .children = {},
         .to_string = [=](std::vector<std::string>) { return std::to_string(value); },
         .leaf_value = value
@@ -97,7 +129,7 @@ EncodedPhenotype Parameter(std::vector<EncodedPhenotype> parameters) {
     if (parameters.size() != 1) { throw std::runtime_error(ErrorCodes::BAD_ENC_PHEN_CONSTRUCTION_BAD_LEAF_VALUE); }
     if (parameters[0].getType() != leafF) { throw std::runtime_error(ErrorCodes::BAD_ENC_PHEN_CONSTRUCTION_BAD_CHILD_TYPE); }
 
-    const float value = parameters[0].getLeafValue();
+    const double value = parameters[0].getLeafValue();
     return EncodedPhenotype({
         .type = paramF,
         .child_type = leafF,
@@ -112,10 +144,14 @@ EncodedPhenotype Event(std::vector<EncodedPhenotype> parameters) {
         std::string error_message = "Error in typecheck for Event construction:\n";
         bool error = false;
 
-        // if (any_of(parameters.begin(), parameters.end(), [](EncodedPhenotype p) { return p.getType() != paramF; })) {
-        //     error = true;
-        //     error_message += " - Not all parameters are of type ept_parameter.\n";
-        // }
+        if (any_of(
+                parameters.begin(), 
+                parameters.end(), 
+                [](EncodedPhenotype p) { return !isEncodedPhenotypeTypeAParameterType(p.getType()); })
+        ) {
+            error = true;
+            error_message += " - Not all arguments are of parameter type.\n";
+        }
 
         if (parameters.size() != CURRENT_SPECIES.getParameterTypes().size()) {
             error = true;
@@ -179,7 +215,7 @@ EncodedPhenotype Score(std::vector<EncodedPhenotype> parameters) {
         .type = scoreF,
         .child_type = voiceF,
         .children = parameters,
-        .to_string = [](std::vector<std::string> children_strings) { return "s(\n\t\t" + join(children_strings, ",\n\t\t") + "\n)"; },
+        .to_string = [](std::vector<std::string> children_strings) { return "s(" + join(children_strings) + ")"; },
         .leaf_value = -1.0
     });
 }

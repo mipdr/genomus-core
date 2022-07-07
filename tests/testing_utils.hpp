@@ -9,6 +9,8 @@ enum GTestErrorState {
     g_failure,
 };
 
+void printOutput();
+
 class GTest {
     public:
 
@@ -30,19 +32,23 @@ class GTest {
         string _name;
         vector<GTestCase> _test_cases;
         function<void(ostream&)> _before;
+        function<void(ostream&)> _before_each;
         function<void(ostream&)> _after;
         unsigned int _n_success;
     public:
         GTest(string title);
-        void run();
+        GTestErrorState run();
         GTest& testCase(string title, function<void(ostream&)>);
         GTest& testCase(string title, function<void()>);
         GTest& before(function<void(ostream&)>);
         GTest& before(function<void()>);
         GTest& after(function<void(ostream&)>);
         GTest& after(function<void()>);
+        GTest& beforeEach(function<void()>);
 };
 
 extern GTest 
     EncodedPhenotypesTest,
-    DecodedGenotypesTest;
+    DecodedGenotypesTest,
+    ParserTest,
+    EncodedGenotypesTest;
