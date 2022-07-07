@@ -70,7 +70,8 @@ void printTokenTree(const std::vector<TokenNode>& tree) {
 }
 
 bool isTokenNumeric(std::string token) {
-    return std::regex_match(token, std::regex("-?[0-9]+([\\.][0-9]+)?"));
+    static const auto numeric_regex = std::regex("-?[0-9]+([\\.][0-9]+)?");
+    return std::regex_match(token, numeric_regex);
 }
 
 std::vector<TokenNode> buildTokenTree(std::string entry) {

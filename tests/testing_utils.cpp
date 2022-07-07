@@ -1,7 +1,6 @@
 #include "testing_utils.hpp"
 #include <functional>
 #include <iostream>
-#include <regex>
 #include <sstream>
 #include <chrono>
 
