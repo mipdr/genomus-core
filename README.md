@@ -11,7 +11,7 @@ _Refer to the original [`GenoMus`](https://github.com/lopezmontes/GenoMus) repos
 
 `genomus-core` is currently at version 0.1.0 and includes the following features:
 
- - Full implementation of the generative gramatic
+ - Full implementation of the generative grammar
  - Partial implementation of the original function library
  - Genotype creation from random germinal vectors
  - Text parsing functionalitites
