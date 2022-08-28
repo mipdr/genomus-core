@@ -1,16 +1,35 @@
 # genomus-core
 
-El proyecto [GenoMus](https://github.com/lopezmontes/GenoMus) conforma una propuesta teórica y una implementación en forma de prototipo de un modelo orientado a la generación semi-automática de música, o Composición Asistida por Computadora. 
+> :warning: **`genomus-core` is currently a work in progress** and it is not ready for its integration and use in the GenoMus project.
 
-Tras la finalización del prototipo por parte de Pepe López Montes, se propone la refactorización del prototipo para conformar una base de código de caracter profesional orientada al establecimiento de GenoMus como un software eficiente, escalable, portable y abordable por parte de otros programadores.
+The [`GenoMus`](https://github.com/lopezmontes/GenoMus) project is conformed by a theoretical proposal and its implementation in the form of (currently) a prototype of a generative model for semi-automatic music composition. `genomus-core` attempts to implement the core functionalities of the `GenoMus` model in the form of a modern C++ library, with the goal of improving performance and providing a well-formed and maintainable code base. 
 
-El objetivo de este proyecto es la implementación de una librería en C++ que conforme el motor de cómputo de GenoMus: genomus-core (nombre provisional), así como de un paquete de npm en el que añadir funcionalidades secundarias y hacer la librería subyacente accesible a un entorno javascript. 
+
+_Refer to the original [`GenoMus`](https://github.com/lopezmontes/GenoMus) repository for model specifications and documentation._
+
+## Version 0.1.0
+
+`genomus-core` is currently at version 0.1.0 and includes the following features:
+
+ - Full implementation of the generative gramatic
+ - Partial implementation of the original function library
+ - Genotype creation from random germinal vectors
+ - Text parsing functionalitites
+ - GenoMus expressions interpreter (CLI)
+ - Benchmarking tool for grammar evaluation speed tests
+ - TDD tool: GTest
 
 ## Project Setup
 
-El proyecto incluye archivos de configuración para el fácil despliegue del entorno de desarrollo en [VSCode](https://code.visualstudio.com/). 
+### Compilation
 
-1. Configurar el proyecto de CMake (cmake configure)
-2. Compilar el proyecto (cmake build)
+This project uses the CMake toolkit for an "easy" compilation process. TO compile and run the different executables you will just need to have a C++ compiler and the CMake toolkit installed.
+
+> :information_source: _It is expected that precompiled executables for the different platforms will be available in future versions._
+
+### Dev setup
+
+VSCode is the recommended editor to read and manipulate this code base, as configuration files for an easy setup are included in this repo.
+ 
 
 
