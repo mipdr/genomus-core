@@ -122,7 +122,7 @@ void innerNormalizeVector(const std::vector<double>& input, std::vector<double>&
                         output.push_back(input[read_position]);
                         advance();
                         list_size++;
-                        if (input[read_position] < 0.5) break;
+                        if (input[read_position] < LIST_EXTENSION_THRESHOLD) break;
                     } while (list_size < MAX_LIST_SIZE);
                 } else if (current_function_parameters.size()) {
                     // Explore parameter types and compute parameters on output
@@ -226,7 +226,7 @@ std::string innerToExpression(const std::vector<double>& input, VectorNormalizat
                         advance();
                         list_size++;
 
-                        if (input[read_position] < 0.5){
+                        if (input[read_position] < LIST_EXTENSION_THRESHOLD){
                             result = result.substr(0, result.length() - 2);
                             break;
                         }

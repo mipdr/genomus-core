@@ -5,10 +5,11 @@
 #include "decoded_genotype.hpp"
 #include "encoded_phenotype.hpp"
 
-#define GERMINAL_VECTOR_MAX_LENGTH 128
-#define MAX_GENOTYPE_VECTOR_SIZE 2048
-#define MAX_GENOTYPE_DEPTH 128
-#define MAX_LIST_SIZE 32
+#define GERMINAL_VECTOR_MAX_LENGTH 256
+#define MAX_GENOTYPE_VECTOR_SIZE 10000
+#define MAX_GENOTYPE_DEPTH 256
+#define MAX_LIST_SIZE 256
+#define LIST_EXTENSION_THRESHOLD std::min(0.5, 1.0 / (double)MAX_LIST_SIZE)
 
 // Generate a random vector of size n
 std::vector<double> randomVector(int n);
