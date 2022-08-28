@@ -14,7 +14,7 @@ _Refer to the original [`GenoMus`](https://github.com/lopezmontes/GenoMus) repos
  - Full implementation of the generative grammar
  - Partial implementation of the original function library
  - Genotype creation from random germinal vectors
- - Text parsing functionalitites
+ - Text parsing functionalities
  - GenoMus expressions interpreter (CLI)
  - Benchmarking tool for grammar evaluation speed tests
  - TDD tool: GTest
@@ -23,13 +23,13 @@ _Refer to the original [`GenoMus`](https://github.com/lopezmontes/GenoMus) repos
 
 ### Compilation
 
-This project uses the CMake toolkit for an "easy" compilation process. TO compile and run the different executables you will just need to have a C++ compiler and the CMake toolkit installed.
+This project uses the CMake toolkit for an "easy" compilation process. In order to compile and run the different executables you will just need to have a C++ compiler and the CMake toolkit installed.
 
 > :information_source: _It is expected that precompiled executables for the different platforms will be available in future versions._
 
 ### Dev setup
 
-VSCode is the recommended editor to read and manipulate this code base, as configuration files for an easy setup are included in this repo.
+VSCode is the recommended editor to read and manipulate this code base, as configuration files for an easy setup are included in the code base.
  
 
 
