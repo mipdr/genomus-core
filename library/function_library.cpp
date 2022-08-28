@@ -268,6 +268,19 @@ GTree::GFunction::GFunctionInitializer buildListFunction(std::string name, Encod
     };
 }
 
+GTree::GFunction::GFunctionInitializer buildAutoReferenceFunction(std::string name, EncodedPhenotypeType output_type, size_t index) {
+    return {
+        .name = name,
+        .index = index,
+        .param_types = { goldenintegerF },
+        .output_type = output_type,
+        .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
+            throw std::runtime_error(ErrorCodes::INVALID_CALL);
+        },
+        .is_Autoreference = true
+    };
+}
+
 
 GTree::GFunction::GFunctionInitializer buildRandomFunction(std::string name, EncodedPhenotypeType output_type, size_t index) {
     return {
@@ -497,28 +510,9 @@ vPerpetuumMobileLoop({
     },
 }),
 
-eAutoref({
-    .name = "eAutoref",
-    .index = 27,
-    .param_types = { goldenintegerF },
-    .output_type = eventF,
-    .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
-        // Autoreferences must be evaluated by the GTree object, not by the GFunction
-        throw std::runtime_error(ErrorCodes::INVALID_CALL);
-    },
-    .is_Autoreference = true,
-}),
-
-vAutoref({
-    .name = "vAutoref",
-    .index = 28,
-    .param_types = { goldenintegerF },
-    .output_type = voiceF,
-    .compute = [](std::vector<enc_phen_t> params) -> enc_phen_t {
-        throw std::runtime_error(ErrorCodes::INVALID_CALL);
-    },
-    .is_Autoreference = true,
-}),
+eAutoref(buildAutoReferenceFunction("eAutoref", eventF, 27)),
+vAutoref(buildAutoReferenceFunction("vAutoref", voiceF, 28)),
+sAutoref(buildAutoReferenceFunction("sAutoref", scoreF, 29)),
 
 sAddV({
     .name = "sAddV",
@@ -543,6 +537,18 @@ sAddS({
         return Score(params[0].getChildren() + params[1].getChildren());
     },
 }), 
+
+nAutoref(buildAutoReferenceFunction("nAutoref", noteValueF, 277)),
+dAutoref(buildAutoReferenceFunction("dAutoref", durationF, 278)),
+mAutoref(buildAutoReferenceFunction("mAutoref", midiPitchF, 279)),
+fAutoref(buildAutoReferenceFunction("fAutoref", frequencyF, 280)),
+aAutoref(buildAutoReferenceFunction("aAutoref", articulationF, 281)),
+iAutoref(buildAutoReferenceFunction("iAutoref", intensityF, 282)),
+qAutoref(buildAutoReferenceFunction("qAutoref", quantizedF, 284)),
+lnAutoref(buildAutoReferenceFunction("lnAutoref", lnoteValueF, 286)),
+lmAutoref(buildAutoReferenceFunction("lmAutoref", lmidiPitchF, 288)),
+laAutoref(buildAutoReferenceFunction("laAutoref", larticulationF, 290)),
+liAutoref(buildAutoReferenceFunction("liAutoref", lintensityF, 291)),
 
 nRnd(buildRandomFunction("nRnd", noteValueF, 310)),
 dRnd(buildRandomFunction("dRnd", durationF, 311)),

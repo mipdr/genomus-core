@@ -128,8 +128,10 @@ using dec_gen_t = GTree::GTreeIndex;
     e, e_piano, \
     p, n, d, f, m, a, i, q, z, \
     ln, ld, lm, la, li, \
+    eAutoref, vAutoref, sAutoref, \
     nRnd, dRnd, mRnd, fRnd, aRnd, iRnd, zRnd, qRnd, \
-    eAutoref, vAutoref \
+    nAutoref, dAutoref, mAutoref, fAutoref, aAutoref, iAutoref, qAutoref, \
+    lnAutoref, lmAutoref, laAutoref, liAutoref
 
 // GFunction instances declaration
 extern GTree::GFunction GENOTYPE_FUNCTIONS;
